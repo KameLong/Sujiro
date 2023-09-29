@@ -1,0 +1,110 @@
+:root {
+    --bg-color-dark: #1f1a24;
+    --bg-color-light: #f0f0f0;
+    --theme-purple: #a852ff;
+}
+
+
+.formRow {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.formRow.noMargin {
+    margin: 0;
+}
+
+.formButtonset {
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    height: 32px;
+    display: flex;
+    overflow: hidden;
+}
+
+.formButtonsetRadio {
+    //display: none;
+}
+
+.formButtonsetRadio:checked + div.formButtonsetItem {
+    background-color: var(--theme-purple);
+    color: #fff;
+}
+
+.formButtonsetItem {
+    width: 40px;
+    text-align: center;
+    line-height: 16px;
+}
+
+.formButtonsetMark {
+    font-weight: 500;
+}
+
+.formButtonsetLabel {
+    color: #808080;
+}
+
+.formButtonsetRadio:checked + div.formButtonsetItem > .formButtonsetLabel {
+    color: #fff;
+}
+
+
+
+.customToggle {
+    width:40px;
+    height:32px;
+}
+
+/* チェックボックスを隠す */
+.customToggle input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* カスタムトグルのスタイル */
+.toggleSwitch {
+    background-color: #eee; /* オフの背景色 */
+    transition: background-color 0.3s ease; /* トランジションを設定 */
+}
+
+/* チェックされたときのスタイル */
+.customToggle input[type="checkbox"]:checked + .toggleSwitch {
+    background-color: #4caf50; /* オンの背景色 */
+    left: 26px; /* オンになったときの位置調整 */
+}
+.toggleSwitchLabel{
+    font-size: 12px;
+    text-align: center;
+    height:16px;
+    line-height: 16px;
+}
+
+.stopTimeEditor{
+    display: flex;
+    padding:5px;
+    align-items:center;
+    box-sizing: border-box;
+    width:290px;
+}
+.timeEditCenter {
+    border:2px solid #888;
+    width:10px;
+    height:32px;
+    margin-right:4px;
+    border-left:none;
+    border-radius: 0px 4px 4px 0px;
+}
+.ariTimeBox{
+
+}
+.depTimeBox{
+    margin-top:10px;
+
+}
+input::-webkit-calendar-picker-indicator {
+    display: none;
+}
