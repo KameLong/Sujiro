@@ -5,23 +5,52 @@ import {Station} from "../../DiaData/Station";
 import {useDispatch, useSelector} from "react-redux";
 
 import {
-    IonContent,
-    IonHeader, IonInfiniteScroll, IonInfiniteScrollContent,
+    IonContent, IonFab, IonFabButton, IonFabList,
+    IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent,
     IonList,
     IonRouterOutlet, IonSearchbar,
 } from '@ionic/react';
 import {StationSimpleView, StationView} from "./StationView";
-import {useRecoilValue} from "recoil";
+import {useRecoilValue, useSetRecoilState} from "recoil";
 import {diaDataState} from "../../store";
+import {add, chevronUpCircle, colorPalette, globe} from "ionicons/icons";
+import {AppTitleState} from "../../App";
 
 
 export const StationListPage: React.FC = ():JSX.Element => {
 
     try {
+
         const diaData: DiaData = useRecoilValue(diaDataState);
         const stationList=Object.values(diaData.stations);
+        const setTitle=useSetRecoilState(AppTitleState);
+        setTimeout(()=>{setTitle((old)=>"StationList");
+        },0)
+
+        const addNewStation=()=>{
+            console.log("addNewStation");
+        }
         return (
-            <StationListView  stationList={stationList}/>
+            <div>
+                <StationListView  stationList={stationList}/>
+
+                <IonFab style={{margin:"10px"}} slot="fixed" vertical="bottom" horizontal="end">
+                    <IonFabButton onClick={addNewStation}>
+                        <IonIcon icon={add} ></IonIcon>
+                    </IonFabButton>
+                    {/*<IonFabList side="top">*/}
+                    {/*    <IonFabButton>*/}
+                    {/*        <IonIcon icon={document}></IonIcon>*/}
+                    {/*    </IonFabButton>*/}
+                    {/*    <IonFabButton>*/}
+                    {/*        <IonIcon icon={colorPalette}></IonIcon>*/}
+                    {/*    </IonFabButton>*/}
+                    {/*    <IonFabButton>*/}
+                    {/*        <IonIcon icon={globe}></IonIcon>*/}
+                    {/*    </IonFabButton>*/}
+                    {/*</IonFabList>*/}
+                </IonFab>
+            </div>
         );
     }catch(e:any){
         console.log(e);

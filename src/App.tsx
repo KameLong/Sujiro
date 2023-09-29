@@ -44,10 +44,18 @@ import {ListConnectorView} from "./pages/Common/ListConnector";
 
 import classes from "./App.module.css"
 import {NewStationPage} from "./pages/StationEdit/NewStationPage";
+import {atom, useRecoilValue} from "recoil";
+import {EditDiaData} from "./DiaData/DiaData";
 setupIonicReact();
 
+export const AppTitleState = atom({
+    key: 'AppTitle',
+    default: "TOP",
+});
+
+
 const App: React.FC = () => {
-    const title="タイトル";
+    const title=useRecoilValue(AppTitleState);
 
     return(
         <IonApp>
