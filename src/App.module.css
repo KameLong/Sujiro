@@ -10,3 +10,8 @@
     border-radius: 0 15px 15px 0;
     box-shadow: 4px 0px 16px rgba(0, 0, 0, 0.18);
 }
+.IonSplitPane {
+    --side-width: 300px;
+    --side-max-width: 300px;
+    /*--border: 1px dashed #b3baff;*/
+}

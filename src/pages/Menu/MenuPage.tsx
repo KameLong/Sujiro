@@ -58,7 +58,7 @@ export const MenuPage = () => {
     }
 
     return (
-        <div style={{height: 'calc(100% - 100px)'}}>
+        <div style={{height: 'calc(100% - 60px)'}}>
             <IonMenuToggle ref={splitPaneRef}>
             </IonMenuToggle>
             <IonHeader>

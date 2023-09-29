@@ -43,6 +43,7 @@ import {StationListPage} from "./pages/StationEdit/StationList";
 import {ListConnectorView} from "./pages/Common/ListConnector";
 
 import classes from "./App.module.css"
+import {NewStationPage} from "./pages/StationEdit/NewStationPage";
 setupIonicReact();
 
 const App: React.FC = () => {
@@ -51,7 +52,7 @@ const App: React.FC = () => {
     return(
         <IonApp>
             <IonReactRouter>
-                <IonSplitPane contentId="main-content" >
+                <IonSplitPane className={classes.IonSplitPane} contentId="main-content" >
                     <IonMenu className={classes.IonMenu} contentId="main-content" side="start" >
                         <MenuPage />
                     </IonMenu>
@@ -70,9 +71,10 @@ const App: React.FC = () => {
                             <Route exact path="/home">
                                 <Example />
                             </Route>
+                            <Route exact path="/StationList" component={StationListPage} />
+                            <Route exact path="/NewStation" component={NewStationPage}/>
                             <Route exact path="/LineTimeTable" component={TimeTableViewPage}/>
                             {/*<Route exact path="/RouteTimeTablePDF" component={RouteTimeTablePDF } />*/}
-                            <Route exact path="/StationList" component={StationListPage} />
                             {/*<Route path="/TimeTableEdit" component={TimeTableEditPage } />*/}
                         </IonContent>
                     </IonPage>
