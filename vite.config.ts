@@ -7,9 +7,9 @@ export default defineConfig({
   plugins: [
     react(),
     legacy(),
-    basicSsl()
+    // basicSsl()
   ],
-  server: { https: true },
+  // server: { https: true },
   test: {
     globals: true,
     environment: 'jsdom',

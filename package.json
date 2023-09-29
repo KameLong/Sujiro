@@ -21,7 +21,7 @@
     "@ionic/react-router": "^7.0.0",
     "@react-pdf/renderer": "^3.1.12",
     "@reduxjs/toolkit": "^1.9.5",
-    "@route-builders/oud-operator": "^3.0.1",
+    "@route-builders/oud-operator": "^3.0.13",
     "@route-builders/oud-to-json": "^2.0.6",
     "@types/react-router": "^5.1.20",
     "@types/react-router-dom": "^5.3.3",

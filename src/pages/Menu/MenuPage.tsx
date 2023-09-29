@@ -1,11 +1,11 @@
 import {
-    IonButton,
+    IonButton, IonButtons,
     IonContent,
     IonHeader,
     IonItem,
     IonLabel,
     IonList,
-    IonListHeader, IonMenuToggle, IonRouterLink,
+    IonListHeader, IonMenuButton, IonMenuToggle, IonRouterLink,
     IonTitle,
     IonToolbar
 } from "@ionic/react";
@@ -17,18 +17,8 @@ import {TimeTable} from "../../DiaData/TimeTable";
 import {Route} from "../../DiaData/Route";
 import {useRecoilValue, useSetRecoilState} from "recoil";
 
-
 export const MenuPage = () => {
     const splitPaneRef:React.MutableRefObject<HTMLIonMenuToggleElement|null> = useRef(null);
-
-    const closeMenu = () => {
-        if (splitPaneRef.current) {
-            //@ts-ignore
-            splitPaneRef.current.click();
-        }
-    };
-
-
     const diaData:DiaData= useRecoilValue(diaDataState);
     const nav = useHistory().push;
     const setDiaData = useSetRecoilState(diaDataState);
@@ -73,6 +63,9 @@ export const MenuPage = () => {
             </IonMenuToggle>
             <IonHeader>
                 <IonToolbar>
+                    <IonButtons slot="start">
+                        <IonMenuButton></IonMenuButton>
+                    </IonButtons>
                     <IonTitle>AOdia WEB</IonTitle>
                 </IonToolbar>
             </IonHeader>

@@ -52,10 +52,11 @@ const App: React.FC = () => {
         <IonApp>
             <IonReactRouter>
                 <IonSplitPane contentId="main-content" >
-                    <IonMenu contentId="main-content" side="start" style={{width:'300px'}}>
+                    <IonMenu className={classes.IonMenu} contentId="main-content" side="start" >
                         <MenuPage />
                     </IonMenu>
-                    <IonPage id="main-content"  className={classes.noScrollBar}>
+
+                <IonPage id="main-content"  className={classes.noScrollBar}>
                         <IonHeader>
                             <IonToolbar>
                                 <IonButtons slot="start">

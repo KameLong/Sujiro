@@ -1,3 +1,12 @@
 .noScrollBar::-webkit-scrollbar {
     display:none;
 }
+
+.IonMenu::part(backdrop) {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.IonMenu::part(container) {
+    border-radius: 0 15px 15px 0;
+    box-shadow: 4px 0px 16px rgba(0, 0, 0, 0.18);
+}
