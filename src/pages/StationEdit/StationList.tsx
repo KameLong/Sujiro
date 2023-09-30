@@ -38,7 +38,7 @@ export const StationListPage: React.FC = ():JSX.Element => {
             onDismiss: (data: string, role: string) => dismiss(data, role),
         });
 
-        useKeyAlt("Help",()=>{
+        useKeyAlt("Insert",()=>{
             openNewStation();
         });
 
