@@ -52,6 +52,13 @@ export const StationListPage: React.FC = ():JSX.Element => {
             present();
         }
 
+        const openEditStation=(stationID:number)=>{
+            setEditModalTitle(()=>"駅編集");
+            setEditModalStationID(()=>stationID);
+            present();
+        }
+
+
         const addNewStation=()=>{
             console.log("addNewStation");
             openNewStation();
@@ -59,23 +66,12 @@ export const StationListPage: React.FC = ():JSX.Element => {
         }
         return (
             <div>
-                <StationListView  stationList={stationList}/>
+                <StationListView  stationList={stationList} onStationSelected={openEditStation}/>
 
                 <IonFab style={{margin:"10px"}} slot="fixed" vertical="bottom" horizontal="end">
                     <IonFabButton onClick={addNewStation}>
                         <IonIcon icon={add} ></IonIcon>
                     </IonFabButton>
-                    {/*<IonFabList side="top">*/}
-                    {/*    <IonFabButton>*/}
-                    {/*        <IonIcon icon={document}></IonIcon>*/}
-                    {/*    </IonFabButton>*/}
-                    {/*    <IonFabButton>*/}
-                    {/*        <IonIcon icon={colorPalette}></IonIcon>*/}
-                    {/*    </IonFabButton>*/}
-                    {/*    <IonFabButton>*/}
-                    {/*        <IonIcon icon={globe}></IonIcon>*/}
-                    {/*    </IonFabButton>*/}
-                    {/*</IonFabList>*/}
                 </IonFab>
             </div>
         );
@@ -92,9 +88,10 @@ export const StationListPage: React.FC = ():JSX.Element => {
 
 
 interface StationListViewProps{
-    stationList:Station[]
+    stationList:Station[],
+    onStationSelected?:((stationID:number)=>void)
 }
-export const StationListView: React.FC<StationListViewProps> = ({stationList}:StationListViewProps):JSX.Element => {
+export const StationListView: React.FC<StationListViewProps> = ({stationList,onStationSelected}:StationListViewProps):JSX.Element => {
     try {
 
 
@@ -102,7 +99,6 @@ export const StationListView: React.FC<StationListViewProps> = ({stationList}:St
         const [showStationList,setShowStationList]=useState<Station[]>([]);
         const [sortedStationList,setSortedStationList]=useState<Station[]>([]);
         useEffect(() => {
-            console.log("query Effect")
             if(query.length==0){
                 setSortedStationList((prev)=>stationList);
             }else{
@@ -133,7 +129,7 @@ export const StationListView: React.FC<StationListViewProps> = ({stationList}:St
                 setSortedStationList(()=>tmp);
             }
 
-        }, [query,stationList.length]);
+        }, [query,stationList]);
         useEffect(() => {
             setShowStationList(()=>sortedStationList.slice(0,100));
         }, [sortedStationList]);
@@ -161,7 +157,11 @@ export const StationListView: React.FC<StationListViewProps> = ({stationList}:St
                         // return <IonItem  key={station.id} style={{padding:'5px 0px',display:"flex"}}><div style={{width:'100px'}}>{station.id}</div>
                         //     <div style={{width:'230px'}}>{station.name}</div>
                         //     <div style={{width:'100px'}}>{station.address}</div></IonItem>
-                        return <StationView key={station.id} station={station} onClick2={(id)=>{console.log(id)}}/>
+                        return <StationView  key={station.id} station={station} onClick2={(id)=>{
+                            if(onStationSelected!==undefined) {
+                                onStationSelected(id);
+                            }
+                        }}/>
                     })
                 }
             </IonList>

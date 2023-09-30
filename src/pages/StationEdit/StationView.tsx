@@ -30,11 +30,10 @@ export const StationSimpleView: React.FC<StationSimpleViewProps> = ({station,onC
          }
     return(
         <IonItem >
-            <div onClick={onClickEvent}>
+            <div  onClick={onClickEvent}>
                 {
                     station.name
                 }
-
             </div>
         </IonItem>
     )
@@ -125,7 +124,7 @@ export const StationSelectorModal:React.FC<StationSelectorModalProps>=(props:Sta
                     <IonCardHeader>
                         <IonCardTitle>全駅一覧</IonCardTitle>
                     </IonCardHeader>
-                    <StationListView stationList={Object.values(props.diaData.stations)}/>
+                    <StationListView stationList={Object.values(props.diaData.stations)} />
                 </IonCard>
             </IonContent>
         </IonPage>
