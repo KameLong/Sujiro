@@ -32,6 +32,7 @@ import '@ionic/react/css/text-transformation.css';
 import '@ionic/react/css/flex-utils.css';
 import '@ionic/react/css/display.css';
 
+import "./App.scss"
 /* Theme variables */
 import './theme/variables.css';
 import React, {useRef} from "react";
@@ -43,10 +44,13 @@ import {StationListPage} from "./pages/StationEdit/StationList";
 import {ListConnectorView} from "./pages/Common/ListConnector";
 
 import classes from "./App.module.css"
-import {NewStationPage} from "./pages/StationEdit/NewStationPage";
+import {EditStationPage} from "./pages/StationEdit/EditStationPage";
 import {atom, useRecoilValue} from "recoil";
 import {EditDiaData} from "./DiaData/DiaData";
-setupIonicReact();
+setupIonicReact({
+     rippleEffect: true,
+    mode: 'ios',
+});
 
 export const AppTitleState = atom({
     key: 'AppTitle',
@@ -80,7 +84,7 @@ const App: React.FC = () => {
                                 <Example />
                             </Route>
                             <Route exact path="/StationList" component={StationListPage} />
-                            <Route exact path="/NewStation" component={NewStationPage}/>
+                            <Route exact path="/NewStation" component={EditStationPage}/>
                             <Route exact path="/LineTimeTable" component={TimeTableViewPage}/>
                             {/*<Route exact path="/RouteTimeTablePDF" component={RouteTimeTablePDF } />*/}
                             {/*<Route path="/TimeTableEdit" component={TimeTableEditPage } />*/}

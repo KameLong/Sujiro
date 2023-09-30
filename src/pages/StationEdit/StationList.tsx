@@ -8,13 +8,17 @@ import {
     IonContent, IonFab, IonFabButton, IonFabList,
     IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent,
     IonList,
-    IonRouterOutlet, IonSearchbar,
+    IonRouterOutlet, IonSearchbar, useIonModal,
 } from '@ionic/react';
 import {StationSimpleView, StationView} from "./StationView";
 import {useRecoilValue, useSetRecoilState} from "recoil";
 import {diaDataState} from "../../store";
 import {add, chevronUpCircle, colorPalette, globe} from "ionicons/icons";
 import {AppTitleState} from "../../App";
+import {EditStationPage} from "./EditStationPage";
+import {OverlayEventDetail} from "@ionic/core/components";
+import {useKey} from "react-use";
+import {useKeyAlt} from "../../hooks/KeyHooks";
 
 
 export const StationListPage: React.FC = ():JSX.Element => {
@@ -24,11 +28,34 @@ export const StationListPage: React.FC = ():JSX.Element => {
         const diaData: DiaData = useRecoilValue(diaDataState);
         const stationList=Object.values(diaData.stations);
         const setTitle=useSetRecoilState(AppTitleState);
+
+        const [editModalTitle, setEditModalTitle] = useState('新規駅作成');
+        const [editModalStationID, setEditModalStationID] = useState(-1);
+
+        const [present, dismiss] = useIonModal(EditStationPage, {
+            title:editModalTitle,
+            stationID:editModalStationID,
+            onDismiss: (data: string, role: string) => dismiss(data, role),
+        });
+
+        useKeyAlt("Help",()=>{
+            openNewStation();
+        });
+
+
         setTimeout(()=>{setTitle((old)=>"StationList");
         },0)
 
+        function openNewStation() {
+            setEditModalTitle(()=>"新規駅作成");
+            setEditModalStationID(()=>-1);
+            present();
+        }
+
         const addNewStation=()=>{
             console.log("addNewStation");
+            openNewStation();
+
         }
         return (
             <div>

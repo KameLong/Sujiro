@@ -3,9 +3,11 @@ import {Route} from "./Route";
 
 export interface Station {
     id: number;
-
     name: string;
     address: string;
+    lat:number,
+    lon:number
+
 }
 
 
@@ -50,7 +52,9 @@ export class StationEdit{
         const res:Station=
             {id:Math.floor(Math.random()*Number.MAX_SAFE_INTEGER),
                 name:"",
-                address:""};
+                address:"",
+                lat:35,
+                lon:135};
         return res;
     }
     public static FROM_SQL_OBJECT(object:any):Station{

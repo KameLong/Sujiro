@@ -5,7 +5,7 @@ import {O_O} from "@route-builders/oud-operator";
 import {OuDiaConverter} from "./OuDiaConverter/OuDiaConverter";
 import {TimeTable, TimeTableRoute, TimeTableRouteStation, TimeTableStation} from "./DiaData/TimeTable";
 import {sujiroDataSlice, SujiroState} from "./sujiroReducer";
-import {Station} from "./DiaData/Station";
+import {Station, StationEdit} from "./DiaData/Station";
 import {Route, RouteStation} from "./DiaData/Route";
 import {Trip} from "./DiaData/Trip";
 import {StationTime} from "./DiaData/StationTime";
@@ -59,11 +59,20 @@ export const timetableStationSelector : (timetableStationID: number) => RecoilVa
     },
 });
 
-export const stationSelector : (stationID: number) => RecoilValueReadOnly<Station>= selectorFamily({
+export const stationSelector : (stationID: number) => RecoilState<Station>= selectorFamily({
     key: 'stationSelector',
     get: stationID => ({ get }) => {
         return get(diaDataState).stations[stationID];
     },
+    set: stationID => ({ get,set },newValue) => {
+
+        const res=get(diaDataState);
+        const stations={...res.stations};
+        stations[stationID]=newValue as Station;
+
+        return set(diaDataState,{...res,stations:stations});
+    },
+
 });
 export const routeSelector : (routeID: number) => RecoilValueReadOnly<Route>= selectorFamily({
     key: 'routeSelector',
