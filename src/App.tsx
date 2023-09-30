@@ -48,6 +48,7 @@ import {EditStationPage} from "./pages/StationEdit/EditStationPage";
 import {atom, useRecoilValue} from "recoil";
 import {EditDiaData} from "./DiaData/DiaData";
 import {KeyTestPage} from "./pages/Test/KeyTestPage";
+import {RouteListPage} from "./pages/Route/RouteList";
 setupIonicReact({
      rippleEffect: true,
     mode: 'ios',
@@ -85,7 +86,8 @@ const App: React.FC = () => {
                                 <Example />
                             </Route>
                             <Route exact path="/StationList" component={StationListPage} />
-                            <Route exact path="/NewStation" component={EditStationPage}/>
+                            <Route exact path="/RouteList" component={RouteListPage} />
+                            {/*<Route exact path="/NewStation" component={EditStationPage}/>*/}
                             <Route exact path="/LineTimeTable" component={TimeTableViewPage}/>
                             <Route exact path="/KeyTest" component={KeyTestPage}/>
                             {/*<Route exact path="/RouteTimeTablePDF" component={RouteTimeTablePDF } />*/}

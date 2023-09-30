@@ -74,6 +74,11 @@ export const stationSelector : (stationID: number) => RecoilState<Station>= sele
     },
 
 });
+export const routesSelector:RecoilValueReadOnly<{ [key:number]:Route }>=selector({
+    // 一意のキー
+    key: 'routesSelector',
+    get: ({get}) => get(diaDataState).routes,
+});
 export const routeSelector : (routeID: number) => RecoilValueReadOnly<Route>= selectorFamily({
     key: 'routeSelector',
     get: routeID => ({ get }) => {
@@ -83,7 +88,7 @@ export const routeSelector : (routeID: number) => RecoilValueReadOnly<Route>= se
 export const routeStationsSelector=selector({
     // 一意のキー
     key: 'routeStationsSelector',
-    get: ({get}) => get(diaDataState).routeStation, //atomの値を取得して２倍して返す
+    get: ({get}) => get(diaDataState).routeStation,
 });
 export const routeStationSelector : (routeStationID: number) => RecoilValueReadOnly<RouteStation>= selectorFamily({
     key: 'routeStationSelector',

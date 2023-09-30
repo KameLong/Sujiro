@@ -52,6 +52,10 @@ export const MenuPage = () => {
         splitPaneRef.current?.click();
         nav(`/StationList`);
     }
+    const onClickRouteList = () => {
+        splitPaneRef.current?.click();
+        nav(`/RouteList`);
+    }
     const onClickMakeTimeTable = () => {
         splitPaneRef.current?.click();
         nav(`/TimeTableEdit`);
@@ -75,6 +79,9 @@ export const MenuPage = () => {
                 <IonButton onClick={loadJson} fill="clear" expand="block">LOAD</IonButton>
                 <IonItem onClick={onClickStationList}>
                     駅編集
+                </IonItem>
+                <IonItem onClick={onClickRouteList}>
+                    路線編集
                 </IonItem>
                 <IonItem onClick={onClickMakeTimeTable}>
                     新規時刻表作成
