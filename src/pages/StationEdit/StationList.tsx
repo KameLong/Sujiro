@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from "react";
-
 import {DiaData} from "../../DiaData/DiaData";
 import {Station} from "../../DiaData/Station";
 import {useDispatch, useSelector} from "react-redux";
@@ -16,15 +15,11 @@ import {diaDataState} from "../../store";
 import {add, chevronUpCircle, colorPalette, globe} from "ionicons/icons";
 import {AppTitleState} from "../../App";
 import {EditStationPage} from "./EditStationPage";
-import {OverlayEventDetail} from "@ionic/core/components";
-import {useKey} from "react-use";
 import {useKeyAlt} from "../../hooks/KeyHooks";
 
 
 export const StationListPage: React.FC = ():JSX.Element => {
-
     try {
-
         const diaData: DiaData = useRecoilValue(diaDataState);
         const stationList=Object.values(diaData.stations);
         const setTitle=useSetRecoilState(AppTitleState);
@@ -46,7 +41,7 @@ export const StationListPage: React.FC = ():JSX.Element => {
         setTimeout(()=>{setTitle((old)=>"StationList");
         },0)
 
-        function openNewStation() {
+        const openNewStation=()=>{
             setEditModalTitle(()=>"新規駅作成");
             setEditModalStationID(()=>-1);
             present();
@@ -60,7 +55,6 @@ export const StationListPage: React.FC = ():JSX.Element => {
 
 
         const addNewStation=()=>{
-            console.log("addNewStation");
             openNewStation();
 
         }
@@ -142,48 +136,45 @@ export const StationListView: React.FC<StationListViewProps> = ({stationList,onS
         };
 
 
-    return (
-        <div>
-            <IonSearchbar value={query} onIonChange={e =>{
-                console.log(e.detail.value);
-                setQuery((prev)=>e.detail.value??"");
-            }}
-            >
-            </IonSearchbar>
-            <IonList>
-
-                {
-                    showStationList.map(station=>{
-                        // return <IonItem  key={station.id} style={{padding:'5px 0px',display:"flex"}}><div style={{width:'100px'}}>{station.id}</div>
-                        //     <div style={{width:'230px'}}>{station.name}</div>
-                        //     <div style={{width:'100px'}}>{station.address}</div></IonItem>
-                        return <StationView  key={station.id} station={station} onClick2={(id)=>{
-                            if(onStationSelected!==undefined) {
-                                onStationSelected(id);
-                            }
-                        }}/>
-                    })
-                }
-            </IonList>
-            <IonInfiniteScroll
-                onIonInfinite={(ev) => {
-                    generateItems();
-                    setTimeout(() => ev.target.complete(), 500);
+        return (
+            <div>
+                <IonSearchbar value={query} onIonChange={e =>{
+                    console.log(e.detail.value);
+                    setQuery((prev)=>e.detail.value??"");
                 }}
-            >
-                <IonInfiniteScrollContent></IonInfiniteScrollContent>
-            </IonInfiniteScroll>
-        </div>
-    );
-}catch(e:any){
-    console.log(e);
-    return (
-        <div>
-            <div>エラーが発生しました</div>
-            <div>{e.toString()}</div>
-        </div>
-    );
-}
+                >
+                </IonSearchbar>
+                <IonList>
+
+                    {
+                        showStationList.map(station=>{
+                            return <StationView  key={station.id} station={station} onClicked={(id)=>{
+                                if(onStationSelected!==undefined) {
+                                    onStationSelected(id);
+                                }
+                            }}/>
+                        })
+                    }
+                </IonList>
+                <IonInfiniteScroll
+                    onIonInfinite={(ev) => {
+                        generateItems();
+                        setTimeout(() => ev.target.complete(), 500);
+                    }}
+                >
+                    <IonInfiniteScrollContent></IonInfiniteScrollContent>
+                </IonInfiniteScroll>
+            </div>
+        );
+    }catch(e:any){
+        console.log(e);
+        return (
+            <div>
+                <div>エラーが発生しました</div>
+                <div>{e.toString()}</div>
+            </div>
+        );
+    }
 }
 
 

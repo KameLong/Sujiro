@@ -18,16 +18,14 @@ import {StationListView} from "./StationList";
 
 interface StationSimpleViewProps{
     station:Station;
-    onClick2?: {(stationID:number):void; };
+    onClicked?: {(stationID:number):void; };
 }
-export const StationSimpleView: React.FC<StationSimpleViewProps> = ({station,onClick2=undefined}:StationSimpleViewProps):JSX.Element => {
+export const StationSimpleView: React.FC<StationSimpleViewProps> = ({station,onClicked=undefined}:StationSimpleViewProps):JSX.Element => {
     const onClickEvent=()=>{
-        console.log(station.name);
-        if(onClick2){
-            onClick2(station.id);
+        if(onClicked){
+            onClicked(station.id);
         }
-
-         }
+    }
     return(
         <IonItem >
             <div  onClick={onClickEvent}>
@@ -39,11 +37,11 @@ export const StationSimpleView: React.FC<StationSimpleViewProps> = ({station,onC
     )
 }
 
-export const StationView: React.FC<StationSimpleViewProps>=({station,onClick2=undefined}:StationSimpleViewProps):JSX.Element =>{
+export const StationView: React.FC<StationSimpleViewProps>=({station,onClicked=undefined}:StationSimpleViewProps):JSX.Element =>{
     return(
         <IonItem onClick={()=>{
-            if(onClick2){
-                onClick2(station.id);
+            if(onClicked){
+                onClicked(station.id);
             }
             }}
             >
@@ -114,7 +112,7 @@ export const StationSelectorModal:React.FC<StationSelectorModalProps>=(props:Sta
                         <IonCardTitle>推奨駅候補</IonCardTitle>
                         <IonList>
                             {
-                                props.recommendStation.map(station=><StationSimpleView onClick2={(stationID)=>onStationSelected(station)}  key={station.id} station={station}/>)
+                                props.recommendStation.map(station=><StationSimpleView onClicked={(stationID)=>onStationSelected(station)} key={station.id} station={station}/>)
                             }
 
                         </IonList>
