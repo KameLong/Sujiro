@@ -33,3 +33,6 @@ yarn-error.log*
 .eslintcache
 
 .vite
+
+#ftp
+sftp_batch
