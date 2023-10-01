@@ -88,13 +88,14 @@ export const routesSelector:RecoilValueReadOnly<{ [key:number]:Route }>=selector
 export const routeSelector : (routeID: number) => RecoilState<Route>= selectorFamily({
     key: 'routeSelector',
     get: routeID => ({ get }) => {
+        console.log(get(diaDataState).routes);
         return get(diaDataState).routes[routeID];
     },
-    set: routeID => ({ get,set },newValue) => {
+    set: () => ({ get,set },newValue) => {
 
         const res=get(diaDataState);
         const routes={...res.routes};
-        routes[routeID]=newValue as Route;
+        routes[(newValue as Route).id]=newValue as Route;
 
         return set(diaDataState,{...res,routes:routes});
     },

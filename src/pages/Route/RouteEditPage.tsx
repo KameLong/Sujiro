@@ -32,10 +32,12 @@ interface EditRoutePageProps{
 }
 
 export const EditRoutePage: React.FC<EditRoutePageProps> = ({onDismiss,title,routeID}):JSX.Element => {
+    console.log(routeID);
     const [route,setRoute]=useState(useRecoilValue(routeSelector(routeID))??EditRoute.newRoute());
     const [_,sendRoute]=useRecoilState(routeSelector(routeID));
 
     const [editRSIndex,setEditRSIndex]=useState(-1);
+    console.log(route);
 
 
     const routeStations=useRecoilValue(routeStationsSelector);
@@ -51,7 +53,7 @@ export const EditRoutePage: React.FC<EditRoutePageProps> = ({onDismiss,title,rou
             setRoute(old=>{
                 const routeStations=[...old.routeStationIDs];
                 if(editRSIndex===-1){
-                    routeStations.push(rs.routeID);
+                    routeStations.push(rs.id);
                 }
                 return {...old,routeStationIDs:routeStations};
             })
@@ -63,8 +65,9 @@ export const EditRoutePage: React.FC<EditRoutePageProps> = ({onDismiss,title,rou
 
 
     const commitRoute=()=>{
-        sendRoute(route);
-
+        if(route.id>=0){
+            sendRoute(route);
+        }
     }
 
     const selectStation=()=>{

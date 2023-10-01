@@ -51,9 +51,9 @@ export const RouteListPage: React.FC = ():JSX.Element => {
             present();
         }
 
-        const openEditRoute=(stationID:number)=>{
+        const openEditRoute=(routeID:number)=>{
             setEditModalTitle(()=>"路線編集");
-            setEditModalRouteID(()=>stationID);
+            setEditModalRouteID(()=>routeID);
             present();
         }
 
@@ -153,8 +153,8 @@ export const RouteListView: React.FC<RouteListViewProps> = ({routeList,onRouteSe
                 <IonList>
 
                     {
-                        showRouteList.map(station=>{
-                            return <RouteView  key={station.id} route={station} onClicked={(id)=>{
+                        showRouteList.map(route=>{
+                            return <RouteView  key={route.id} route={route} onClicked={(id)=>{
                                 if(onRouteSelected!==undefined) {
                                     onRouteSelected(id);
                                 }
@@ -192,6 +192,7 @@ export const RouteView: React.FC<RouteViewProps>=({route,onClicked=undefined}):J
     return(
         <IonItem onClick={()=>{
             if(onClicked){
+                console.log(route.id);
                 onClicked(route.id);
             }
         }}
