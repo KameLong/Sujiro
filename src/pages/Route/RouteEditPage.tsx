@@ -1,21 +1,29 @@
 import React, {useState} from "react";
 import {
     IonButton,
-    IonButtons,
+    IonButtons, IonCard, IonCheckbox,
     IonContent, IonGrid,
     IonHeader,
     IonInput,
-    IonItem, IonList,
+    IonItem, IonLabel, IonList,
     IonPage, IonRow,
     IonTitle,
-    IonToolbar
+    IonToolbar, useIonModal
 } from "@ionic/react";
-import {useRecoilState, useRecoilValue} from "recoil";
-import {routeSelector, stationSelector} from "../../store";
+import {useRecoilState, useRecoilValue, useSetRecoilState} from "recoil";
+import {
+    routeSelector,
+    routeStationSelector,
+    routeStationsSelector,
+    stationSelector,
+    stationsSelector
+} from "../../store";
 import {StationEdit} from "../../DiaData/Station";
 import {useKey} from "react-use";
 import {useKeyAlt} from "../../hooks/KeyHooks";
-import {EditRoute} from "../../DiaData/Route";
+import {EditRoute, EditRouteStation} from "../../DiaData/Route";
+import {EditStationPage} from "../StationEdit/EditStationPage";
+import {StationSelectorPage} from "../StationEdit/StationSelectorPage";
 
 interface EditRoutePageProps{
     onDismiss: (data?: string | null | undefined | number, role?: string) => void;
@@ -27,8 +35,40 @@ export const EditRoutePage: React.FC<EditRoutePageProps> = ({onDismiss,title,rou
     const [route,setRoute]=useState(useRecoilValue(routeSelector(routeID))??EditRoute.newRoute());
     const [_,sendRoute]=useRecoilState(routeSelector(routeID));
 
+    const [editRSIndex,setEditRSIndex]=useState(-1);
+
+
+    const routeStations=useRecoilValue(routeStationsSelector);
+    const setRouteStation=useSetRecoilState(routeStationSelector(0));
+    const stations=useRecoilValue(stationsSelector);
+
+
+    const [present, dismiss] = useIonModal(StationSelectorPage, {
+        onStationSelected:(stationID:number)=>{
+            dismiss();
+            const rs=EditRouteStation.newRouteStation(routeID,stationID);
+            setRouteStation(rs);
+            setRoute(old=>{
+                const routeStations=[...old.routeStationIDs];
+                if(editRSIndex===-1){
+                    routeStations.push(rs.routeID);
+                }
+                return {...old,routeStationIDs:routeStations};
+            })
+            console.log(stationID);
+
+        },
+    });
+
+
+
     const commitRoute=()=>{
         sendRoute(route);
+
+    }
+
+    const selectStation=()=>{
+        present();
 
     }
     useKeyAlt("Enter",(e) =>{
@@ -61,10 +101,39 @@ export const EditRoutePage: React.FC<EditRoutePageProps> = ({onDismiss,title,rou
     <IonList>
         <IonItem>
             <IonInput  labelPlacement="stacked" label="路線名" placeholder="新規路線" value={route.name}
-    onInput={(e)=>setRoute(old=>{
-        return{...old,name:(e.target as HTMLInputElement).value as string}})}
+    onIonInput={(e)=>setRoute(old=>{
+        return{...old,name:(e.target).value as string}})}
     />
     </IonItem>
+        <IonCard>
+            <IonList>
+                {
+                    route.routeStationIDs.map(rsID=>{
+                        return(
+                            <IonItem key={rsID}>
+                                <div style={{ display: 'flex', alignItems: 'center',width:'100%' }}>
+                                <IonCheckbox labelPlacement="end" justify="start" style={{width:'60px'}}>
+                                </IonCheckbox>
+                                <div style={{flexGrow:"1"}} >
+                                    {stations[routeStations[rsID].stationID].name}
+                                </div>
+                                </div>
+                            </IonItem>
+                        )
+                    })
+                }
+                <IonItem key={-1}>
+                    <div style={{ display: 'flex', alignItems: 'center',width:'100%' }}>
+                        <IonCheckbox labelPlacement="end" justify="start" style={{width:'60px'}}>
+                        </IonCheckbox>
+                        <div style={{height:'30px',cursor: 'pointer',flexGrow:"1"}} onClick={(e)=>{setEditRSIndex(-1);selectStation()}} >
+
+                        </div>
+                    </div>
+
+                </IonItem>
+            </IonList>
+        </IonCard>
     </IonList>
     </IonContent>
     </IonPage>

@@ -58,7 +58,12 @@ export const timetableStationSelector : (timetableStationID: number) => RecoilVa
         return get(diaDataState).timeTableStation[timetableStationID];
     },
 });
+export const stationsSelector:RecoilValueReadOnly<{ [key:number]:Station }>=selector({
+    // 一意のキー
+    key: 'stationsSelector',
+    get: ({get}) => get(diaDataState).stations,
 
+});
 export const stationSelector : (stationID: number) => RecoilState<Station>= selectorFamily({
     key: 'stationSelector',
     get: stationID => ({ get }) => {
@@ -99,10 +104,20 @@ export const routeStationsSelector=selector({
     key: 'routeStationsSelector',
     get: ({get}) => get(diaDataState).routeStation,
 });
-export const routeStationSelector : (routeStationID: number) => RecoilValueReadOnly<RouteStation>= selectorFamily({
+export const routeStationSelector : (routeStationID: number) => RecoilState<RouteStation>= selectorFamily({
     key: 'routeStationSelector',
     get: routeStationID => ({ get }) => {
         return get(diaDataState).routeStation[routeStationID];
     },
+    set: () => ({ get,set },newValue) => {
+
+        const res=get(diaDataState);
+        const routeStations={...res.routeStation};
+        const rs=newValue as RouteStation;
+        routeStations[rs.id]=rs;
+
+        return set(diaDataState,{...res,routeStation:routeStations});
+    },
+
 });
 

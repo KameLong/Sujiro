@@ -8,7 +8,7 @@ const container = document.getElementById('root');
 const root = createRoot(container!);
 root.render(
     <RecoilRoot>
-        {/*<RecoilizeDebugger/>*/}
+        <RecoilizeDebugger/>
         <App />
     </RecoilRoot>
 );
