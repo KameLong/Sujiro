@@ -18,6 +18,7 @@ import {EditStationPage} from "../StationEdit/EditStationPage";
 import {useKeyAlt} from "../../hooks/KeyHooks";
 import {add} from "ionicons/icons";
 import {StationListView} from "../StationEdit/StationList";
+import {EditRoutePage} from "./RouteEditPage";
 
 
 
@@ -30,11 +31,11 @@ export const RouteListPage: React.FC = ():JSX.Element => {
         const [editModalTitle, setEditModalTitle] = useState('新規路線作成');
         const [editModalRouteID, setEditModalRouteID] = useState(-1);
 
-        // const [present, dismiss] = useIonModal(EditRoutePage, {
-        //     title:editModalTitle,
-        //     routeID:editModalRouteID,
-        //     onDismiss: (data: string, role: string) => dismiss(data, role),
-        // });
+        const [present, dismiss] = useIonModal(EditRoutePage, {
+            title:editModalTitle,
+            routeID:editModalRouteID,
+            onDismiss: (data: string, role: string) => dismiss(data, role),
+        });
 
         useKeyAlt("Insert",()=>{
             openNewRoute();
@@ -45,15 +46,15 @@ export const RouteListPage: React.FC = ():JSX.Element => {
         },0)
 
         const openNewRoute=()=>{
-            setEditModalTitle(()=>"新規駅作成");
+            setEditModalTitle(()=>"新規路線作成");
             setEditModalRouteID(()=>-1);
-            // present();
+            present();
         }
 
         const openEditRoute=(stationID:number)=>{
-            setEditModalTitle(()=>"駅編集");
+            setEditModalTitle(()=>"路線編集");
             setEditModalRouteID(()=>stationID);
-            // present();
+            present();
         }
 
 
