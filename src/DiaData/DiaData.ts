@@ -158,6 +158,7 @@ export class EditDiaData {
     private static debugMakeTimeTable(diaData:DiaData) {
         const timetable = EditTimeTable.newTimeTable();
         timetable.id = 0;
+        timetable.name="東海道";
         diaData.timeTable[timetable.id] = timetable;
         const addStation = (stationID: number) => {
             if (diaData.stations[stationID]) {

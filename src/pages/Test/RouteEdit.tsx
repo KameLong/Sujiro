@@ -15,7 +15,7 @@
 
 
 import React, {useState} from "react";
-import {useMoveOnDrag} from "../Test/Move";
+import {useMoveOnDrag} from "./Move";
 import {TimeTableStation} from "../../DiaData/TimeTable";
 //@ts-ignore
 import Path from 'react-svg-path'

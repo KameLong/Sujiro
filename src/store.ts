@@ -27,6 +27,13 @@ export const tripSelector : (tripID: number) => RecoilValueReadOnly<Trip>= selec
         return get(diaDataState).trips[tripID];
     },
 });
+
+export const timetablesSelector:RecoilValueReadOnly<{ [key:number]:TimeTable }>=selector({
+    // 一意のキー
+    key: 'timetablesSelector',
+    get: ({get}) => get(diaDataState).timeTable,
+
+});
 export const timetableSelector : (timetableID: number) => RecoilValueReadOnly<TimeTable>= selectorFamily({
     key: 'timetableSelector',
     get: timetableID => ({ get }) => {

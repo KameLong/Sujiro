@@ -58,7 +58,7 @@ export const MenuPage = () => {
     }
     const onClickMakeTimeTable = () => {
         splitPaneRef.current?.click();
-        nav(`/TimeTableEdit`);
+        nav(`/TimetableList`);
     }
 
     return (
