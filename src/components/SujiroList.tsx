@@ -96,7 +96,7 @@ export const SujiroListTest : React.FC = ():JSX.Element => {
                         <ChildComponent key={showList.indexOf(item)} item={item} />
                     )}
                     sortList={(list,query)=>{
-                        return list.filter(item=>item.includes(query));
+                        return list.filter(item=>item.value.includes(query));
                     }}
                 />
         )
