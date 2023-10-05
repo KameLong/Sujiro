@@ -50,6 +50,7 @@ import {KeyTestPage} from "./pages/Test/KeyTestPage";
 import {RouteListPage} from "./pages/Route/RouteList";
 import {TimetableListPage} from "./pages/TimeTableEdit/TimetableListPage";
 import {TimetableEditPage} from "./pages/TimeTableEdit/TimeTableEditPage";
+import {SujiroListTest} from "./components/SujiroList";
 setupIonicReact({
      rippleEffect: true,
     mode: 'ios',
@@ -82,14 +83,14 @@ const App: React.FC = () => {
                             </IonToolbar>
                         </IonHeader>
                         <IonContent >
-                            <Route exact path="/" component={ListConnectorView}/>
+                            <Route exact path="/" component={SujiroListTest}/>
                             <Route exact path="/home">
                             </Route>
                             <Route exact path="/StationList" component={StationListPage} />
                             <Route exact path="/RouteList" component={RouteListPage} />
                             <Route exact path="/TimetableList" component={TimetableListPage}/>
                             {/*<Route exact path="/NewStation" component={EditStationPage}/>*/}
-                            <Route exact path="/TimetableEdit" component={TimetableEditPage}/>
+                            <Route exact path="/TimetableEdit/" component={TimetableEditPage}/>
 
                             <Route exact path="/LineTimeTable" component={TimeTableViewPage}/>
                             <Route exact path="/KeyTest" component={KeyTestPage}/>

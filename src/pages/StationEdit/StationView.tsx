@@ -18,34 +18,30 @@ import {StationListView} from "./StationList";
 
 interface StationSimpleViewProps{
     station:Station;
-    onClicked?: {(stationID:number):void; };
+    onClicked?: {(station:Station):void; };
 }
 export const StationSimpleView: React.FC<StationSimpleViewProps> = ({station,onClicked=undefined}:StationSimpleViewProps):JSX.Element => {
     const onClickEvent=()=>{
         if(onClicked){
-            onClicked(station.id);
+            onClicked(station);
         }
     }
     return(
-        <IonItem >
             <div  onClick={onClickEvent}>
                 {
                     station.name
                 }
             </div>
-        </IonItem>
     )
 }
 
 export const StationView: React.FC<StationSimpleViewProps>=({station,onClicked=undefined}:StationSimpleViewProps):JSX.Element =>{
     return(
-        <IonItem onClick={()=>{
-            if(onClicked){
-                onClicked(station.id);
-            }
-            }}
-            >
-            <div style={{display:"flex"}}>
+            <div onClick={()=>{
+                if(onClicked){
+                    onClicked(station);
+                }
+            }} style={{display:"flex"}}>
                 <div style={{width:"200px"}}>
                 {
                     station.name
@@ -57,7 +53,6 @@ export const StationView: React.FC<StationSimpleViewProps>=({station,onClicked=u
                     }
                 </div>
             </div>
-        </IonItem>
     );
 }
 

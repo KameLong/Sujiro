@@ -16,6 +16,7 @@ import {add, chevronUpCircle, colorPalette, globe} from "ionicons/icons";
 import {AppTitleState} from "../../App";
 import {EditStationPage} from "./EditStationPage";
 import {useKeyAlt} from "../../hooks/KeyHooks";
+import {SujiroList} from "../../components/SujiroList";
 
 
 export const StationListPage: React.FC = ():JSX.Element => {
@@ -60,7 +61,8 @@ export const StationListPage: React.FC = ():JSX.Element => {
         }
         return (
             <div>
-                <StationListView  stationList={stationList} onStationSelected={openEditStation}/>
+                <StationListView stationList={stationList} onStationSelected={openEditStation}></StationListView>
+
 
                 <IonFab style={{margin:"10px"}} slot="fixed" vertical="bottom" horizontal="end">
                     <IonFabButton onClick={addNewStation}>
@@ -85,97 +87,139 @@ interface StationListViewProps{
     stationList:Station[],
     onStationSelected?:((stationID:number)=>void)
 }
-export const StationListView: React.FC<StationListViewProps> = ({stationList,onStationSelected}:StationListViewProps):JSX.Element => {
-    try {
+ export const StationListView: React.FC<StationListViewProps> = ({stationList,onStationSelected}:StationListViewProps):JSX.Element => {
+    return (
+        <SujiroList renderRow={(station:Station,onClicked:(station:Station)=>void)=>{
+            return(<StationView  key={station.id} station={station} onClicked={onClicked}/>)}}
+                    itemList={stationList}
+                    sortList={(stationList,query)=>{
+                        const queryedStationList=stationList.filter(station=>station.name.includes(query)||station.id.toString().includes(query)||station.address.includes(query));
+                        const tmp=queryedStationList.sort((a,b)=>{
+                            let score=0;
 
-
-        const [query, setQuery] = useState<string>('');
-        const [showStationList,setShowStationList]=useState<Station[]>([]);
-        const [sortedStationList,setSortedStationList]=useState<Station[]>([]);
-        useEffect(() => {
-            if(query.length==0){
-                setSortedStationList((prev)=>stationList);
-            }else{
-                const queryedStationList=stationList.filter(station=>station.name.includes(query)||station.id.toString().includes(query)||station.address.includes(query));
-                const tmp=queryedStationList.sort((a,b)=>{
-                    let score=0;
-
-                    if(a.name===query){
-                        score-=100;
-                    }
-                    if(b.name===query){
-                        score+=100;
-                    }
-                    if(a.name.includes(query)){
-                        score-=10;
-                    }
-                    if(b.name.includes(query)){
-                        score+=10;
-                    }
-                    if(a.id.toString()===query){
-                        score-=20;
-                    }
-                    if(b.id.toString()===query){
-                        score+=20;
-                    }
-                    return score;
-                })
-                setSortedStationList(()=>tmp);
-            }
-
-        }, [query,stationList]);
-        useEffect(() => {
-            setShowStationList(()=>sortedStationList.slice(0,100));
-        }, [sortedStationList]);
-
-        const generateItems = () => {
-            console.log("generateItems");
-            setShowStationList((prev)=>{
-                return sortedStationList.slice(0,prev.length+100);
-            })
-        };
-
-
-        return (
-            <div>
-                <IonSearchbar value={query} onIonChange={e =>{
-                    console.log(e.detail.value);
-                    setQuery((prev)=>e.detail.value??"");
-                }}
-                >
-                </IonSearchbar>
-                <IonList>
-
-                    {
-                        showStationList.map(station=>{
-                            return <StationView  key={station.id} station={station} onClicked={(id)=>{
-                                if(onStationSelected!==undefined) {
-                                    onStationSelected(id);
-                                }
-                            }}/>
+                            if(a.name===query){
+                                score-=100;
+                            }
+                            if(b.name===query){
+                                score+=100;
+                            }
+                            if(a.name.includes(query)){
+                                score-=10;
+                            }
+                            if(b.name.includes(query)){
+                                score+=10;
+                            }
+                            if(a.id.toString()===query){
+                                score-=20;
+                            }
+                            if(b.id.toString()===query){
+                                score+=20;
+                            }
+                            return score;
                         })
-                    }
-                </IonList>
-                <IonInfiniteScroll
-                    onIonInfinite={(ev) => {
-                        generateItems();
-                        setTimeout(() => ev.target.complete(), 500);
+                        return tmp;
+
+
+
                     }}
-                >
-                    <IonInfiniteScrollContent></IonInfiniteScrollContent>
-                </IonInfiniteScroll>
-            </div>
-        );
-    }catch(e:any){
-        console.log(e);
-        return (
-            <div>
-                <div>エラーが発生しました</div>
-                <div>{e.toString()}</div>
-            </div>
-        );
-    }
-}
+                    onClicked={(station=>{
+                        if(onStationSelected){
+                            onStationSelected(station.id)
+                        }
+                    })}/>
+    )
+ }
+// export const StationListView: React.FC<StationListViewProps> = ({stationList,onStationSelected}:StationListViewProps):JSX.Element => {
+//     try {
+//
+//
+//         const [query, setQuery] = useState<string>('');
+//         const [showStationList,setShowStationList]=useState<Station[]>([]);
+//         const [sortedStationList,setSortedStationList]=useState<Station[]>([]);
+//         useEffect(() => {
+//             if(query.length==0){
+//                 setSortedStationList((prev)=>stationList);
+//             }else{
+//                 const queryedStationList=stationList.filter(station=>station.name.includes(query)||station.id.toString().includes(query)||station.address.includes(query));
+//                 const tmp=queryedStationList.sort((a,b)=>{
+//                     let score=0;
+//
+//                     if(a.name===query){
+//                         score-=100;
+//                     }
+//                     if(b.name===query){
+//                         score+=100;
+//                     }
+//                     if(a.name.includes(query)){
+//                         score-=10;
+//                     }
+//                     if(b.name.includes(query)){
+//                         score+=10;
+//                     }
+//                     if(a.id.toString()===query){
+//                         score-=20;
+//                     }
+//                     if(b.id.toString()===query){
+//                         score+=20;
+//                     }
+//                     return score;
+//                 })
+//                 setSortedStationList(()=>tmp);
+//             }
+//
+//         }, [query,stationList]);
+//         useEffect(() => {
+//             setShowStationList(()=>sortedStationList.slice(0,100));
+//         }, [sortedStationList]);
+//
+//         const generateItems = () => {
+//             console.log("generateItems");
+//             setShowStationList((prev)=>{
+//                 return sortedStationList.slice(0,prev.length+100);
+//             })
+//         };
+//
+//
+//         return (
+//             <div>
+//                 <IonSearchbar value={query} onIonChange={e =>{
+//                     console.log(e.detail.value);
+//                     setQuery((prev)=>e.detail.value??"");
+//                 }}
+//                 >
+//                 </IonSearchbar>
+//                 <IonList>
+//
+//                     {
+//                         showStationList.map(station=>{
+//                             return <StationView  key={station.id} station={station} onClicked={(id)=>{
+//                                 if(onStationSelected!==undefined) {
+//                                     // onStationSelected();
+//                                 }
+//                             }}/>
+//                         })
+//                     }
+//                 </IonList>
+//                 <IonInfiniteScroll
+//                     onIonInfinite={(ev) => {
+//                         generateItems();
+//                         setTimeout(() => ev.target.complete(), 500);
+//                     }}
+//                 >
+//                     <IonInfiniteScrollContent></IonInfiniteScrollContent>
+//                 </IonInfiniteScroll>
+//             </div>
+//         );
+//     }catch(e:any){
+//         console.log(e);
+//         return (
+//             <div>
+//                 <div>エラーが発生しました</div>
+//                 <div>{e.toString()}</div>
+//             </div>
+//         );
+//     }
+// }
 
 
 
