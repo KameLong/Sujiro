@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from "react";
-import {IonInfiniteScroll, IonInfiniteScrollContent, IonItem, IonList, IonSearchbar} from "@ionic/react";
+import {IonCheckbox, IonInfiniteScroll, IonInfiniteScrollContent, IonItem, IonList, IonSearchbar} from "@ionic/react";
+import {useKey} from "react-use";
 interface Tsub{
     id:number
 }
@@ -16,26 +17,90 @@ interface SujiroListProps<T　extends Tsub>{
 
 export function SujiroList<T　extends Tsub>({itemList,renderRow,sortList,onClicked}:SujiroListProps<T>):JSX.Element{
     const [query, setQuery] = useState<string>('');
-    const [showStationList,setShowStationList]=useState<T[]>([]);
-    const [sortedStationList,setSortedStationList]=useState<T[]>([]);
+    const [showList,setShowList]=useState<T[]>([]);
+    const [sortedList,setSortedList]=useState<T[]>([]);
+    const [selectedList,setSelectedList]=useState<boolean[]>([]);
+    console.log(selectedList);
+    const setSelect=(index:number,value:boolean)=>{
+        console.log(index,value);
+        setSelectedList(old=>{
+            const next=[...old];
+            next[index]=value;
+            console.log(next);
+            return next;
+        })
+    }
     useEffect(() => {
         if(query.length==0){
-            setSortedStationList((prev)=>itemList);
+            setSortedList((prev)=>itemList);
         }else{
-            setSortedStationList(()=>sortList(itemList,query));
+            setSortedList(()=>sortList(itemList,query));
         }
-
     }, [query,itemList]);
     useEffect(() => {
-        setShowStationList(()=>sortedStationList.slice(0,100));
-    }, [sortedStationList]);
+        setShowList(()=>sortedList.slice(0,100));
+        setSelectedList(showList.map(item=>false));
+
+    }, [sortedList]);
+    useKey("ArrowUp",(e)=>{
+        console.log(selectedList);
+        e.preventDefault();
+        console.log("up");
+        if(selectedList.every(item=>!item)){
+            setSelect(0,true);
+        }else{
+
+            const index=selectedList.findIndex(item=>item);
+            console.log(index);
+            if(index>0){
+                setSelectedList(old=>{
+                    const next=old.map(item=>false);
+                    next[index-1]=true;
+                    return next;
+
+                });
+            }
+        }
+
+    },undefined,[selectedList]);
+    useKey("ArrowDown",(e)=>{
+        console.log(selectedList);
+        e.preventDefault();
+        console.log("down");
+        if(selectedList.every(item=>!item)){
+            setSelect(0,true);
+        }else{
+            const index=selectedList.findIndex(item=>item);
+            console.log(index);
+            if(index>=0){
+                setSelectedList(old=>{
+                    const next=old.map(item=>false);
+                    next[index+1]=true;
+                    return next;
+
+                });
+            }
+        }
+    },undefined,[selectedList]);
 
     const generateItems = () => {
         console.log("generateItems");
-        setShowStationList((prev)=>{
-            return sortedStationList.slice(0,prev.length+100);
+        setShowList((prev)=>{
+            return sortedList.slice(0,prev.length+100);
+        })
+        setSelectedList(old=>{
+            const next=[...old];
+            for(let i=0;i<showList.length-old.length;i++){
+                next.push(false);
+            }
+            return next;
         })
     };
+    const clicked=(item:T)=>{
+        if(onClicked){
+            onClicked(item)
+        }
+    }
     return (
             <div>
                 <IonSearchbar value={query} onIonChange={e =>{
@@ -45,16 +110,12 @@ export function SujiroList<T　extends Tsub>({itemList,renderRow,sortList,onClic
                 >
                 </IonSearchbar>
                 <IonList>
-
                     {
-                        showStationList.map(station=>
-                            <IonItem key={station.id}>
-
-                                {renderRow(station,(item)=>{
-                                if(onClicked){
-                                    onClicked(item)
-                                }
-                            })}
+                        showList.map((item,i)=>
+                            <IonItem key={item.id}>
+                                <IonCheckbox style={{width:"40px"}} checked={selectedList[i]}
+                                             onIonChange={(e)=>setSelect(i,e.detail.checked)}/>
+                                {renderRow(item,clicked)}
                             </IonItem>
 
                         )
