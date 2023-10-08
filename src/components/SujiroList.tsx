@@ -20,28 +20,34 @@ export function SujiroList<T　extends Tsub>({itemList,renderRow,sortList,onClic
     const [showList,setShowList]=useState<T[]>([]);
     const [sortedList,setSortedList]=useState<T[]>([]);
     const [selectedList,setSelectedList]=useState<boolean[]>([]);
-    console.log(selectedList);
+    const [focus,setFocus]=useState<boolean[]>([]);
+    const [selectStart,setSelectStart]=useState<number|undefined>(undefined);
+
+
     const setSelect=(index:number,value:boolean)=>{
-        console.log(index,value);
+        if(value){
+            setFocus(selectedList.map((_,i)=>i===index));
+        }
         setSelectedList(old=>{
             const next=[...old];
             next[index]=value;
-            console.log(next);
             return next;
         })
     }
     useEffect(() => {
         if(query.length==0){
-            setSortedList((prev)=>itemList);
+            setSortedList(()=>itemList);
         }else{
             setSortedList(()=>sortList(itemList,query));
         }
     }, [query,itemList]);
     useEffect(() => {
         setShowList(()=>sortedList.slice(0,100));
-        setSelectedList(showList.map(item=>false));
-
     }, [sortedList]);
+    useEffect(() => {
+        setSelectedList(showList.map(()=>false));
+    }, [showList]);
+
     useKey("ArrowUp",(e)=>{
         console.log(selectedList);
         e.preventDefault();
@@ -49,38 +55,43 @@ export function SujiroList<T　extends Tsub>({itemList,renderRow,sortList,onClic
         if(selectedList.every(item=>!item)){
             setSelect(0,true);
         }else{
-
-            const index=selectedList.findIndex(item=>item);
+            const index=focus.findIndex(item=>item);
             console.log(index);
             if(index>0){
                 setSelectedList(old=>{
-                    const next=old.map(item=>false);
+                    const next=old.map(()=>false);
                     next[index-1]=true;
                     return next;
 
                 });
+                setFocus(selectedList.map((_,i)=>i===index-1));
             }
         }
 
     },undefined,[selectedList]);
     useKey("ArrowDown",(e)=>{
+        if(e.shiftKey) {
+
+        }else{
+
         console.log(selectedList);
         e.preventDefault();
         console.log("down");
         if(selectedList.every(item=>!item)){
             setSelect(0,true);
         }else{
-            const index=selectedList.findIndex(item=>item);
+            const index=focus.findIndex(item=>item);
             console.log(index);
-            if(index>=0){
+            if(index<selectedList.length-1){
                 setSelectedList(old=>{
-                    const next=old.map(item=>false);
+                    const next=old.map(()=>false);
                     next[index+1]=true;
                     return next;
 
                 });
+                setFocus(selectedList.map((_,i)=>i===index+1));
             }
-        }
+        }}
     },undefined,[selectedList]);
 
     const generateItems = () => {
@@ -105,20 +116,26 @@ export function SujiroList<T　extends Tsub>({itemList,renderRow,sortList,onClic
             <div>
                 <IonSearchbar value={query} onIonChange={e =>{
                     console.log(e.detail.value);
-                    setQuery((prev)=>e.detail.value??"");
+                    setQuery(()=>e.detail.value??"");
                 }}
                 >
                 </IonSearchbar>
                 <IonList>
                     {
-                        showList.map((item,i)=>
-                            <IonItem key={item.id}>
-                                <IonCheckbox style={{width:"40px"}} checked={selectedList[i]}
-                                             onIonChange={(e)=>setSelect(i,e.detail.checked)}/>
-                                {renderRow(item,clicked)}
+                        showList.map((item,i)=> {
+                            let style = {};
+                            if(focus[i]){
+                                style={border:"1px black solid"};
+                            }
+                            return (
+                            <IonItem key={item.id} style={style}>
+                                <IonCheckbox style={{width: "40px"}} checked={selectedList[i]}
+                                             onIonChange={(e) => {e.preventDefault();setSelect(i, e.detail.checked)}}/>
+                                {renderRow(item, clicked)}
                             </IonItem>
+                            )
 
-                        )
+                        })
                     }
                 </IonList>
                 <IonInfiniteScroll

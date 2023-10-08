@@ -1,6 +1,3 @@
-import {Trip} from "./Trip";
-import {Station} from "./Station";
-import {DiaData} from "./DiaData";
 
 export interface Route {
     id: number;
