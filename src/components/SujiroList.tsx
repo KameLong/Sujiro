@@ -25,6 +25,7 @@ export function SujiroList<T　extends Tsub>({itemList,renderRow,sortList,onClic
 
 
     const setSelect=(index:number,value:boolean)=>{
+        setSelectStart(undefined);
         if(value){
             setFocus(selectedList.map((_,i)=>i===index));
         }
@@ -49,49 +50,78 @@ export function SujiroList<T　extends Tsub>({itemList,renderRow,sortList,onClic
     }, [showList]);
 
     useKey("ArrowUp",(e)=>{
-        console.log(selectedList);
         e.preventDefault();
-        console.log("up");
-        if(selectedList.every(item=>!item)){
-            setSelect(0,true);
-        }else{
-            const index=focus.findIndex(item=>item);
-            console.log(index);
-            if(index>0){
-                setSelectedList(old=>{
-                    const next=old.map(()=>false);
-                    next[index-1]=true;
-                    return next;
+        if(e.shiftKey) {
+            const index = focus.findIndex(item => item);
+            if(index<=0){
+                return;
+            }else{
+                let a=selectStart;
+                if(selectStart===undefined){
+                    setSelectStart(index);
+                    a=index;
+                }
+                setSelectedList(old =>
+                    old.map((_,i) => (i-a!!)*(i-(index-1))<=0)
+                );
+                setFocus(selectedList.map((_, i) => i === index - 1));
+            }
+        }else {
+            setSelectStart(undefined);
+            if (selectedList.every(item => !item)) {
+                setSelect(0, true);
+            } else {
+                const index = focus.findIndex(item => item);
+                console.log(index);
+                if (index > 0) {
+                    setSelectedList(old => {
+                        const next = old.map(() => false);
+                        next[index - 1] = true;
+                        return next;
 
-                });
-                setFocus(selectedList.map((_,i)=>i===index-1));
+                    });
+                    setFocus(selectedList.map((_, i) => i === index - 1));
+                }
             }
         }
 
     },undefined,[selectedList]);
     useKey("ArrowDown",(e)=>{
         if(e.shiftKey) {
-
-        }else{
-
-        console.log(selectedList);
-        e.preventDefault();
-        console.log("down");
-        if(selectedList.every(item=>!item)){
-            setSelect(0,true);
-        }else{
-            const index=focus.findIndex(item=>item);
-            console.log(index);
-            if(index<selectedList.length-1){
-                setSelectedList(old=>{
-                    const next=old.map(()=>false);
-                    next[index+1]=true;
-                    return next;
-
-                });
-                setFocus(selectedList.map((_,i)=>i===index+1));
+            const index = focus.findIndex(item => item);
+            if(index<0||index>=selectedList.length-1){
+                return;
+            }else{
+                let a=selectStart;
+                if(selectStart===undefined){
+                    setSelectStart(index);
+                    a=index;
+                }
+                setSelectedList(old =>
+                    old.map((_,i) => (i-a!!)*(i-(index+1))<=0)
+                );
+                setFocus(selectedList.map((_, i) => i === index + 1));
             }
-        }}
+
+        }else{
+            setSelectStart(undefined);
+            e.preventDefault();
+            console.log("down");
+            if(selectedList.every(item=>!item)){
+                setSelect(0,true);
+            }else{
+                const index=focus.findIndex(item=>item);
+                console.log(index);
+                if(index<selectedList.length-1){
+                    setSelectedList(old=>{
+                        const next=old.map(()=>false);
+                        next[index+1]=true;
+                        return next;
+
+                    });
+                    setFocus(selectedList.map((_,i)=>i===index+1));
+                }
+            }}
     },undefined,[selectedList]);
 
     const generateItems = () => {
