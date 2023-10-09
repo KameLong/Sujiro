@@ -37,6 +37,8 @@ export function SujiroList<T　extends Tsub>({itemList,renderRow,sortList,onClic
     }
     if(getSelected!==undefined)getSelected(AAA);
 
+    const listRef = React.createRef<HTMLIonListElement>()
+
 
     const setSelect=(index:number,value:boolean)=>{
         setSelectStart(undefined);
@@ -63,6 +65,16 @@ export function SujiroList<T　extends Tsub>({itemList,renderRow,sortList,onClic
         setSelectedList(showList.map(()=>false));
     }, [showList]);
 
+    const showFocusItem=(index:number)=>{
+        const element=listRef.current?.children[index-1];
+        if(element===undefined){
+            return;
+        }
+        element.scrollIntoView({block:"nearest"})
+
+
+    }
+
     useKey("ArrowUp",(e)=>{
         e.preventDefault();
         if(e.shiftKey) {
@@ -80,6 +92,7 @@ export function SujiroList<T　extends Tsub>({itemList,renderRow,sortList,onClic
                     old.map((_,i) => (i-a!!)*(i-(index-1))<=0)
                 );
                 setFocus(selectedList.map((_, i) => i === index - 1));
+                showFocusItem(index-1);
             }
         }else {
             console.log("Up");
@@ -96,6 +109,7 @@ export function SujiroList<T　extends Tsub>({itemList,renderRow,sortList,onClic
 
                     });
                     setFocus(selectedList.map((_, i) => i === index - 1));
+                    showFocusItem(index-1);
                 }
             }
         }
@@ -118,6 +132,7 @@ export function SujiroList<T　extends Tsub>({itemList,renderRow,sortList,onClic
                     old.map((_,i) => (i-a!!)*(i-(index+1))<=0)
                 );
                 setFocus(selectedList.map((_, i) => i === index + 1));
+                showFocusItem(index+1);
             }
 
         }else{
@@ -136,6 +151,8 @@ export function SujiroList<T　extends Tsub>({itemList,renderRow,sortList,onClic
 
                     });
                     setFocus(selectedList.map((_,i)=>i===index+1));
+                    showFocusItem(index+1);
+
                 }
             }}
     },undefined,[selectedList]);
@@ -159,22 +176,25 @@ export function SujiroList<T　extends Tsub>({itemList,renderRow,sortList,onClic
         }
     }
     return (
-            <div>
+            <div >
                 <IonSearchbar value={query} onIonChange={e =>{
                     console.log(e.detail.value);
                     setQuery(()=>e.detail.value??"");
                 }}
                 >
                 </IonSearchbar>
-                <IonList>
+                <IonList  ref={listRef} >
                     {
                         showList.map((item,i)=> {
                             let style = {};
+                            let ref=null;
                             if(focus[i]){
                                 style={border:"1px black solid"};
+                                ref=listRef;
                             }
+
                             return (
-                            <IonItem key={item.id} style={style}>
+                            <IonItem key={item.id} style={style} >
                                 <IonCheckbox style={{width: "40px"}} checked={selectedList[i]}
                                              onIonChange={(e) => {e.preventDefault();setSelect(i, e.detail.checked)}}/>
                                 {renderRow(item, clicked)}

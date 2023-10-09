@@ -125,7 +125,8 @@ export const StationListPage: React.FC = ():JSX.Element => {
         }
 
         return (
-            <div>
+            <div  style={{height:'100vh'}}
+            >
                 <SujiroList renderRow={(station:Station,onClicked:(station:Station)=>void)=>{
                     return(<StationView  key={station.id} station={station} onClicked={onClicked}/>)}}
                             itemList={stationList}
