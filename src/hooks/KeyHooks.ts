@@ -8,7 +8,7 @@ export const useKeyAlt = (keyName:string, action:(e:KeyboardEvent)=>void) => {
 
 export const useKeyCtrl = (keyName:string, action:(e:KeyboardEvent)=>void) => {
     // CtrlとMetaを入れ替えているので
-    useKey((e) => {console.log(e); return e.metaKey && e.code === keyName},(e)=>{
+    useKey((e) => {return e.metaKey && e.code === keyName},(e)=>{
         action(e);
     });
 };

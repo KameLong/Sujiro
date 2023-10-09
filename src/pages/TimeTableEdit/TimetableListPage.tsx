@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {useRecoilValue, useSetRecoilState} from "recoil";
-import {routesSelector, timetableSelector, timetablesSelector} from "../../store";
+import {timetablesSelector} from "../../store";
 import {AppTitleState} from "../../App";
 import {
     IonFab,
@@ -10,13 +10,9 @@ import {
     IonInfiniteScrollContent, IonItem,
     IonList,
     IonSearchbar,
-    useIonModal
 } from "@ionic/react";
-import {EditRoutePage} from "../Route/RouteEditPage";
 import {useKeyAlt} from "../../hooks/KeyHooks";
 import {add} from "ionicons/icons";
-import {RouteListView, RouteView} from "../Route/RouteList";
-import {Route} from "../../DiaData/Route";
 import {TimeTable} from "../../DiaData/TimeTable";
 import {useHistory} from "react-router-dom";
 

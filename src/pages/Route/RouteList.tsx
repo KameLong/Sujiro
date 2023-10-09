@@ -19,6 +19,8 @@ import {useKeyAlt} from "../../hooks/KeyHooks";
 import {add} from "ionicons/icons";
 import {StationListView} from "../StationEdit/StationList";
 import {EditRoutePage} from "./RouteEditPage";
+import {SujiroList} from "../../components/SujiroList";
+import {StationView} from "../StationEdit/StationView";
 
 
 
@@ -40,8 +42,6 @@ export const RouteListPage: React.FC = ():JSX.Element => {
         useKeyAlt("Insert",()=>{
             openNewRoute();
         });
-
-
         setTimeout(()=>{setTitle((old)=>"RouteList");
         },0)
 
@@ -51,20 +51,52 @@ export const RouteListPage: React.FC = ():JSX.Element => {
             present();
         }
 
-        const openEditRoute=(routeID:number)=>{
+        const openEditRoute=(route:Route)=>{
             setEditModalTitle(()=>"路線編集");
-            setEditModalRouteID(()=>routeID);
+            setEditModalRouteID(()=>route.id);
             present();
         }
 
 
         const addNewRoute=()=>{
             openNewRoute();
+        }
 
+        const sortRoute=(list:Route[],query:string)=>{
+            const queryedRouteList=routeList.filter(route=>route.name.includes(query)||route.id.toString().includes(query));
+            return queryedRouteList.sort((a,b)=>{
+                let score=0;
+
+                if(a.name===query){
+                    score-=100;
+                }
+                if(b.name===query){
+                    score+=100;
+                }
+                if(a.name.includes(query)){
+                    score-=10;
+                }
+                if(b.name.includes(query)){
+                    score+=10;
+                }
+                if(a.id.toString()===query){
+                    score-=20;
+                }
+                if(b.id.toString()===query){
+                    score+=20;
+                }
+                return score;
+            })
         }
         return (
             <div>
-                <RouteListView  routeList={routeList} onRouteSelected={openEditRoute}/>
+                <SujiroList
+                    renderRow={(route:Route,onClicked:(route:Route)=>void)=>
+                        (<RouteView  key={route.id} route={route} onClicked={onClicked}/>)}
+                    itemList={routeList}
+                    sortList={sortRoute}
+                    onClicked={openEditRoute}
+                />
 
                 <IonFab style={{margin:"10px"}} slot="fixed" vertical="bottom" horizontal="end">
                     <IonFabButton onClick={addNewRoute}>
@@ -87,113 +119,112 @@ export const RouteListPage: React.FC = ():JSX.Element => {
 
 
 
-interface RouteListViewProps{
-    routeList:Route[],
-    onRouteSelected?:((routeID:number)=>void)
-}
-export const RouteListView: React.FC<RouteListViewProps> = ({routeList,onRouteSelected}):JSX.Element => {
-    try {
-
-
-        const [query, setQuery] = useState<string>('');
-        const [showRouteList,setShowRouteList]=useState<Route[]>([]);
-        const [sortedRouteList,setSortedRouteList]=useState<Route[]>([]);
-        useEffect(() => {
-            if(query.length==0){
-                setSortedRouteList((prev)=>routeList);
-            }else{
-                const queryedRouteList=routeList.filter(route=>route.name.includes(query)||route.id.toString().includes(query));
-                const tmp=queryedRouteList.sort((a,b)=>{
-                    let score=0;
-
-                    if(a.name===query){
-                        score-=100;
-                    }
-                    if(b.name===query){
-                        score+=100;
-                    }
-                    if(a.name.includes(query)){
-                        score-=10;
-                    }
-                    if(b.name.includes(query)){
-                        score+=10;
-                    }
-                    if(a.id.toString()===query){
-                        score-=20;
-                    }
-                    if(b.id.toString()===query){
-                        score+=20;
-                    }
-                    return score;
-                })
-                setSortedRouteList(()=>tmp);
-            }
-
-        }, [query,routeList]);
-        useEffect(() => {
-            setShowRouteList(()=>sortedRouteList.slice(0,100));
-        }, [sortedRouteList]);
-
-        const generateItems = () => {
-            console.log("generateItems");
-            setShowRouteList((prev)=>{
-                return sortedRouteList.slice(0,prev.length+100);
-            })
-        };
-
-
-        return (
-            <div>
-                <IonSearchbar value={query} onIonChange={e =>{
-                    console.log(e.detail.value);
-                    setQuery((prev)=>e.detail.value??"");
-                }}
-                >
-                </IonSearchbar>
-                <IonList>
-
-                    {
-                        showRouteList.map(route=>{
-                            return <RouteView  key={route.id} route={route} onClicked={(id)=>{
-                                if(onRouteSelected!==undefined) {
-                                    onRouteSelected(id);
-                                }
-                            }}/>
-                        })
-                    }
-                </IonList>
-                <IonInfiniteScroll
-                    onIonInfinite={(ev) => {
-                        generateItems();
-                        setTimeout(() => ev.target.complete(), 500);
-                    }}
-                >
-                    <IonInfiniteScrollContent></IonInfiniteScrollContent>
-                </IonInfiniteScroll>
-            </div>
-        );
-    }catch(e:any){
-        console.log(e);
-        return (
-            <div>
-                <div>エラーが発生しました</div>
-                <div>{e.toString()}</div>
-            </div>
-        );
-    }
-}
+// interface RouteListViewProps{
+//     routeList:Route[],
+//     onRouteSelected?:((routeID:number)=>void)
+// }
+// export const RouteListView: React.FC<RouteListViewProps> = ({routeList,onRouteSelected}):JSX.Element => {
+//     try {
+//
+//
+//         const [query, setQuery] = useState<string>('');
+//         const [showRouteList,setShowRouteList]=useState<Route[]>([]);
+//         const [sortedRouteList,setSortedRouteList]=useState<Route[]>([]);
+//         useEffect(() => {
+//             if(query.length==0){
+//                 setSortedRouteList((prev)=>routeList);
+//             }else{
+//                 const queryedRouteList=routeList.filter(route=>route.name.includes(query)||route.id.toString().includes(query));
+//                 const tmp=queryedRouteList.sort((a,b)=>{
+//                     let score=0;
+//
+//                     if(a.name===query){
+//                         score-=100;
+//                     }
+//                     if(b.name===query){
+//                         score+=100;
+//                     }
+//                     if(a.name.includes(query)){
+//                         score-=10;
+//                     }
+//                     if(b.name.includes(query)){
+//                         score+=10;
+//                     }
+//                     if(a.id.toString()===query){
+//                         score-=20;
+//                     }
+//                     if(b.id.toString()===query){
+//                         score+=20;
+//                     }
+//                     return score;
+//                 })
+//                 setSortedRouteList(()=>tmp);
+//             }
+//
+//         }, [query,routeList]);
+//         useEffect(() => {
+//             setShowRouteList(()=>sortedRouteList.slice(0,100));
+//         }, [sortedRouteList]);
+//
+//         const generateItems = () => {
+//             console.log("generateItems");
+//             setShowRouteList((prev)=>{
+//                 return sortedRouteList.slice(0,prev.length+100);
+//             })
+//         };
+//
+//
+//         return (
+//             <div>
+//                 <IonSearchbar value={query} onIonChange={e =>{
+//                     console.log(e.detail.value);
+//                     setQuery((prev)=>e.detail.value??"");
+//                 }}
+//                 >
+//                 </IonSearchbar>
+//                 <IonList>
+//                     {
+//                         showRouteList.map(route=>{
+//                             return <RouteView  key={route.id} route={route} onClicked={(id)=>{
+//                                 if(onRouteSelected!==undefined) {
+//                                     // onRouteSelected(id);
+//                                 }
+//                             }}/>
+//                         })
+//                     }
+//                 </IonList>
+//                 <IonInfiniteScroll
+//                     onIonInfinite={(ev) => {
+//                         generateItems();
+//                         setTimeout(() => ev.target.complete(), 500);
+//                     }}
+//                 >
+//                     <IonInfiniteScrollContent></IonInfiniteScrollContent>
+//                 </IonInfiniteScroll>
+//             </div>
+//         );
+//     }catch(e:any){
+//         console.log(e);
+//         return (
+//             <div>
+//                 <div>エラーが発生しました</div>
+//                 <div>{e.toString()}</div>
+//             </div>
+//         );
+//     }
+// }
 
 
 interface RouteViewProps{
     route:Route;
-    onClicked?: {(routeID:number):void; };
+    onClicked?: {(route:Route):void; };
 }
 export const RouteView: React.FC<RouteViewProps>=({route,onClicked=undefined}):JSX.Element =>{
     return(
         <IonItem onClick={()=>{
             if(onClicked){
-                console.log(route.id);
-                onClicked(route.id);
+                console.log(route);
+                onClicked(route);
             }
         }}
         >
