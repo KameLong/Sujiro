@@ -19,6 +19,7 @@ export function SujiroList<T　extends Tsub>({itemList,renderRow,sortList,onClic
     const [query, setQuery] = useState<string>('');
     const [showList,setShowList]=useState<T[]>([]);
     const [sortedList,setSortedList]=useState<T[]>([]);
+
     const [selectedList,setSelectedList]=useState<boolean[]>([]);
     const [focus,setFocus]=useState<boolean[]>([]);
     const [selectStart,setSelectStart]=useState<number|undefined>(undefined);
@@ -52,6 +53,7 @@ export function SujiroList<T　extends Tsub>({itemList,renderRow,sortList,onClic
     useKey("ArrowUp",(e)=>{
         e.preventDefault();
         if(e.shiftKey) {
+            console.log("ShiftUp");
             const index = focus.findIndex(item => item);
             if(index<=0){
                 return;
@@ -67,12 +69,12 @@ export function SujiroList<T　extends Tsub>({itemList,renderRow,sortList,onClic
                 setFocus(selectedList.map((_, i) => i === index - 1));
             }
         }else {
+            console.log("Up");
             setSelectStart(undefined);
             if (selectedList.every(item => !item)) {
                 setSelect(0, true);
             } else {
                 const index = focus.findIndex(item => item);
-                console.log(index);
                 if (index > 0) {
                     setSelectedList(old => {
                         const next = old.map(() => false);
@@ -88,6 +90,8 @@ export function SujiroList<T　extends Tsub>({itemList,renderRow,sortList,onClic
     },undefined,[selectedList]);
     useKey("ArrowDown",(e)=>{
         if(e.shiftKey) {
+            console.log("ShiftDown");
+
             const index = focus.findIndex(item => item);
             if(index<0||index>=selectedList.length-1){
                 return;
@@ -106,12 +110,11 @@ export function SujiroList<T　extends Tsub>({itemList,renderRow,sortList,onClic
         }else{
             setSelectStart(undefined);
             e.preventDefault();
-            console.log("down");
+            console.log("Down");
             if(selectedList.every(item=>!item)){
                 setSelect(0,true);
             }else{
                 const index=focus.findIndex(item=>item);
-                console.log(index);
                 if(index<selectedList.length-1){
                     setSelectedList(old=>{
                         const next=old.map(()=>false);
