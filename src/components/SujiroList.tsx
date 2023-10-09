@@ -1,5 +1,13 @@
 import React, {useEffect, useState} from "react";
-import {IonCheckbox, IonInfiniteScroll, IonInfiniteScrollContent, IonItem, IonList, IonSearchbar} from "@ionic/react";
+import {
+    IonButton,
+    IonCheckbox,
+    IonInfiniteScroll,
+    IonInfiniteScrollContent,
+    IonItem,
+    IonList,
+    IonSearchbar
+} from "@ionic/react";
 import {useKey} from "react-use";
 interface Tsub{
     id:number
@@ -12,10 +20,11 @@ interface SujiroListProps<T　extends Tsub>{
     //queryを条件としてソートされたリスト
     sortList:(list:T[],query:string)=>T[],
     //要素がクリックされた時に行われるアクション
-    onClicked?:((clicked:T)=>void)
+    onClicked?:((clicked:T)=>void),
+    getSelected?:(a:()=>T[])=>void
 }
 
-export function SujiroList<T　extends Tsub>({itemList,renderRow,sortList,onClicked}:SujiroListProps<T>):JSX.Element{
+export function SujiroList<T　extends Tsub>({itemList,renderRow,sortList,onClicked,getSelected}:SujiroListProps<T>):JSX.Element{
     const [query, setQuery] = useState<string>('');
     const [showList,setShowList]=useState<T[]>([]);
     const [sortedList,setSortedList]=useState<T[]>([]);
@@ -23,6 +32,10 @@ export function SujiroList<T　extends Tsub>({itemList,renderRow,sortList,onClic
     const [selectedList,setSelectedList]=useState<boolean[]>([]);
     const [focus,setFocus]=useState<boolean[]>([]);
     const [selectStart,setSelectStart]=useState<number|undefined>(undefined);
+    const AAA:()=>T[]=()=>{
+        return selectedList.map((v,i)=>{if(v){return showList[i];}else{return undefined;}}).filter(item=>item!==undefined) as T[];
+    }
+    if(getSelected!==undefined)getSelected(AAA);
 
 
     const setSelect=(index:number,value:boolean)=>{
@@ -200,7 +213,14 @@ interface A{
 // 基本レイアウトコンポーネント
 export const SujiroListTest : React.FC = ():JSX.Element => {
     const showList:A[]=[{id:0,value:"a"},{id:1,value:"b"},{id:2,value:"c"},{id:3,value:"d"},{id:4,value:"e"}];
-        return (
+    let aaa:()=>A[];
+    const getSelected= (a:()=>A[])=>{
+        aaa=a;
+    }
+
+    return (
+        <>
+            <IonButton onClick={()=>{console.log(aaa())}}>test</IonButton>
                 <SujiroList
                     itemList={showList}
                     renderRow={(item:A) => (
@@ -209,6 +229,8 @@ export const SujiroListTest : React.FC = ():JSX.Element => {
                     sortList={(list,query)=>{
                         return list.filter(item=>item.value.includes(query));
                     }}
+                    getSelected={getSelected}
                 />
+        </>
         )
 }
