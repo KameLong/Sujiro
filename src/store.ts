@@ -65,10 +65,14 @@ export const timetableStationSelector : (timetableStationID: number) => RecoilVa
         return get(diaDataState).timeTableStation[timetableStationID];
     },
 });
-export const stationsSelector:RecoilValueReadOnly<{ [key:number]:Station }>=selector({
+export const stationsSelector:RecoilState<{ [key:number]:Station }>=selector({
     // 一意のキー
     key: 'stationsSelector',
     get: ({get}) => get(diaDataState).stations,
+    set: ({ get,set },newValue) => {
+        const res=get(diaDataState);
+        return set(diaDataState,{...res,stations:newValue as {[p:number]:Station}});
+    },
 
 });
 export const stationSelector : (stationID: number) => RecoilState<Station>= selectorFamily({

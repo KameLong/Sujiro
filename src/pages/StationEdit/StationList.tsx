@@ -10,13 +10,14 @@ import {
     IonRouterOutlet, IonSearchbar, useIonModal,
 } from '@ionic/react';
 import {StationSimpleView, StationView} from "./StationView";
-import {useRecoilValue, useSetRecoilState} from "recoil";
-import {diaDataState} from "../../store";
+import {useRecoilState, useRecoilValue, useSetRecoilState} from "recoil";
+import {diaDataState, stationsSelector} from "../../store";
 import {add, chevronUpCircle, colorPalette, globe} from "ionicons/icons";
 import {AppTitleState} from "../../App";
 import {EditStationPage} from "./EditStationPage";
 import {useKeyAlt} from "../../hooks/KeyHooks";
 import {SujiroList} from "../../components/SujiroList";
+import {Action, useUndo} from "../../hooks/UndoRedo";
 
 
 export const StationListPage: React.FC = ():JSX.Element => {
@@ -27,6 +28,8 @@ export const StationListPage: React.FC = ():JSX.Element => {
 
         const [editModalTitle, setEditModalTitle] = useState('新規駅作成');
         const [editModalStationID, setEditModalStationID] = useState(-1);
+        const [run]=useUndo();
+        const [a,setA]=useRecoilState(stationsSelector);
 
         const [present, dismiss] = useIonModal(EditStationPage, {
             title:editModalTitle,
@@ -37,6 +40,32 @@ export const StationListPage: React.FC = ():JSX.Element => {
         useKeyAlt("Insert",()=>{
             openNewStation();
         });
+        useKeyAlt("Delete",()=>{
+            const deleteList=selected();
+
+            const deleteAction:Action={
+                action:()=>{
+                    setA(old=>{
+                        const next={...old};
+                        deleteList.forEach(station=>{
+                            delete next[station.id];
+                        })
+                        return next;
+                    })
+                },
+                undo:()=>{
+                    setA(old=>{
+                        const next={...old};
+                        deleteList.forEach(station=>{
+                            next[station.id]=station;
+                        })
+                        return next;
+                    })
+                }
+            }
+            run(deleteAction);
+
+        })
 
 
         setTimeout(()=>{setTitle((old)=>"StationList");
@@ -59,9 +88,55 @@ export const StationListPage: React.FC = ():JSX.Element => {
             openNewStation();
 
         }
+        let selected:()=>Station[];
+        const getSelected= (a:()=>Station[])=>{
+            selected=a;
+        }
+
+        const sortStation=(stationList:Station[],query:string)=>{
+            const queryedStationList=stationList.filter(station=>station.name.includes(query)||station.id.toString().includes(query)||station.address.includes(query));
+            const tmp=queryedStationList.sort((a,b)=>{
+                let score=0;
+
+                if(a.name===query){
+                    score-=100;
+                }
+                if(b.name===query){
+                    score+=100;
+                }
+                if(a.name.includes(query)){
+                    score-=10;
+                }
+                if(b.name.includes(query)){
+                    score+=10;
+                }
+                if(a.id.toString()===query){
+                    score-=20;
+                }
+                if(b.id.toString()===query){
+                    score+=20;
+                }
+                return score;
+            })
+            return tmp;
+
+
+
+        }
+
         return (
             <div>
-                <StationListView stationList={stationList} onStationSelected={openEditStation}></StationListView>
+                <SujiroList renderRow={(station:Station,onClicked:(station:Station)=>void)=>{
+                    return(<StationView  key={station.id} station={station} onClicked={onClicked}/>)}}
+                            itemList={stationList}
+                            sortList={sortStation}
+                            onClicked={(station=>{
+                                openEditStation(station.id);
+                            })}
+                            getSelected={getSelected}
+                />
+
+
 
 
                 <IonFab style={{margin:"10px"}} slot="fixed" vertical="bottom" horizontal="end">
@@ -129,99 +204,4 @@ interface StationListViewProps{
                     })}/>
     )
  }
-// export const StationListView: React.FC<StationListViewProps> = ({stationList,onStationSelected}:StationListViewProps):JSX.Element => {
-//     try {
-//
-//
-//         const [query, setQuery] = useState<string>('');
-//         const [showStationList,setShowStationList]=useState<Station[]>([]);
-//         const [sortedStationList,setSortedStationList]=useState<Station[]>([]);
-//         useEffect(() => {
-//             if(query.length==0){
-//                 setSortedStationList((prev)=>stationList);
-//             }else{
-//                 const queryedStationList=stationList.filter(station=>station.name.includes(query)||station.id.toString().includes(query)||station.address.includes(query));
-//                 const tmp=queryedStationList.sort((a,b)=>{
-//                     let score=0;
-//
-//                     if(a.name===query){
-//                         score-=100;
-//                     }
-//                     if(b.name===query){
-//                         score+=100;
-//                     }
-//                     if(a.name.includes(query)){
-//                         score-=10;
-//                     }
-//                     if(b.name.includes(query)){
-//                         score+=10;
-//                     }
-//                     if(a.id.toString()===query){
-//                         score-=20;
-//                     }
-//                     if(b.id.toString()===query){
-//                         score+=20;
-//                     }
-//                     return score;
-//                 })
-//                 setSortedStationList(()=>tmp);
-//             }
-//
-//         }, [query,stationList]);
-//         useEffect(() => {
-//             setShowStationList(()=>sortedStationList.slice(0,100));
-//         }, [sortedStationList]);
-//
-//         const generateItems = () => {
-//             console.log("generateItems");
-//             setShowStationList((prev)=>{
-//                 return sortedStationList.slice(0,prev.length+100);
-//             })
-//         };
-//
-//
-//         return (
-//             <div>
-//                 <IonSearchbar value={query} onIonChange={e =>{
-//                     console.log(e.detail.value);
-//                     setQuery((prev)=>e.detail.value??"");
-//                 }}
-//                 >
-//                 </IonSearchbar>
-//                 <IonList>
-//
-//                     {
-//                         showStationList.map(station=>{
-//                             return <StationView  key={station.id} station={station} onClicked={(id)=>{
-//                                 if(onStationSelected!==undefined) {
-//                                     // onStationSelected();
-//                                 }
-//                             }}/>
-//                         })
-//                     }
-//                 </IonList>
-//                 <IonInfiniteScroll
-//                     onIonInfinite={(ev) => {
-//                         generateItems();
-//                         setTimeout(() => ev.target.complete(), 500);
-//                     }}
-//                 >
-//                     <IonInfiniteScrollContent></IonInfiniteScrollContent>
-//                 </IonInfiniteScroll>
-//             </div>
-//         );
-//     }catch(e:any){
-//         console.log(e);
-//         return (
-//             <div>
-//                 <div>エラーが発生しました</div>
-//                 <div>{e.toString()}</div>
-//             </div>
-//         );
-//     }
-// }
-
-
-
-
 
