@@ -18,6 +18,7 @@ import {EditStationPage} from "./EditStationPage";
 import {useKeyAlt} from "../../hooks/KeyHooks";
 import {SujiroList} from "../../components/SujiroList";
 import {Action, useUndo} from "../../hooks/UndoRedo";
+import {useKey} from "react-use";
 
 
 export const StationListPage: React.FC = ():JSX.Element => {
@@ -41,6 +42,7 @@ export const StationListPage: React.FC = ():JSX.Element => {
             openNewStation();
         });
         useKeyAlt("Delete",()=>{
+            console.log("Delete");
             const deleteList=selected();
 
             const deleteAction:Action={

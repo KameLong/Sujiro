@@ -1,9 +1,9 @@
 import { Redirect, Route } from 'react-router-dom';
 import {
-    IonApp,
+    IonApp, IonButton,
     IonButtons,
     IonContent,
-    IonHeader,
+    IonHeader, IonIcon,
     IonMenu,
     IonMenuButton,
     IonPage,
@@ -51,6 +51,9 @@ import {RouteListPage} from "./pages/Route/RouteList";
 import {TimetableListPage} from "./pages/TimeTableEdit/TimetableListPage";
 import {TimetableEditPage} from "./pages/TimeTableEdit/TimeTableEditPage";
 import {SujiroListTest} from "./components/SujiroList";
+import {arrowRedo, arrowUndo} from "ionicons/icons";
+import {useUndo} from "./hooks/UndoRedo";
+import {useKeyCtrl} from "./hooks/KeyHooks";
 setupIonicReact({
      rippleEffect: true,
     mode: 'ios',
@@ -64,6 +67,10 @@ export const AppTitleState = atom({
 
 const App: React.FC = () => {
     const title=useRecoilValue(AppTitleState);
+    const [action,undo,redo,canUndo,canRedo]=useUndo();
+    useKeyCtrl("KeyZ",(e)=>{e.preventDefault();undo()});
+    useKeyCtrl("KeyY",(e)=>{e.preventDefault();redo()});
+
 
     return(
         <IonApp>
@@ -80,6 +87,10 @@ const App: React.FC = () => {
                                     <IonMenuButton></IonMenuButton>
                                 </IonButtons>
                                 <IonTitle>{title}</IonTitle>
+                                <IonButtons slot="end">
+                                <IonButton disabled={!canUndo} onClick={undo}><IonIcon icon={arrowUndo}/></IonButton>
+                                    <IonButton disabled={!canRedo} onClick={redo}><IonIcon icon={arrowRedo}/></IonButton>
+                                </IonButtons>
                             </IonToolbar>
                         </IonHeader>
                         <IonContent >
