@@ -50,10 +50,11 @@ import {KeyTestPage} from "./pages/Test/KeyTestPage";
 import {RouteListPage} from "./pages/Route/RouteList";
 import {TimetableListPage} from "./pages/TimeTableEdit/TimetableListPage";
 import {TimetableEditPage} from "./pages/TimeTableEdit/TimeTableEditPage";
-import {SujiroListTest} from "./components/SujiroList";
+import {SujiroListTest} from "./components/SujiroSearchList";
 import {arrowRedo, arrowUndo} from "ionicons/icons";
 import {useUndo} from "./hooks/UndoRedo";
 import {useKeyCtrl} from "./hooks/KeyHooks";
+import {EditRoutePage} from "./pages/Route/RouteEditPage";
 setupIonicReact({
      rippleEffect: true,
     mode: 'ios',
@@ -99,14 +100,13 @@ const App: React.FC = () => {
                             </Route>
                             <Route exact path="/StationList" component={StationListPage} />
                             <Route exact path="/RouteList" component={RouteListPage} />
+                            <Route exact path="/EditRoute" component={EditRoutePage} />
+
                             <Route exact path="/TimetableList" component={TimetableListPage}/>
-                            {/*<Route exact path="/NewStation" component={EditStationPage}/>*/}
                             <Route exact path="/TimetableEdit/" component={TimetableEditPage}/>
 
                             <Route exact path="/LineTimeTable" component={TimeTableViewPage}/>
                             <Route exact path="/KeyTest" component={KeyTestPage}/>
-                            {/*<Route exact path="/RouteTimeTablePDF" component={RouteTimeTablePDF } />*/}
-                            {/*<Route path="/TimeTableEdit" component={TimeTableEditPage } />*/}
                         </IonContent>
                     </IonPage>
                 </IonSplitPane>

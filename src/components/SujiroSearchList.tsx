@@ -12,28 +12,28 @@ import {useKey} from "react-use";
 interface Tsub{
     id:number
 }
-interface SujiroListProps<T　extends Tsub>{
+interface SujiroSearchListProps<T　extends Tsub>{
     // 表示する子View
     renderRow:(item:T,onClicked:(clicked:T)=>void)=>JSX.Element
     //入力リスト
     itemList:T[],
+    //queryを条件としてソートされたリスト
+    sortList:(list:T[],query:string)=>T[],
     //要素がクリックされた時に行われるアクション
     onClicked?:((clicked:T)=>void),
     getSelected?:(a:()=>T[])=>void
 }
 
-export function SujiroList<T　extends Tsub>({itemList,renderRow,onClicked,getSelected}:SujiroListProps<T>):JSX.Element{
+export function SujiroSearchList<T　extends Tsub>({itemList,renderRow,sortList,onClicked,getSelected}:SujiroSearchListProps<T>):JSX.Element{
+    const [query, setQuery] = useState<string>('');
+    const [showList,setShowList]=useState<T[]>([]);
+    const [sortedList,setSortedList]=useState<T[]>([]);
 
-    const tmpList=itemList.map(()=>false);
-    tmpList.push(false);
-
-    const [selectedList,setSelectedList]=useState<boolean[]>(tmpList);
-
+    const [selectedList,setSelectedList]=useState<boolean[]>([]);
     const [focus,setFocus]=useState<boolean[]>([]);
     const [selectStart,setSelectStart]=useState<number|undefined>(undefined);
-
     const AAA:()=>T[]=()=>{
-        return selectedList.map((v,i)=>{if(v){return itemList[i];}else{return undefined;}}).filter(item=>item!==undefined) as T[];
+        return selectedList.map((v,i)=>{if(v){return showList[i];}else{return undefined;}}).filter(item=>item!==undefined) as T[];
     }
     if(getSelected!==undefined)getSelected(AAA);
 
@@ -51,7 +51,19 @@ export function SujiroList<T　extends Tsub>({itemList,renderRow,onClicked,getSe
             return next;
         })
     }
-
+    useEffect(() => {
+        if(query.length==0){
+            setSortedList(()=>itemList);
+        }else{
+            setSortedList(()=>sortList(itemList,query));
+        }
+    }, [query,itemList]);
+    useEffect(() => {
+        setShowList(()=>sortedList.slice(0,100));
+    }, [sortedList]);
+    useEffect(() => {
+        setSelectedList(showList.map(()=>false));
+    }, [showList]);
 
     const showFocusItem=(index:number)=>{
         const element=listRef.current?.children[index-1];
@@ -145,57 +157,72 @@ export function SujiroList<T　extends Tsub>({itemList,renderRow,onClicked,getSe
             }}
     },undefined,[selectedList]);
 
-
+    const generateItems = () => {
+        console.log("generateItems");
+        setShowList((prev)=>{
+            return sortedList.slice(0,prev.length+100);
+        })
+        setSelectedList(old=>{
+            const next=[...old];
+            for(let i=0;i<showList.length-old.length;i++){
+                next.push(false);
+            }
+            return next;
+        })
+    };
     const clicked=(item:T)=>{
         if(onClicked){
             onClicked(item)
         }
     }
-    let lastStyle = {};
-    if(focus[itemList.length]){
-        lastStyle={border:"1px black solid"};
-    }
-
     return (
-        <div >
-            <IonList  ref={listRef} >
-                {
-                    itemList.map((item,i)=> {
-                        let style = {};
-                        let ref=null;
-                        if(focus[i]){
-                            style={border:"1px black solid"};
-                            ref=listRef;
-                        }
+            <div >
+                <IonSearchbar value={query} onIonChange={e =>{
+                    console.log(e.detail.value);
+                    setQuery(()=>e.detail.value??"");
+                }}
+                >
+                </IonSearchbar>
+                <IonList  ref={listRef} >
+                    {
+                        showList.map((item,i)=> {
+                            let style = {};
+                            let ref=null;
+                            if(focus[i]){
+                                style={border:"1px black solid"};
+                                ref=listRef;
+                            }
 
-                        return (
+                            return (
                             <IonItem key={item.id} style={style} >
                                 <IonCheckbox style={{width: "40px"}} checked={selectedList[i]}
                                              onIonChange={(e) => {e.preventDefault();setSelect(i, e.detail.checked)}}/>
                                 {renderRow(item, clicked)}
                             </IonItem>
-                        )
+                            )
 
-                    })
-                }
-                <IonItem key={-1} style={lastStyle} >
-                    <IonCheckbox style={{width: "40px"}} checked={selectedList[itemList.length]}
-                                 onIonChange={(e) => {e.preventDefault();setSelect(itemList.length, e.detail.checked)}}/>
-
-                </IonItem>
-
-            </IonList>
-        </div>
-    )
+                        })
+                    }
+                </IonList>
+                <IonInfiniteScroll
+                    onIonInfinite={(ev) => {
+                        generateItems();
+                        setTimeout(() => ev.target.complete(), 500);
+                    }}
+                >
+                    <IonInfiniteScrollContent></IonInfiniteScrollContent>
+                </IonInfiniteScroll>
+            </div>
+        )
 }
 
 interface ChildProps{
     item:A
 }
 const ChildComponent: React.FC<ChildProps> = (props):JSX.Element => {
-    return (
-        <div style={{marginLeft:"20px"}}>{props.item.value}</div>
-    )
+        return (
+            <div style={{marginLeft:"20px"}}>{props.item.value}</div>
+        )
 }
 
 interface A{
@@ -203,3 +230,27 @@ interface A{
     value:string
 }
 
+// 基本レイアウトコンポーネント
+export const SujiroListTest : React.FC = ():JSX.Element => {
+    const showList:A[]=[{id:0,value:"a"},{id:1,value:"b"},{id:2,value:"c"},{id:3,value:"d"},{id:4,value:"e"}];
+    let aaa:()=>A[];
+    const getSelected= (a:()=>A[])=>{
+        aaa=a;
+    }
+
+    return (
+        <>
+            <IonButton onClick={()=>{console.log(aaa())}}>test</IonButton>
+                <SujiroSearchList
+                    itemList={showList}
+                    renderRow={(item:A) => (
+                        <ChildComponent key={showList.indexOf(item)} item={item} />
+                    )}
+                    sortList={(list,query)=>{
+                        return list.filter(item=>item.value.includes(query));
+                    }}
+                    getSelected={getSelected}
+                />
+        </>
+        )
+}

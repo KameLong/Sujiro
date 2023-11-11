@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import {
     IonButton,
-    IonButtons, IonCard, IonCheckbox,
+    IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox,
     IonContent, IonGrid,
     IonHeader,
     IonInput,
@@ -21,28 +21,41 @@ import {
 import {StationEdit} from "../../DiaData/Station";
 import {useKey} from "react-use";
 import {useKeyAlt} from "../../hooks/KeyHooks";
-import {EditRoute, EditRouteStation} from "../../DiaData/Route";
+import {EditRoute, EditRouteStation, RouteStation} from "../../DiaData/Route";
 import {EditStationPage} from "../StationEdit/EditStationPage";
 import {StationSelectorPage} from "../StationEdit/StationSelectorPage";
+import {SujiroSearchList} from "../../components/SujiroSearchList";
+import {SujiroList} from "../../components/SujiroList";
+import {useLocation} from "react-router";
 
 interface EditRoutePageProps{
-    onDismiss: (data?: string | null | undefined | number, role?: string) => void;
-    title:string,
-    routeID:number
 }
 
-export const EditRoutePage: React.FC<EditRoutePageProps> = ({onDismiss,title,routeID}):JSX.Element => {
+export const EditRoutePage: React.FC<EditRoutePageProps> = ():JSX.Element => {
+    const searchParams = new URLSearchParams(useLocation().search);
+    const routeID = Number(searchParams.get("route"));
+
     console.log(routeID);
     const [route,setRoute]=useState(useRecoilValue(routeSelector(routeID))??EditRoute.newRoute());
-    const [_,sendRoute]=useRecoilState(routeSelector(routeID));
-
-    const [editRSIndex,setEditRSIndex]=useState(-1);
     console.log(route);
-
 
     const routeStations=useRecoilValue(routeStationsSelector);
     const setRouteStation=useSetRecoilState(routeStationSelector(0));
     const stations=useRecoilValue(stationsSelector);
+
+    const routeStation=route.routeStationIDs.map(rsID=>routeStations[rsID]);
+    console.log(route);
+    console.log(routeStation);
+
+    useKeyAlt("Insert",(e)=>{console.log(e),e.preventDefault()});
+
+
+
+    // const [_,sendRoute]=useRecoilState(routeSelector(routeID));
+
+    // const [editRSIndex,setEditRSIndex]=useState(-1);
+
+
 
 
     const [present, dismiss] = useIonModal(StationSelectorPage, {
@@ -52,9 +65,9 @@ export const EditRoutePage: React.FC<EditRoutePageProps> = ({onDismiss,title,rou
             setRouteStation(rs);
             setRoute(old=>{
                 const routeStations=[...old.routeStationIDs];
-                if(editRSIndex===-1){
-                    routeStations.push(rs.id);
-                }
+                // if(editRSIndex===-1){
+                //     routeStations.push(rs.id);
+                // }
                 return {...old,routeStationIDs:routeStations};
             })
             console.log(stationID);
@@ -66,7 +79,7 @@ export const EditRoutePage: React.FC<EditRoutePageProps> = ({onDismiss,title,rou
 
     const commitRoute=()=>{
         if(route.id>=0){
-            sendRoute(route);
+            // sendRoute(route);
         }
     }
 
@@ -76,30 +89,9 @@ export const EditRoutePage: React.FC<EditRoutePageProps> = ({onDismiss,title,rou
     }
     useKeyAlt("Enter",(e) =>{
         commitRoute();
-        onDismiss();
     });
 
     return(
-        <IonPage>
-            <IonHeader>
-                <IonToolbar>
-                    <IonButtons slot="start">
-        <IonButton onClick={() => onDismiss()} color="medium" >
-        Cancel
-        </IonButton>
-        </IonButtons>
-        <IonTitle>{title}</IonTitle>
-        <IonButtons slot="end">
-    <IonButton onClick={() => {
-        commitRoute();
-        onDismiss();
-    }}
-    strong={true}>
-        決定
-        </IonButton>
-        </IonButtons>
-        </IonToolbar>
-        </IonHeader>
         <IonContent className="ion-padding">
     <IonList>
         <IonItem>
@@ -109,36 +101,23 @@ export const EditRoutePage: React.FC<EditRoutePageProps> = ({onDismiss,title,rou
     />
     </IonItem>
         <IonCard>
-            <IonList>
-                {
-                    route.routeStationIDs.map(rsID=>{
-                        return(
-                            <IonItem key={rsID}>
-                                <div style={{ display: 'flex', alignItems: 'center',width:'100%' }}>
-                                <IonCheckbox labelPlacement="end" justify="start" style={{width:'60px'}}>
-                                </IonCheckbox>
-                                <div style={{flexGrow:"1"}} >
-                                    {stations[routeStations[rsID].stationID].name}
-                                </div>
-                                </div>
-                            </IonItem>
-                        )
-                    })
-                }
-                <IonItem key={-1}>
-                    <div style={{ display: 'flex', alignItems: 'center',width:'100%' }}>
-                        <IonCheckbox labelPlacement="end" justify="start" style={{width:'60px'}}>
-                        </IonCheckbox>
-                        <div style={{height:'30px',cursor: 'pointer',flexGrow:"1"}} onClick={(e)=>{setEditRSIndex(-1);selectStation()}} >
+            <IonCardHeader>
+                <IonCardSubtitle>駅リスト</IonCardSubtitle>
+            </IonCardHeader>
+            <IonCardContent>
+                <SujiroList
+                    renderRow={(rs:RouteStation)=>(
+                                        <div style={{flexGrow:"1"}} >
+                                            {stations[rs.stationID].name}
+                                        </div>
+)
+                    }
+                    itemList={routeStation}
+                />
 
-                        </div>
-                    </div>
-
-                </IonItem>
-            </IonList>
+            </IonCardContent>
         </IonCard>
     </IonList>
     </IonContent>
-    </IonPage>
 )
 }

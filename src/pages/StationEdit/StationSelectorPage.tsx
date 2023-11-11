@@ -18,7 +18,7 @@ import {EditStationPage} from "./EditStationPage";
 import {useKeyAlt} from "../../hooks/KeyHooks";
 import {add} from "ionicons/icons";
 import {StationListView} from "./StationList";
-import {SujiroList} from "../../components/SujiroList";
+import {SujiroSearchList} from "../../components/SujiroSearchList";
 import {Station} from "../../DiaData/Station";
 import {StationView} from "./StationView";
 
@@ -69,7 +69,7 @@ export const StationSelectorPage: React.FC<StationSelectorPageProps> = ({onStati
                         </IonToolbar>
                         </IonHeader>
                 <IonContent>
-                    <SujiroList
+                    <SujiroSearchList
                         renderRow={(station:Station,onClicked:(station:Station)=>void)=>{
                             return(<StationView  key={station.id} station={station} onClicked={onClicked}/>)}}
                         itemList={stationList}

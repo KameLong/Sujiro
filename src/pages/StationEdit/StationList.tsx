@@ -16,7 +16,7 @@ import {add, chevronUpCircle, colorPalette, globe} from "ionicons/icons";
 import {AppTitleState} from "../../App";
 import {EditStationPage} from "./EditStationPage";
 import {useKeyAlt} from "../../hooks/KeyHooks";
-import {SujiroList} from "../../components/SujiroList";
+import {SujiroSearchList} from "../../components/SujiroSearchList";
 import {Action, useUndo} from "../../hooks/UndoRedo";
 import {useKey} from "react-use";
 
@@ -129,15 +129,15 @@ export const StationListPage: React.FC = ():JSX.Element => {
         return (
             <div  style={{height:'100vh'}}
             >
-                <SujiroList renderRow={(station:Station,onClicked:(station:Station)=>void)=>{
+                <SujiroSearchList renderRow={(station:Station, onClicked:(station:Station)=>void)=>{
                                 return(<StationView  key={station.id} station={station} onClicked={onClicked}/>)}}
 
-                            itemList={stationList}
-                            sortList={sortStation}
-                            onClicked={(station=>{
+                                  itemList={stationList}
+                                  sortList={sortStation}
+                                  onClicked={(station=>{
                                 openEditStation(station.id);
                             })}
-                            getSelected={getSelected}
+                                  getSelected={getSelected}
                 />
 
 
@@ -168,10 +168,10 @@ interface StationListViewProps{
 }
  export const StationListView: React.FC<StationListViewProps> = ({stationList,onStationSelected}:StationListViewProps):JSX.Element => {
     return (
-        <SujiroList renderRow={(station:Station,onClicked:(station:Station)=>void)=>{
+        <SujiroSearchList renderRow={(station:Station, onClicked:(station:Station)=>void)=>{
             return(<StationView  key={station.id} station={station} onClicked={onClicked}/>)}}
-                    itemList={stationList}
-                    sortList={(stationList,query)=>{
+                          itemList={stationList}
+                          sortList={(stationList,query)=>{
                         const queryedStationList=stationList.filter(station=>station.name.includes(query)||station.id.toString().includes(query)||station.address.includes(query));
                         const tmp=queryedStationList.sort((a,b)=>{
                             let score=0;
@@ -201,7 +201,7 @@ interface StationListViewProps{
 
 
                     }}
-                    onClicked={(station=>{
+                          onClicked={(station=>{
                         if(onStationSelected){
                             onStationSelected(station.id)
                         }

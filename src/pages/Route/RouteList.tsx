@@ -19,13 +19,16 @@ import {useKeyAlt} from "../../hooks/KeyHooks";
 import {add} from "ionicons/icons";
 import {StationListView} from "../StationEdit/StationList";
 import {EditRoutePage} from "./RouteEditPage";
-import {SujiroList} from "../../components/SujiroList";
+import {SujiroSearchList} from "../../components/SujiroSearchList";
 import {StationView} from "../StationEdit/StationView";
+import {useHistory} from "react-router-dom";
 
 
 
 export const RouteListPage: React.FC = ():JSX.Element => {
     try {
+        const nav = useHistory().push;
+
         console.log("RouteListPage");
         const routeList=Object.values(useRecoilValue(routesSelector));
         const setTitle=useSetRecoilState(AppTitleState);
@@ -33,28 +36,48 @@ export const RouteListPage: React.FC = ():JSX.Element => {
         const [editModalTitle, setEditModalTitle] = useState('新規路線作成');
         const [editModalRouteID, setEditModalRouteID] = useState(-1);
 
+        // EditRoutePageのモーダルが開いているか？
+        const [isModalOpen, setIsModalOpen] = useState(false);
+
         const [present, dismiss] = useIonModal(EditRoutePage, {
+            isOpen: isModalOpen,
             title:editModalTitle,
             routeID:editModalRouteID,
-            onDismiss: (data: string, role: string) => dismiss(data, role),
+            onDismiss: (data: string, role: string) => {
+                setIsModalOpen(false);
+                dismiss(data, role)
+            },
         });
 
-        useKeyAlt("Insert",()=>{
+
+        useKeyAlt("Insert",(e)=>{
+            e.preventDefault();
+            console.log(e);
             openNewRoute();
         });
         setTimeout(()=>{setTitle((old)=>"RouteList");
         },0)
 
         const openNewRoute=()=>{
-            setEditModalTitle(()=>"新規路線作成");
-            setEditModalRouteID(()=>-1);
-            present();
+            //新規路線作成
+
+            //路線編集はモーダルではなくページで行います。
+            nav(`/EditRoute?route=0`);
+
         }
 
         const openEditRoute=(route:Route)=>{
-            setEditModalTitle(()=>"路線編集");
-            setEditModalRouteID(()=>route.id);
-            present();
+            //路線編集はモーダルではなくページで行います。
+            nav(`/EditRoute?route=${route.id}`);
+
+
+            // if(isModalOpen){
+            //     return;
+            // }
+            // setEditModalTitle(()=>"路線編集");
+            // setEditModalRouteID(()=>route.id);
+            // setIsModalOpen(true);
+            // present();
         }
 
 
@@ -90,7 +113,7 @@ export const RouteListPage: React.FC = ():JSX.Element => {
         }
         return (
             <div>
-                <SujiroList
+                <SujiroSearchList
                     renderRow={(route:Route,onClicked:(route:Route)=>void)=>
                         (<RouteView  key={route.id} route={route} onClicked={onClicked}/>)}
                     itemList={routeList}
@@ -221,14 +244,15 @@ interface RouteViewProps{
 }
 export const RouteView: React.FC<RouteViewProps>=({route,onClicked=undefined}):JSX.Element =>{
     return(
-        <IonItem onClick={()=>{
-            if(onClicked){
-                console.log(route);
-                onClicked(route);
-            }
-        }}
-        >
-            <div style={{display:"flex"}}>
+        // <IonItem
+        // }}
+        // >
+            <div onClick={()=>{
+                    if(onClicked){
+                        onClicked(route);
+                    }}}
+                 style={{display:"flex"}}>
+
                 <div style={{width:"200px"}}>
                     {
                         route.name
@@ -239,6 +263,6 @@ export const RouteView: React.FC<RouteViewProps>=({route,onClicked=undefined}):J
                     }
                 </div>
             </div>
-        </IonItem>
+        // </IonItem>
     );
 }

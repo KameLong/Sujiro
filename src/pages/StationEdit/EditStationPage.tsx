@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {
     IonButton,
     IonButtons,
@@ -25,6 +25,14 @@ interface EditStationPageProps{
 export const EditStationPage: React.FC<EditStationPageProps> = ({onDismiss,title,stationID}):JSX.Element => {
     const [station,setStation]=useState(useRecoilValue(stationSelector(stationID))??StationEdit.newStation());
     const [_,commitStationSelector]=useRecoilState(stationSelector(station.id));
+    const inputRef = useRef<HTMLIonInputElement>(null);
+    useEffect(() => {
+        // モーダルがマウントされた後にinput要素にフォーカスをあてる。
+        setTimeout(() => {
+            console.log(inputRef);
+            inputRef.current?.setFocus();
+        }, 300);
+    }, []);
 
     const commitStation=()=>{
         commitStationSelector(station);
@@ -59,7 +67,7 @@ export const EditStationPage: React.FC<EditStationPageProps> = ({onDismiss,title
             <IonContent className="ion-padding">
                 <IonList>
                 <IonItem>
-                    <IonInput  labelPlacement="stacked" label="駅名" placeholder="新規駅名" value={station.name}
+                    <IonInput  ref={inputRef} labelPlacement="stacked" label="駅名" placeholder="新規駅名" value={station.name}
                                onInput={(e)=>setStation(old=>{
                                    return{...old,name:(e.target as HTMLInputElement).value as string}})}
                     />
