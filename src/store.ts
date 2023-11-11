@@ -90,10 +90,14 @@ export const stationSelector : (stationID: number) => RecoilState<Station>= sele
     },
 
 });
-export const routesSelector:RecoilValueReadOnly<{ [key:number]:Route }>=selector({
+export const routesSelector:RecoilState<{ [key:number]:Route }>=selector({
     // 一意のキー
     key: 'routesSelector',
     get: ({get}) => get(diaDataState).routes,
+    set: ({ get,set },newValue) => {
+        const res=get(diaDataState);
+        return set(diaDataState,{...res,routes:newValue as {[p:number]:Route}});
+    },
 
 });
 export const routeSelector : (routeID: number) => RecoilState<Route>= selectorFamily({

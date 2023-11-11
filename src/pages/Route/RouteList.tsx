@@ -8,10 +8,10 @@ import {
     IonSearchbar,
     useIonModal
 } from "@ionic/react";
-import {Route} from "../../DiaData/Route";
+import {EditRoute, Route} from "../../DiaData/Route";
 import {Station} from "../../DiaData/Station";
 import {DiaData} from "../../DiaData/DiaData";
-import {useRecoilValue, useSetRecoilState} from "recoil";
+import {useRecoilState, useRecoilValue, useSetRecoilState} from "recoil";
 import {diaDataState, routeSelector, routesSelector} from "../../store";
 import {AppTitleState} from "../../App";
 import {EditStationPage} from "../StationEdit/EditStationPage";
@@ -22,15 +22,18 @@ import {EditRoutePage} from "./RouteEditPage";
 import {SujiroSearchList} from "../../components/SujiroSearchList";
 import {StationView} from "../StationEdit/StationView";
 import {useHistory} from "react-router-dom";
+import {Action, useUndo} from "../../hooks/UndoRedo";
 
 
 
 export const RouteListPage: React.FC = ():JSX.Element => {
     try {
         const nav = useHistory().push;
+        const [run]=useUndo();
 
         console.log("RouteListPage");
-        const routeList=Object.values(useRecoilValue(routesSelector));
+        const [routes,setRoutes]=useRecoilState(routesSelector);
+        const routeList=Object.values(routes);
         const setTitle=useSetRecoilState(AppTitleState);
 
         const [editModalTitle, setEditModalTitle] = useState('新規路線作成');
@@ -59,25 +62,31 @@ export const RouteListPage: React.FC = ():JSX.Element => {
         },0)
 
         const openNewRoute=()=>{
+            let routeID=-1;
             //新規路線作成
-
+            const addNewRoute:Action={
+                action:()=>{
+                    const route=EditRoute.newRoute();
+                    routeID=route.id;
+                    const newRoutes={...routes};
+                    newRoutes[routeID]=route;
+                    setRoutes(newRoutes);
+                },
+                undo:()=>{
+                    const newRoutes={...routes};
+                    delete newRoutes[routeID];
+                    setRoutes(newRoutes);
+                }
+            }
+            run(addNewRoute);
             //路線編集はモーダルではなくページで行います。
-            nav(`/EditRoute?route=0`);
+            nav(`/EditRoute?route=${routeID}`);
 
         }
 
         const openEditRoute=(route:Route)=>{
             //路線編集はモーダルではなくページで行います。
             nav(`/EditRoute?route=${route.id}`);
-
-
-            // if(isModalOpen){
-            //     return;
-            // }
-            // setEditModalTitle(()=>"路線編集");
-            // setEditModalRouteID(()=>route.id);
-            // setIsModalOpen(true);
-            // present();
         }
 
 
@@ -140,102 +149,6 @@ export const RouteListPage: React.FC = ():JSX.Element => {
 }
 
 
-
-
-// interface RouteListViewProps{
-//     routeList:Route[],
-//     onRouteSelected?:((routeID:number)=>void)
-// }
-// export const RouteListView: React.FC<RouteListViewProps> = ({routeList,onRouteSelected}):JSX.Element => {
-//     try {
-//
-//
-//         const [query, setQuery] = useState<string>('');
-//         const [showRouteList,setShowRouteList]=useState<Route[]>([]);
-//         const [sortedRouteList,setSortedRouteList]=useState<Route[]>([]);
-//         useEffect(() => {
-//             if(query.length==0){
-//                 setSortedRouteList((prev)=>routeList);
-//             }else{
-//                 const queryedRouteList=routeList.filter(route=>route.name.includes(query)||route.id.toString().includes(query));
-//                 const tmp=queryedRouteList.sort((a,b)=>{
-//                     let score=0;
-//
-//                     if(a.name===query){
-//                         score-=100;
-//                     }
-//                     if(b.name===query){
-//                         score+=100;
-//                     }
-//                     if(a.name.includes(query)){
-//                         score-=10;
-//                     }
-//                     if(b.name.includes(query)){
-//                         score+=10;
-//                     }
-//                     if(a.id.toString()===query){
-//                         score-=20;
-//                     }
-//                     if(b.id.toString()===query){
-//                         score+=20;
-//                     }
-//                     return score;
-//                 })
-//                 setSortedRouteList(()=>tmp);
-//             }
-//
-//         }, [query,routeList]);
-//         useEffect(() => {
-//             setShowRouteList(()=>sortedRouteList.slice(0,100));
-//         }, [sortedRouteList]);
-//
-//         const generateItems = () => {
-//             console.log("generateItems");
-//             setShowRouteList((prev)=>{
-//                 return sortedRouteList.slice(0,prev.length+100);
-//             })
-//         };
-//
-//
-//         return (
-//             <div>
-//                 <IonSearchbar value={query} onIonChange={e =>{
-//                     console.log(e.detail.value);
-//                     setQuery((prev)=>e.detail.value??"");
-//                 }}
-//                 >
-//                 </IonSearchbar>
-//                 <IonList>
-//                     {
-//                         showRouteList.map(route=>{
-//                             return <RouteView  key={route.id} route={route} onClicked={(id)=>{
-//                                 if(onRouteSelected!==undefined) {
-//                                     // onRouteSelected(id);
-//                                 }
-//                             }}/>
-//                         })
-//                     }
-//                 </IonList>
-//                 <IonInfiniteScroll
-//                     onIonInfinite={(ev) => {
-//                         generateItems();
-//                         setTimeout(() => ev.target.complete(), 500);
-//                     }}
-//                 >
-//                     <IonInfiniteScrollContent></IonInfiniteScrollContent>
-//                 </IonInfiniteScroll>
-//             </div>
-//         );
-//     }catch(e:any){
-//         console.log(e);
-//         return (
-//             <div>
-//                 <div>エラーが発生しました</div>
-//                 <div>{e.toString()}</div>
-//             </div>
-//         );
-//     }
-// }
 
 
 interface RouteViewProps{
