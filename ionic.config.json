@@ -1,7 +1,0 @@
-{
-  "name": "sujiro",
-  "integrations": {
-    "capacitor": {}
-  },
-  "type": "react-vite"
-}
