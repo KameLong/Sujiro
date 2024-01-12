@@ -1,5 +1,3 @@
-using Sujiro.WebAPI.SignalR;
-
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,7 +5,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
-builder.Services.AddSignalR();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins,
@@ -34,18 +31,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors(MyAllowSpecificOrigins);
 
 app.UseAuthorization();
 
 
 app.MapControllers();
-app.MapHub<ChatHub>("/chatHub");
-
-//https://learn.microsoft.com/en-gb/aspnet/core/tutorials/web-api-javascript?view=aspnetcore-8.0&viewFallbackFrom=aspnetcore-3.0
-//react‚ðwwwroot‚Ö
-app.UseDefaultFiles();
-app.UseStaticFiles();
-//
 
 app.Run();

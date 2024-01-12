@@ -5,6 +5,10 @@ VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sujiro.WebAPI", "Sujiro.WebAPI\Sujiro.WebAPI.csproj", "{C7941455-A054-4AE3-A616-200645240EA7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sujiro.Data", "Sujiro.Data\Sujiro.Data.csproj", "{746E2CF5-AA54-419E-A7F2-59578BE403A1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OuDia", "OuDia\OuDia.csproj", "{75190EFE-FC2B-4EB0-8A7C-B0092B22A28A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{C7941455-A054-4AE3-A616-200645240EA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7941455-A054-4AE3-A616-200645240EA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7941455-A054-4AE3-A616-200645240EA7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{746E2CF5-AA54-419E-A7F2-59578BE403A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{746E2CF5-AA54-419E-A7F2-59578BE403A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{746E2CF5-AA54-419E-A7F2-59578BE403A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{746E2CF5-AA54-419E-A7F2-59578BE403A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75190EFE-FC2B-4EB0-8A7C-B0092B22A28A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75190EFE-FC2B-4EB0-8A7C-B0092B22A28A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75190EFE-FC2B-4EB0-8A7C-B0092B22A28A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75190EFE-FC2B-4EB0-8A7C-B0092B22A28A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
