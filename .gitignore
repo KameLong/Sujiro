@@ -1,7 +1,9 @@
 /.vs
 /.github
-/Sujiro.Server/bin
-/Sujiro.Server/obj
-/Sujiro.Client/.vscode
-/Sujiro.Client/node_modules
-/Sujiro.Client/obj
+/Sujiro.WebAPI/bin
+/Sujiro.WebAPI/obj
+
+/Sujiro.FE/.vscode
+/Sujiro.FE/.idea
+/Sujiro.FE/build
+/Sujiro.FE/node_modules

@@ -1,0 +1,6 @@
+@Sujiro.WebAPI_HostAddress = http://localhost:5149
+
+GET {{Sujiro.WebAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

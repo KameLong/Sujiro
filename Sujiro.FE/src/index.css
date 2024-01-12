@@ -1,0 +1,38 @@
+@font-face {
+  font-family: 'Noto Sans JP';   /* フォント名 */
+  src: url('../public/NotoSansJP.ttf') format('truetype');   /* フォントファイル */
+}
+
+@font-face {
+  font-family: 'DiaPro';   /* フォント名 */
+  src: url('../public/DiaPro-Regular.ttf') format('truetype');   /* フォントファイル */
+}
+
+body {
+  margin: 0;
+  font-family: 'Noto Sans JP';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.DiaPro{
+  font-family: 'DiaPro';
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+*{
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+html{
+  height:100%;
+}
+body{
+  height:100%;
+}
+#root{
+  height:100%;
+}
