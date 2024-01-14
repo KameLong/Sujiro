@@ -34,7 +34,7 @@ function TrainView({trip,stations,direct,selected,setSelected}:TrainViewProps) {
     const getStopTime = (stationID:number)=>{
         return trip.stopTimes.filter(item=>item.stationID===stationID)[0];
     }
-    const getTimeStr=(station:Station,stopTime:StopTime)=>{
+    const getDepTimeStr=(station:Station,stopTime:StopTime)=>{
         if(stopTime.stopType===0){
             return "‥";
         }
@@ -57,6 +57,30 @@ function TrainView({trip,stations,direct,selected,setSelected}:TrainViewProps) {
         const hh=time%24;
         return hh+mm.toString().padStart(2,"0");
     }
+    const getAriTimeStr=(station:Station,stopTime:StopTime)=>{
+        if(stopTime.stopType===0){
+            return "‥";
+        }
+        if(stopTime.stopType===2){
+            return "⇂";
+        }
+        if(stopTime.stopType===3){
+            return "║";
+        }
+        let time=stopTime.depTime;
+        if(stopTime.ariTime>=0){
+            time=stopTime.ariTime;
+        }
+        const ss=time%60;
+        time-=ss;
+        time/=60;
+        const mm=time%60;
+        time-=mm;
+        time/=60;
+        const hh=time%24;
+        return hh+mm.toString().padStart(2,"0");
+    }
+
 
 
     let viewIndex=5;
@@ -106,7 +130,7 @@ function TrainView({trip,stations,direct,selected,setSelected}:TrainViewProps) {
                                         viewID:0
                                     });
                                 }}>
-                                {getTimeStr(station, getStopTime(station.stationID))}
+                                {getAriTimeStr(station, getStopTime(station.stationID))}
                             </div>:null
                         }
                         {
@@ -125,7 +149,7 @@ function TrainView({trip,stations,direct,selected,setSelected}:TrainViewProps) {
                                              viewID:2
                                          });
                                      }}>
-                                    {getTimeStr(station, getStopTime(station.stationID))}
+                                    {getDepTimeStr(station, getStopTime(station.stationID))}
                                 </div>:null
                         }
                     </div>

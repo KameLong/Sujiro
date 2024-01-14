@@ -4,7 +4,10 @@ import {Station, StopTime, Trip} from "../SujiroData/DiaData";
 import * as PIXI from 'pixi.js'
 import {DisplayObject, ICanvas} from "pixi.js";
 import {DiagramData, DiagramStation, DiagramTrip} from "./DiagramData";
-
+const connection = new signalR.HubConnectionBuilder()
+    .withUrl(`${process.env.REACT_APP_SERVER_URL}/chatHub`)
+    .build();
+connection.start().catch((err) => console.error(err));
 
 function DiagramPage() {
     const SCALE:number=3;
@@ -105,6 +108,44 @@ function DiagramPage() {
                     }
                 })
             })
+        connection.on("UpdateStoptime", (stoptime: StopTime) => {
+            console.log("UpdateStoptime",stoptime);
+            setUpTrips(prev=> {
+                const tripIndex=prev.findIndex(item=>item.tripID===stoptime.tripID);
+                if(tripIndex<0){
+                    console.error("tripIndex<0");
+                    return prev;
+                }
+                const stopTimeIndex=prev[tripIndex].stopTimes.findIndex(item=>item.stopTimeID===stoptime.stopTimeID);
+                if(stopTimeIndex<0){
+                    console.error("stopTimeIndex<0");
+                    return prev;
+                }
+                const next=[...prev];
+                next[tripIndex]={...next[tripIndex]};
+                next[tripIndex].stopTimes=[...next[tripIndex].stopTimes];
+                next[tripIndex].stopTimes[stopTimeIndex]=stoptime;
+                return next;
+            });
+            setDownTrips(prev=> {
+                const tripIndex=prev.findIndex(item=>item.tripID===stoptime.tripID);
+                if(tripIndex<0){
+                    console.error("tripIndex<0");
+                    return prev;
+                }
+                const stopTimeIndex=prev[tripIndex].stopTimes.findIndex(item=>item.stopTimeID===stoptime.stopTimeID);
+                if(stopTimeIndex<0){
+                    console.error("stopTimeIndex<0");
+                    return prev;
+                }
+                const next=[...prev];
+                next[tripIndex]={...next[tripIndex]};
+                next[tripIndex].stopTimes=[...next[tripIndex].stopTimes];
+                next[tripIndex].stopTimes[stopTimeIndex]=stoptime;
+                return next;
+            });
+        });
+
 
     },[])
 
