@@ -85,8 +85,12 @@
     overflow-y:hidden;
     white-space: nowrap;
     text-align: center;
-
+    position: relative;
     vertical-align: bottom;
+    background-color: #FFF;
+    box-sizing: border-box;
+    border:1px solid transparent;
+
 }
 
 .trainNameView{
@@ -96,13 +100,19 @@
     white-space: nowrap;
     text-align: center;
     border-bottom: 2px solid #000;
+
 }
 
 .checkbox{
-    /*transform: scale(1.5);*/
 
     transform: scale(calc(var(--timetable-font-size) / 10));
     margin :calc(var(--timetable-font-pt) / 2);
     box-sizing: border-box;
 
 }
+
+.selected{
+    background-color: #ECE;
+    border:1px dashed #000;
+}
+

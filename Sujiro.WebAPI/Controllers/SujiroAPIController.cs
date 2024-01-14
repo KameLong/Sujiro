@@ -11,11 +11,11 @@ using System.Diagnostics;
 
 namespace Sujiro.WebAPI.Controllers
 {
-    public class AOdiaApiController:ControllerBase
+    public class SujiroAPIController:ControllerBase
     {
             protected readonly IConfiguration Configuration;
             protected readonly IHubContext<ChatHub> _hubContext;
-            public AOdiaApiController(IHubContext<ChatHub> hubContext, IConfiguration configuration)
+            public SujiroAPIController(IHubContext<ChatHub> hubContext, IConfiguration configuration)
             {
                 _hubContext = hubContext;
                 Configuration = configuration;

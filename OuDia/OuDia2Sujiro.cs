@@ -13,13 +13,13 @@ namespace OuDia
 {
     public class OuDia2Sujiro
     {
-        public static async  Task<int> Reset()
+        public static async  Task<int> Reset(string oudiaFileName,string DbFile)
         {
             var now = DateTime.Now;
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
 
-//            var lineFile = new OuDia.LineFile(@"C:\Users\kamelong\Downloads\京成電鉄.oud");
-            var lineFile = new LineFile(@"C:\Users\kamelong\Downloads\阪急宝塚線.oud");
-            const string DbFile = @"C:\Users\kamelong\Desktop\阪急宝塚線.db";
+           var lineFile = new LineFile(oudiaFileName);
             if (File.Exists(DbFile))
             {
                 File.Delete(DbFile);

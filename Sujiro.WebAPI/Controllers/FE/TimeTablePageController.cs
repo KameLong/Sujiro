@@ -11,7 +11,7 @@ namespace Sujiro.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TimeTablePageController : AOdiaApiController
+    public class TimeTablePageController : SujiroAPIController
     {
 
         class TimetableTrip : Trip

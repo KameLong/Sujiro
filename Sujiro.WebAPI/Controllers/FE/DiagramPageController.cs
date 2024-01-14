@@ -10,7 +10,7 @@ namespace Sujiro.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DiagramPageController : AOdiaApiController
+    public class DiagramPageController : SujiroAPIController
     {
         class DiagramStation : Station
         {

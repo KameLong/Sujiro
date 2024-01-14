@@ -1,5 +1,5 @@
 {
-  "name": "untitled",
+  "name": "Sujiro.FE",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -20,6 +20,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.21.1",
     "react-scripts": "5.0.1",
+    "react-use": "^17.4.3",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },

@@ -10,18 +10,16 @@ namespace Sujiro.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AdminController : ControllerBase
+    public class AdminController :SujiroAPIController
     {
-        private readonly IHubContext<ChatHub> _hubContext;
-        public AdminController(IHubContext<ChatHub> hubContext)
+        public AdminController(IHubContext<ChatHub> hubContext, IConfiguration configuration) : base(hubContext, configuration)
         {
-            _hubContext = hubContext;
         }
         [HttpGet("Reset")]
         public async Task<int> Get()
         {
             Debug.WriteLine("Reset");
-            await OuDia2Sujiro.Reset();
+            await OuDia2Sujiro.Reset(Configuration["ConnectionStrings:oudPath"], Configuration["ConnectionStrings:DBpath"]);
             return 0;
         }
     }

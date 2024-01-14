@@ -1,23 +1,21 @@
-import React from "react";
+import React, {Dispatch, SetStateAction, useContext} from "react";
 import style from "./TimeTablePage.module.css";
 import {Station, StopTime} from "../SujiroData/DiaData";
 import {Button, Checkbox, Dialog, DialogTitle, List, ListItem, ListItemButton} from "@mui/material";
 import axios from "axios";
 import {TimeTableTrip} from "./TimeTableData";
+import {TimetableSelected} from "./TimeTablePage";
 interface TrainViewProps {
     trip:TimeTableTrip;
     stations:Station[]
     signalR:signalR.HubConnection;
     direct:number;
+    selected:TimetableSelected|null;
+    setSelected:Dispatch<SetStateAction<TimetableSelected | null>>;
 }
-function TrainView({trip,stations,signalR,direct}:TrainViewProps) {
+function TrainView({trip,stations,signalR,direct,selected,setSelected}:TrainViewProps) {
     const [open, setOpen] = React.useState(false);
-    const [selectedTrip, setSelectedTrip] = React.useState<number>(-1);
-    const showStations=(direct==0)?stations: [...stations].reverse();
-
-    const handleClickOpen = () => {
-        setOpen(!open);
-    };
+    const showStations=(direct===0)?stations: [...stations].reverse();
 
     const handleClose = (value: string) => {
         setOpen(false);
@@ -38,13 +36,13 @@ function TrainView({trip,stations,signalR,direct}:TrainViewProps) {
         return trip.stopTimes.filter(item=>item.stationID===stationID)[0];
     }
     const getTimeStr=(station:Station,stopTime:StopTime)=>{
-        if(stopTime.stopType==0){
+        if(stopTime.stopType===0){
             return "‥";
         }
-        if(stopTime.stopType==2){
+        if(stopTime.stopType===2){
             return "⇂";
         }
-        if(stopTime.stopType==3){
+        if(stopTime.stopType===3){
             return "║";
         }
         let time=stopTime.ariTime;
@@ -60,6 +58,10 @@ function TrainView({trip,stations,signalR,direct}:TrainViewProps) {
         const hh=time%24;
         return hh+mm.toString().padStart(2,"0");
     }
+
+
+    let viewIndex=5;
+    console.log("render");
 
     return (
         <div className={style.trainView} onTouchEndCapture={(e)=>{
@@ -77,21 +79,34 @@ function TrainView({trip,stations,signalR,direct}:TrainViewProps) {
             </div>
             <div style={{borderBottom: "2px solid #000"}}>
             </div>
-            <div className={style.timeView2}>
+            <div className={`${style.timeView2} ${viewIndex===0?style.selected:""}`} onClick={
+                    (e)=>{
+                        console.log(viewIndex);
+                        e.preventDefault();
+                }
+            }>
                 {trip.number}
             </div>
-            <div className={style.timeView2}>
+            <div className={`${style.timeView2} ${viewIndex===1?style.selected:""}`}>
                 {trip.trainType.shortName}
             </div>
             <div style={{borderBottom: "1px solid #000"}}></div>
-            <div className={style.trainNameView}>
+            <div className={`${style.trainNameView} ${viewIndex===2?style.selected:""}`}>
             </div>
             {
                 showStations.map(station =>
+
                     <div key={station.stationID}>
                         {
                             (station.style&0x02)>0?
-                            <div className={style.timeView}>
+                            <div className={`${style.timeView}  ${(selected?.tripID===trip.tripID&&selected.stationID===station.stationID&&selected.viewID===0)?style.selected:""}`}
+                                onClick={(e)=>{
+                                    setSelected({
+                                        tripID:trip.tripID,
+                                        stationID:station.stationID,
+                                        viewID:0
+                                    });
+                                }}>
                                 {getTimeStr(station, getStopTime(station.stationID))}
                             </div>:null
                         }
@@ -103,7 +118,14 @@ function TrainView({trip,stations,signalR,direct}:TrainViewProps) {
 
                         {
                             (station.style&0x01)>0?
-                                <div className={style.timeView}>
+                                <div className={`${style.timeView}  ${(selected?.tripID===trip.tripID&&selected.stationID===station.stationID&&selected.viewID===2)?style.selected:""}`}
+                                     onClick={(e)=>{
+                                         setSelected({
+                                             tripID:trip.tripID,
+                                             stationID:station.stationID,
+                                             viewID:2
+                                         });
+                                     }}>
                                     {getTimeStr(station, getStopTime(station.stationID))}
                                 </div>:null
                         }

@@ -13,7 +13,7 @@ namespace Sujiro.WebAPI.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
-    public class StationController : AOdiaApiController
+    public class StationController : SujiroAPIController
     {
         public StationController(IHubContext<ChatHub> hubContext, IConfiguration configuration):base(hubContext, configuration)
         {
