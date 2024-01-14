@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import * as signalR from "@microsoft/signalr";
-import {Station, StopTime, Trip} from "../TimeTable/DiaData";
+import {Station, StopTime, Trip} from "../SujiroData/DiaData";
 import * as PIXI from 'pixi.js'
 import {DisplayObject, ICanvas} from "pixi.js";
+import {DiagramData, DiagramStation, DiagramTrip} from "./DiagramData";
 
 const connection = new signalR.HubConnectionBuilder()
     .withUrl(`${process.env.REACT_APP_SERVER_URL}/chatHub`)
@@ -11,17 +12,71 @@ connection.start().catch((err) => console.error(err));
 
 function DiagramPage() {
     const SCALE:number=3;
-    const [stations, setStations] = useState<Station[]>([]);
-    const [downTrips, setDownTrips] = useState<Trip[]>([]);
-    const [upTrips, setUpTrips] = useState<Trip[]>([]);
+    const [stations, setStations] = useState<DiagramStation[]>([]);
+
+    const [downTrips, setDownTrips] = useState<DiagramTrip[]>([]);
+    const [upTrips, setUpTrips] = useState<DiagramTrip[]>([]);
+
 
     const [app,setApp]=useState<PIXI.Application>();
-    const [diagramLines,setDiagramLines]=useState<DiagramLine[]>([]);
+    const [downLines,setDownLines]=useState<DiagramLine[]>([]);
+    const [upLines,setUpLines]=useState<DiagramLine[]>([]);
+
+    const makeDiagramLine=(trips:DiagramTrip[]):DiagramLine[]=>{
+        const diagramLines:DiagramLine[]=[];
+        trips.forEach(trip=>{
+
+            let diagramLine:DiagramLine={
+                color:0x000000,
+                points:[],
+                number:trip.number,
+                number2 : new PIXI.Text(trip.number , { fontSize:48,fill: 0x000000 }),
+
+            };
+            switch(trip.type){
+                case 0:
+                    diagramLine.color=0x000000;
+                    break;
+                case 1:
+                    diagramLine.color=0x008000;
+                    break;
+                case 2:
+                    diagramLine.color=0xFF8000;
+                    break;
+            }
+            const stopTimes=trip.direct==0?trip.stopTimes:[...trip.stopTimes].reverse();
+            for(let i=0;i<stopTimes.length;i++){
+                const st=stopTimes[i];
+                if(st.ariTime>=0){
+                    diagramLine.points.push({
+                        x:st.ariTime,
+                        y:stations.filter(item=>item.stationID===st.stationID)[0].stationTime
+                    });
+                }
+                if(st.depTime>=0) {
+                    diagramLine.points.push({
+                        x: st.depTime,
+                        y:stations.filter(item=>item.stationID===st.stationID)[0].stationTime
+                    });
+                }
+            }
+            diagramLines.push(diagramLine);
+        })
+        return diagramLines;
+
+    }
+
     const [transform,setTransform]=useState<DiagramTransform>({
-        x:0,
+        x:3600*6,
         y:0,
         xScale:0.03*SCALE,
         yScale:0.1*SCALE
+    });
+    const [diaRect,setDiaRect]=useState<DiagramRect>({
+        yStart:0,
+        yEnd:0,
+        xStart:3600*3,
+        xEnd:3600*27
     });
     const [gesture,setGesture]=useState<Gesture>({
         isDrag:false,
@@ -41,10 +96,18 @@ function DiagramPage() {
     useEffect(()=>{
         console.log("load");
         fetch(`${process.env.REACT_APP_SERVER_URL}/api/DiagramPage/0`).then(res=>res.json())
-            .then((res)=>{
+            .then((res:DiagramData)=>{
                 setDownTrips(res.downTrips);
                 setUpTrips(res.upTrips);
                 setStations(res.stations);
+                setDiaRect(prevState => {
+                    return {
+                        xStart: prevState.xStart,
+                        xEnd: prevState.xEnd,
+                        yStart: res.stations[0].stationTime,
+                        yEnd: res.stations[res.stations.length - 1].stationTime
+                    }
+                })
             })
         connection.on("DeleteTrip", (tripID: number) => {
             console.log("DeleteTrip "+tripID);
@@ -55,51 +118,19 @@ function DiagramPage() {
     },[])
 
     useEffect(()=>{
-        const diagramLines:DiagramLine[]=[];
-        downTrips.forEach(trip=>{
-            let diagramLine:DiagramLine={
-                color:0x000000,
-                points:[],
-                number:trip.number,
-                number2 : new PIXI.Text(trip.number , { fontSize:48,fill: 0x000000 }),
-
-            };
-            switch(trip.type){
-                case 0:
-                    diagramLine.color=0x000000;
-                    break;
-                case 1:
-                    diagramLine.color=0x008000;
-                    break;
-                case 2:
-                    diagramLine.color=0xFF8000;
-                    break;
-            }
-            for(let i=0;i<trip.stopTimes.length;i++){
-                const st=trip.stopTimes[i];
-                if(st.ariTime>=0){
-                    diagramLine.points.push({
-                        x:st.ariTime,
-                        y:i*100+100
-                    });
-                }
-                if(st.depTime>=0) {
-                    diagramLine.points.push({
-                        x: st.depTime,
-                        y: i * 100 + 100
-                    });
-                }
-            }
-            diagramLines.push(diagramLine);
-        })
-        setDiagramLines(diagramLines);
+        setDownLines(makeDiagramLine(downTrips));
     },[downTrips])
+    useEffect(()=>{
+        setUpLines(makeDiagramLine(upTrips));
+    },[upTrips])
 
 
 
 
     useEffect(() => {
         const canvas=(document.getElementById("test") as  HTMLCanvasElement);
+        canvas.width=canvas.clientWidth*SCALE;
+        canvas.height=canvas.clientHeight*SCALE;
 
         // キャンバスサイズと背景色を指定してステージを作成
         const app = new PIXI.Application({
@@ -116,11 +147,32 @@ function DiagramPage() {
             return;
         }
         app.stage.removeChildren();
-        diagramLines.forEach(item=>{
+        for(let h=3;h<28;h++){
+            const line = new PIXI.Graphics();
+            line.lineStyle(4, 0x808080, 1);
+            line.moveTo((h*3600-transform.x)*transform.xScale*SCALE, (diaRect.yStart-transform.y)*transform.yScale*SCALE);
+            line.lineTo((h*3600-transform.x)*transform.xScale*SCALE, (diaRect.yEnd-transform.y)*transform.yScale*SCALE);
+            app.stage.addChild(line as DisplayObject);
+        }
+        for(let station of stations){
+            const line = new PIXI.Graphics();
+            let width=1;
+            if(station.style==(3|3<<4)){
+                width=2;
+            }
+            if(stations[0]==station||stations.slice(-1)[0]==station){
+                width=2;
+            }
+            line.lineStyle(width, 0x808080, 1);
+            line.moveTo((diaRect.xStart-transform.x)*transform.xScale*SCALE, (station.stationTime-transform.y)*transform.yScale*SCALE);
+            line.lineTo((diaRect.xEnd-transform.x)*transform.xScale*SCALE, (station.stationTime-transform.y)*transform.yScale*SCALE);
+            app.stage.addChild(line as DisplayObject);
+
+        }
+        downLines.forEach(item=>{
             if(item.points.length<2){
                 return;
             }
-
             var line = new PIXI.Graphics();
             line.lineStyle(SCALE, item.color, 1);
             line.moveTo((item.points[0].x-transform.x)*transform.xScale*SCALE, (item.points[0].y-transform.y)*transform.yScale*SCALE);
@@ -134,17 +186,70 @@ function DiagramPage() {
             numberText.y = (item.points[0].y-transform.y)*transform.yScale*SCALE;
             numberText.rotation=Math.atan2((item.points[1].y-item.points[0].y)*transform.yScale,(item.points[1].x-item.points[0].x)*transform.xScale)
             app.stage.addChild(numberText as DisplayObject);
-
-
+        })
+        upLines.forEach(item=>{
+            if(item.points.length<2){
+                return;
+            }
+            var line = new PIXI.Graphics();
+            line.lineStyle(SCALE, item.color, 1);
+            line.moveTo((item.points[0].x-transform.x)*transform.xScale*SCALE, (item.points[0].y-transform.y)*transform.yScale*SCALE);
+            for(let i=1;i<item.points.length;i++){
+                line.lineTo((item.points[i].x-transform.x)*transform.xScale*SCALE, (item.points[i].y-transform.y)*transform.yScale*SCALE);
+            }
+            app.stage.addChild(line as DisplayObject);
+            const numberText=item.number2;
+            numberText.anchor.set(-1,1);
+            numberText.x = (item.points[0].x-transform.x)*transform.xScale*SCALE;
+            numberText.y = (item.points[0].y-transform.y)*transform.yScale*SCALE;
+            numberText.rotation=Math.atan2((item.points[1].y-item.points[0].y)*transform.yScale,(item.points[1].x-item.points[0].x)*transform.xScale)
+            app.stage.addChild(numberText as DisplayObject);
         })
 
-    }, [diagramLines,transform]);
+        const stationViewWidth=250;
+        var stationView = new PIXI.Graphics();
+        stationView.beginFill(0xFFFFFF);
+        stationView.drawRect(0, 0, stationViewWidth, 1000*SCALE);
+        stationView.endFill();
+        app.stage.addChild(stationView as DisplayObject);
+        const line = new PIXI.Graphics();
+        line.lineStyle(4, 0x808080, 1);
+        line.moveTo(stationViewWidth, (diaRect.yStart-transform.y)*transform.yScale*SCALE);
+        line.lineTo(stationViewWidth, (diaRect.yEnd-transform.y)*transform.yScale*SCALE);
+        app.stage.addChild(line as DisplayObject);
+
+        for(let station of stations){
+            const line = new PIXI.Graphics();
+            let width=1;
+            if(station.style==(3|3<<4)){
+                width=2;
+            }
+            if(stations[0]==station||stations.slice(-1)[0]==station){
+                width=2;
+            }
+            line.lineStyle(width, 0x808080, 1);
+            line.moveTo(0, (station.stationTime-transform.y)*transform.yScale*SCALE);
+            line.lineTo(stationViewWidth, (station.stationTime-transform.y)*transform.yScale*SCALE);
+            app.stage.addChild(line as DisplayObject);
+
+            const text=new PIXI.Text(station.name , { fontSize:40,fill: 0x000000 });
+            text.anchor.set(0,1);
+            text.x=20;
+            text.y=(station.stationTime-transform.y)*transform.yScale*SCALE;
+            app.stage.addChild(text as DisplayObject);
+
+
+        }
+
+
+
+
+    }, [downLines,upTrips,transform]);
 
 
 
     return (
-        <div>
-        <canvas id="test" width={1000*SCALE} height={800*SCALE} style={{width:'1000px',height:'800px',overflowY:'hidden'}}
+        <canvas id="test"  style={{width:'100%',height:'100%',overflowY:'hidden'}}
             onTouchStart={(e)=>{
                 if(e.touches.length==1) {
                     setGesture({
@@ -203,6 +308,7 @@ function DiagramPage() {
                     let x=(x1+x2)/2;
                     let y=(y1+y2)/2;
 
+
                     setGesture2(prev=>{return{
                         isXDrag:Math.abs(e.touches[0].clientX-e.touches[1].clientX)>100,
                         isYDrag:Math.abs(e.touches[0].clientY-e.touches[1].clientY)>100,
@@ -248,8 +354,6 @@ function DiagramPage() {
                 }}
         >
         </canvas>
-            <br/>
-        </div>
     );
 }
 
@@ -303,4 +407,10 @@ interface Gesture2{
     start2:Point;
     moveing1:Point;
     moveing2:Point;
+}
+interface DiagramRect{
+    xStart:number;
+    xEnd:number;
+    yStart:number;
+    yEnd:number;
 }

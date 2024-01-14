@@ -23,7 +23,22 @@ namespace Sujiro.Data
             ariTime = (int)(long)reader["ariTime"];
             depTime = (int)(long)reader["depTime"];
             stopType = (int)(long)reader["stopType"];
-
+        }
+        public int GetDAtime()
+        {
+            if (!(depTime is null) && depTime >= 0)
+            {
+                return depTime ?? -1;
+            }
+            return ariTime ?? -1;
+        }
+        public int GetADtime()
+        {
+            if (!(ariTime is null) && ariTime >= 0)
+            {
+                return ariTime ?? -1;
+            }
+            return depTime ?? -1;
         }
     }
 }

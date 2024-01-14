@@ -81,7 +81,7 @@ namespace OuDia
                 {
                     StopTime stopTime = new StopTime();
                     stopTime.tripID = trip.TripID;
-                    stopTime.stationID = i;
+                    stopTime.stationID =i;
                     stopTime.ariTime = train.times[i].AriTime;
                     stopTime.depTime = train.times[i].DepTime;
                     stopTime.stopType = train.times[i].StopType;
@@ -103,7 +103,7 @@ namespace OuDia
                 {
                     StopTime stopTime = new StopTime();
                     stopTime.tripID = trip.TripID;
-                    stopTime.stationID = i;
+                    stopTime.stationID = route.Stations.Count- i-1;
                     stopTime.ariTime = train.times[i].AriTime;
                     stopTime.depTime = train.times[i].DepTime;
                     stopTime.stopType = train.times[i].StopType;

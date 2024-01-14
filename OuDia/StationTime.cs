@@ -75,7 +75,7 @@ namespace OuDia
                 default:
                     return -1;
             }
-            return int.Parse(hh) * 3600 + int.Parse(mm) * 60 + int.Parse(ss);
+            return (int.Parse(hh) * 3600 + int.Parse(mm) * 60 + int.Parse(ss)+24*3600-3*3600)%(24*3600)+3*3600;
         }
     }
 }

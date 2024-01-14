@@ -5,21 +5,23 @@ export interface Station{
 }
 export interface Trip{
     tripID:number;
+    direct:number;
     number:string;
-    stopTimes:StopTime[];
+    name:string;
     type:number;
-}
-export interface TimeTableTrip extends Trip{
-    tripColor:string;
-    trainTypeName:string;
-    trainTypeShortName:string;
-
 }
 export interface StopTime{
     stopTimeID:number;
+    tripID:number;
+    stationID:number;
     ariTime:number;
     depTime:number;
-    stationID:number;
-    tripID:number;
     stopType:number;
+}
+
+export interface TrainType{
+    trainTypeID:number;
+    name:string;
+    shortName:string;
+    color:string;
 }

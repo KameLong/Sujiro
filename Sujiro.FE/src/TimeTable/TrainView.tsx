@@ -1,16 +1,19 @@
 import React from "react";
 import style from "./TimeTablePage.module.css";
-import {Station, StopTime, TimeTableTrip, Trip} from "./DiaData";
+import {Station, StopTime} from "../SujiroData/DiaData";
 import {Button, Checkbox, Dialog, DialogTitle, List, ListItem, ListItemButton} from "@mui/material";
 import axios from "axios";
+import {TimeTableTrip} from "./TimeTableData";
 interface TrainViewProps {
     trip:TimeTableTrip;
     stations:Station[]
     signalR:signalR.HubConnection;
+    direct:number;
 }
-function TrainView({trip,stations,signalR}:TrainViewProps) {
+function TrainView({trip,stations,signalR,direct}:TrainViewProps) {
     const [open, setOpen] = React.useState(false);
     const [selectedTrip, setSelectedTrip] = React.useState<number>(-1);
+    const showStations=(direct==0)?stations: [...stations].reverse();
 
     const handleClickOpen = () => {
         setOpen(!open);
@@ -67,7 +70,7 @@ function TrainView({trip,stations,signalR}:TrainViewProps) {
             // handleClickOpen();
             // e.preventDefault();
         }}
-             style={{color:trip.tripColor}}
+             style={{color:trip.trainType.color}}
         >
             <div style={{textAlign:"center"}}>
                 <input className={style.checkbox} type={"checkbox"}/>
@@ -78,13 +81,13 @@ function TrainView({trip,stations,signalR}:TrainViewProps) {
                 {trip.number}
             </div>
             <div className={style.timeView2}>
-                {trip.trainTypeShortName}
+                {trip.trainType.shortName}
             </div>
             <div style={{borderBottom: "1px solid #000"}}></div>
             <div className={style.trainNameView}>
             </div>
             {
-                stations.map(station =>
+                showStations.map(station =>
                     <div key={station.stationID}>
                         {
                             (station.style&0x02)>0?

@@ -1,12 +1,14 @@
 import React, {useEffect, useState} from "react";
 import style from "./TimeTablePage.module.css";
-import {Station} from "./DiaData";
+import {Station} from "../SujiroData/DiaData";
 import {Checkbox} from "@mui/material";
 
 interface StationViewProps {
     stations:Station[];
+    direct:number;
 }
-function StationView({stations}:StationViewProps){
+function StationView({stations,direct}:StationViewProps){
+    const showStations=(direct==0)?stations: [...stations].reverse();
     return (
         <div className={style.stationListView}>
             <div style={{textAlign: "center"}}>
@@ -24,28 +26,23 @@ function StationView({stations}:StationViewProps){
             <div style={{borderBottom: "1px solid #000"}}></div>
             <div className={style.trainNameView}/>
 
-            {stations.map((station: any) => {
+            {showStations.map((station: Station) => {
                 switch(station.style&0x03){
                     case 3:
                         return (
-                            <div key={station.id}>
-                                <div className={style.bigStationView}>
+                            <div key={station.stationID} className={style.bigStationView}>
                                     {station.name}
-                                </div>
                             </div>
                         )
                     default:
                         return (
-                            <div className={style.stationView} key={station.id}> {station.name} </div>
+                            <div className={style.stationView} key={station.stationID}> {station.name} </div>
                         )
 
                 }
 
             })}
             <div style={{borderBottom: "2px solid #000"}}></div>
-            <div>
-
-            </div>
         </div>
 
     );

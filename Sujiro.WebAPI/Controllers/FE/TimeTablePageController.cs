@@ -17,10 +17,8 @@ namespace Sujiro.WebAPI.Controllers
         class TimetableTrip : Trip
         {
             public List<StopTime> stopTimes { get; set; } = new List<StopTime>();
+            public TrainType trainType { get; set; } = new TrainType();
 
-            public string tripColor { get; set; } = "";
-            public string trainTypeName { get; set; } = "";
-            public string trainTypeShortName { get; set; } = "";
             
             public TimetableTrip(SqliteDataReader reader) : base(reader)
             {
@@ -85,9 +83,7 @@ namespace Sujiro.WebAPI.Controllers
                             if(trip == null || trip.TripID != (long)reader["tripID"])
                             {
                                 trip = new TimetableTrip(reader);
-                                trip.trainTypeShortName = trainTypes.Find(x => x.TrainTypeID == trip.Type).ShortName;
-                                trip.tripColor = trainTypes.Find(x => x.TrainTypeID == trip.Type).color;
-                                
+                                trip.trainType = trainTypes.Find(x => x.TrainTypeID == trip.Type);
                                 result.trips.Add(trip);
                             }
                             StopTime stopTime = new StopTime(reader);

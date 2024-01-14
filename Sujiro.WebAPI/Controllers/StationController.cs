@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.Sqlite;
 using Sujiro.Data;
+using Sujiro.WebAPI.SignalR;
 using System.Diagnostics;
 
 namespace Sujiro.WebAPI.Controllers
@@ -11,12 +13,10 @@ namespace Sujiro.WebAPI.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
-    public class StationController : ControllerBase
+    public class StationController : AOdiaApiController
     {
-        private readonly IConfiguration Configuration;
-        public StationController(IConfiguration configuration)
+        public StationController(IHubContext<ChatHub> hubContext, IConfiguration configuration):base(hubContext, configuration)
         {
-            Configuration = configuration;
         }
 
         [HttpGet]
@@ -24,33 +24,30 @@ namespace Sujiro.WebAPI.Controllers
         {
             try
             {
-
-            
-
-            DateTime now = DateTime.Now;
-            var stations =new List<Station>();
-            using (var conn = new SqliteConnection("Data Source=" + Configuration["ConnectionStrings:DBpath"]))
-            {
-                conn.Open();
-                var tran = conn.BeginTransaction();
-                var command = conn.CreateCommand();
-
-                command = conn.CreateCommand();
-                command.CommandText = @"SELECT * FROM stations";
-
-                using (var reader = command.ExecuteReader())
+                DateTime now = DateTime.Now;
+                var stations =new List<Station>();
+                using (var conn = new SqliteConnection("Data Source=" + Configuration["ConnectionStrings:DBpath"]))
                 {
-                    while (reader.Read())
+                    conn.Open();
+                    var tran = conn.BeginTransaction();
+                    var command = conn.CreateCommand();
+
+                    command = conn.CreateCommand();
+                    command.CommandText = @"SELECT * FROM stations";
+
+                    using (var reader = command.ExecuteReader())
                     {
-                        Station station = new Station(reader);
-                        stations.Add(station);
+                        while (reader.Read())
+                        {
+                            Station station = new Station(reader);
+                            stations.Add(station);
+                        }
                     }
                 }
-            }
-            Debug.WriteLine((DateTime.Now - now).TotalMilliseconds);
+                Debug.WriteLine((DateTime.Now - now).TotalMilliseconds);
 
 
-            return stations;
+                return stations;
             }
             catch (Exception e)
             {
