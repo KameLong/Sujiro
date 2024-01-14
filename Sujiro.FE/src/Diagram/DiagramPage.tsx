@@ -5,10 +5,6 @@ import * as PIXI from 'pixi.js'
 import {DisplayObject, ICanvas} from "pixi.js";
 import {DiagramData, DiagramStation, DiagramTrip} from "./DiagramData";
 
-const connection = new signalR.HubConnectionBuilder()
-    .withUrl(`${process.env.REACT_APP_SERVER_URL}/chatHub`)
-    .build();
-connection.start().catch((err) => console.error(err));
 
 function DiagramPage() {
     const SCALE:number=3;
@@ -109,11 +105,6 @@ function DiagramPage() {
                     }
                 })
             })
-        connection.on("DeleteTrip", (tripID: number) => {
-            console.log("DeleteTrip "+tripID);
-            setDownTrips((prev)=>prev.filter(item=>item.tripID!==tripID));
-            setUpTrips((prev)=>prev.filter(item=>item.tripID!==tripID));
-        });
 
     },[])
 

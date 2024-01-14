@@ -10,10 +10,9 @@ import {Route, Router, Routes } from 'react-router-dom';
 function App() {
   return (
       <Routes>
-        <Route path="/diagram" element={<DiagramPage/>}>
-        </Route>
-        <Route path="/timetable/:direct" element={<TimeTablePage/>}>
-        </Route>
+          <Route path="/" element={<DiagramPage/>}></Route>
+        <Route path="/diagram" element={<DiagramPage/>}></Route>
+        <Route path="/timetable/:direct" element={<TimeTablePage/>}></Route>
 
       </Routes>
   );

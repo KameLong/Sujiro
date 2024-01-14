@@ -1,0 +1,13 @@
+/etc/systemd/system/sujiro.service
+=================
+[Unit]
+Description = Sujiro (port 5000)
+
+[Service]
+WorkingDirectory= /www/Sujiro
+ExecStart = dotnet /www/Sujiro/Sujiro.WebAPI.dll
+Restart = always
+Type = simple
+
+[Install]
+WantedBy = multi-user.target

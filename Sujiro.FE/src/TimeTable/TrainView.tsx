@@ -8,12 +8,11 @@ import {TimetableSelected} from "./TimeTablePage";
 interface TrainViewProps {
     trip:TimeTableTrip;
     stations:Station[]
-    signalR:signalR.HubConnection;
     direct:number;
     selected:TimetableSelected|null;
     setSelected:Dispatch<SetStateAction<TimetableSelected | null>>;
 }
-function TrainView({trip,stations,signalR,direct,selected,setSelected}:TrainViewProps) {
+function TrainView({trip,stations,direct,selected,setSelected}:TrainViewProps) {
     const [open, setOpen] = React.useState(false);
     const showStations=(direct===0)?stations: [...stations].reverse();
 

@@ -8,10 +8,6 @@ import {TimeTableTrip} from "./TimeTableData";
 import {useParams} from "react-router-dom";
 import {useKey} from 'react-use';
 
-const connection = new signalR.HubConnectionBuilder()
-    .withUrl(`${process.env.REACT_APP_SERVER_URL}/chatHub`)
-    .build();
-connection.start().catch((err) => console.error(err));
 
 
 const MemoTrainView = memo(TrainView);
@@ -164,10 +160,6 @@ function TimeTablePage() {
                 setTrips(res.trips);
                 setStations(res.stations);
             })
-        connection.on("DeleteTrip", (tripID: number) => {
-            console.log("DeleteTrip "+tripID);
-            setTrips((prev)=>prev.filter(item=>item.tripID!==tripID));
-        });
 
     },[])
 
@@ -179,7 +171,7 @@ function TimeTablePage() {
                 <div className={style.trainListView}>
                     {trips.map((trip) => {
                         return (
-                            <MemoTrainView key={trip.tripID} trip={trip} stations={stations} direct={Number(direct)} signalR={connection} selected={selected?.tripID===trip.tripID?selected:null} setSelected={setSelected}/>
+                            <MemoTrainView key={trip.tripID} trip={trip} stations={stations} direct={Number(direct)}  selected={selected?.tripID===trip.tripID?selected:null} setSelected={setSelected}/>
                         )
                     })}
                 </div>

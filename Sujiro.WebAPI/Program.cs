@@ -47,5 +47,6 @@ app.MapHub<ChatHub>("/chatHub");
 app.UseDefaultFiles();
 app.UseStaticFiles();
 //
+app.MapFallbackToFile("index.html");
 
 app.Run();
