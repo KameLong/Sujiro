@@ -15,6 +15,16 @@ namespace Sujiro.Data
         {
 
         }
+        public void Update(ref SqliteCommand command)
+        {
+            command.CommandText = @"UPDATE stop_time SET tripID=$tripID,stationID=$stationID,ariTime=$ariTime,depTime=$depTime,stopType=$stopType WHERE stopTimeID=$stopTimeID";
+            command.Parameters.AddWithValue("$stopTimeID", StopTimeID);
+            command.Parameters.AddWithValue("$tripID", tripID);
+            command.Parameters.AddWithValue("$stationID", stationID);
+            command.Parameters.AddWithValue("$ariTime", ariTime);
+            command.Parameters.AddWithValue("$depTime", depTime);
+            command.Parameters.AddWithValue("$stopType", stopType);
+        }
         public StopTime(SqliteDataReader reader)
         {
             StopTimeID = (long)reader["stopTimeID"];

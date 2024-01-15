@@ -29,8 +29,34 @@ function SimpleDialog(props: SimpleDialogProps) {
 
     const { onClose, selectedValue, open,stopTime,focusIndex } = props;
 
+    console.log(open);
 
     const handleClose = () => {
+        const dep=timeS2int(depTime);
+        const ari=timeS2int(ariTime);
+        if(dep<-1||ari<-1) {
+            console.error("異常な値");
+            return;
+        }
+        console.log(dep,ari);
+        //stopTimeの更新
+        if(stopTime===null) {
+            return;
+        }
+        const newStopTime:StopTime={
+            stopTimeID:stopTime.stopTimeID,
+            stationID:stopTime.stationID,
+            tripID:stopTime.tripID,
+            stopType:stopTime.stopType,
+            depTime:dep,
+            ariTime:ari
+        };
+        console.log(newStopTime);
+        axios.put(`${process.env.REACT_APP_SERVER_URL}/api/stopTime`,newStopTime);
+
+
+
+
         onClose(selectedValue);
     };
     const time2Str=(time:number|undefined)=>{
@@ -72,7 +98,7 @@ function SimpleDialog(props: SimpleDialogProps) {
 
     return (
         <Dialog  onClose={handleClose} open={open}>
-            <div style={{margin:'20px'}}>
+            <div style={{margin:'20px'}} onKeyDown={e=>{if(open&&e.key==="Enter"){console.log(e);handleClose();e.preventDefault()}}}>
                 <DialogTitle>駅時刻編集</DialogTitle>
             <List sx={{ pt: 0 }} >
                 <ListItem >
@@ -85,30 +111,6 @@ function SimpleDialog(props: SimpleDialogProps) {
                 </ListItem>
             </List>
             <Button onClick={()=> {
-                const dep=timeS2int(depTime);
-                const ari=timeS2int(ariTime);
-                if(dep<-1||ari<-1) {
-                    console.error("異常な値");
-                    return;
-                }
-                console.log(dep,ari);
-                //stopTimeの更新
-                if(stopTime===null) {
-                    return;
-                }
-                const newStopTime:StopTime={
-                    stopTimeID:stopTime.stopTimeID,
-                    stationID:stopTime.stationID,
-                    tripID:stopTime.tripID,
-                    stopType:stopTime.stopType,
-                    depTime:dep,
-                    ariTime:ari
-                };
-                console.log(newStopTime);
-                axios.put(`${process.env.REACT_APP_SERVER_URL}/api/stopTime`,newStopTime);
-
-
-
                 handleClose();
             }}>OK</Button>
         </div>
@@ -127,18 +129,19 @@ function TimeTablePage() {
         stationID:0,
         viewID:1
     });
-
-
-
-
-
     useEffect(() => {
         console.log(selected);
     }, [selected]);
-    useEffect(() => {
+    const onRightKeyDown=(e:React.KeyboardEvent<HTMLDivElement>)=>{
+        let open=false;
+        setOpen(prev=>{
+            open=prev;
+            return prev;
+        })
+        if(open){
+            return;
+        }
 
-    }, []);
-    useKey("ArrowRight",(e)=>{
         let trips:TimeTableTrip[]=[];
         setTrips(prev=>{
             trips=prev;
@@ -157,8 +160,17 @@ function TimeTablePage() {
         });
         e.preventDefault();
 
-    });
-    useKey("ArrowLeft",(e)=>{
+    };
+    const onLeftKeyDown=(e:React.KeyboardEvent<HTMLDivElement>)=>{
+        let open=false;
+        setOpen(prev=>{
+            open=prev;
+            return prev;
+        })
+        if(open){
+            return;
+        }
+
         let trips:TimeTableTrip[]=[];
         setTrips(prev=>{
             trips=prev;
@@ -176,8 +188,17 @@ function TimeTablePage() {
             return prev;
         });
         e.preventDefault();
-    });
-    useKey("ArrowUp",(e)=>{
+    };
+    const onUpKeyDown=(e:React.KeyboardEvent<HTMLDivElement>)=>{
+        let open=false;
+        setOpen(prev=>{
+            open=prev;
+            return prev;
+        })
+        if(open){
+            return;
+        }
+
         let stations:Station[]=[];
         setStations(prev=>{
             stations=prev;
@@ -215,10 +236,14 @@ function TimeTablePage() {
             return prev;
         });
         e.preventDefault();
+    };
+    const onDownKeyDown=(e:React.KeyboardEvent<HTMLDivElement>|undefined)=>{
 
-    });
-
-    useKey("ArrowDown",(e)=>{
+        let open=false;
+        setOpen(prev=>{
+            open=prev;
+            return prev;
+        })
         if(open){
             return;
         }
@@ -257,11 +282,8 @@ function TimeTablePage() {
             }
             return prev;
         });
-        e.preventDefault();
-
-    });
-
-
+        e?.preventDefault();
+    };
     useKey((e)=>{
         if(!!Number(e.key)){
             return true;
@@ -274,22 +296,7 @@ function TimeTablePage() {
         console.log("s");
         e.preventDefault();
     });
-    useKey("Enter",(e)=>{
-        let open=false;
-        setOpen(prev=>{
-            open=prev;
-            return prev;
-        })
-        if(open){
-            handleClose("");
-            e.preventDefault();
-        }else{
-            console.log("enter");
-            handleClickOpen();
-            e.preventDefault();
 
-        }
-    });
 
 
 
@@ -334,12 +341,68 @@ function TimeTablePage() {
 
     const handleClose = (value: string) => {
         setOpen(false);
-        setSelectedValue(value);
+        onDownKeyDown(undefined);
     };
+    const onEnterKeyDown=(e:React.KeyboardEvent<HTMLDivElement>)=>{
+        if (open) {
+            // handleClose("");
+            // e.preventDefault();
+        } else {
+            console.log("enter");
+            handleClickOpen();
+            e.preventDefault();
+        }
+    }
 
 
     return (
-        <div className={style.timetableMain}>
+        <div tabIndex={-1} className={style.timetableMain} onKeyDown={e=>{
+            switch (e.key) {
+                case "Enter":
+                    onEnterKeyDown(e);
+                    break;
+                case "ArrowDown":
+                    onDownKeyDown(e);
+                    break;
+                case "ArrowUp":
+                    onUpKeyDown(e);
+                    break;
+                case "ArrowRight":
+                    onRightKeyDown(e);
+                    break;
+                case "ArrowLeft":
+                    onLeftKeyDown(e);
+                    break;
+                case "L":
+                    if(e.ctrlKey){
+                        console.log(e);
+                        //以後の駅をすべて１分遅らせる
+                        const trip=trips.find(item=>item.tripID===selected?.tripID);
+                        if(!trip)return;
+                        let flag=false;
+                        for(let i=0;i<trip.stopTimes.length;i++) {
+                            if(trip.stopTimes[i].stationID===selected?.stationID&&selected?.viewID===0){
+                                flag=true;
+                            }
+                            if(flag&&trip.stopTimes[i].ariTime>=0){
+                                trip.stopTimes[i].ariTime++;
+                            }
+                            if(trip.stopTimes[i].stationID===selected?.stationID&&selected?.viewID===2){
+                                flag=true;
+                            }
+                            if(flag&&trip.stopTimes[i].depTime>=0){
+                                trip.stopTimes[i].depTime++;
+                            }
+                        }
+                        console.log(trip);
+                        axios.put(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/trip`,trip);
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+        }}>
             <StationView stations={stations} direct={Number(direct)}/>
             <div className={style.trainListLayout}>
                 <div className={style.trainListView}>

@@ -14,7 +14,7 @@ namespace Sujiro.WebAPI.Controllers
     public class TimeTablePageController : SujiroAPIController
     {
 
-        class TimetableTrip : Trip
+        public class TimetableTrip : Trip
         {
             public List<StopTime> stopTimes { get; set; } = new List<StopTime>();
             public TrainType trainType { get; set; } = new TrainType();
@@ -25,7 +25,7 @@ namespace Sujiro.WebAPI.Controllers
             }
 
         }
-        class TimeTableData
+        public class TimeTableData
         {
             public List<TimetableTrip> trips { get; set; }=new List<TimetableTrip>();
             public List<Station> stations { get; set; } = new List<Station>();
@@ -94,6 +94,39 @@ namespace Sujiro.WebAPI.Controllers
 
                 }
                 return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                return StatusCode(500);
+            }
+        }
+
+        [HttpPut("trip")]
+        public async Task<ActionResult> PutTrip(TimetableTrip trip)
+        {
+
+            try
+            {
+               Debug.WriteLine($"PostTrip");
+                /*
+                using (var conn = new SqliteConnection("Data Source=" + Configuration["ConnectionStrings:DBpath"]))
+                {
+                    conn.Open();
+                    var tran = conn.BeginTransaction();
+                    var command = conn.CreateCommand();
+                    trip.Update(ref command);
+                    command.ExecuteNonQuery();
+                    foreach(var stopTime in trip.stopTimes)
+                    {
+                        stopTime.Update(ref command);
+                        command.ExecuteNonQuery();
+                    }
+
+                    tran.Commit();
+                }
+                */
+                return Ok("");
             }
             catch (Exception ex)
             {

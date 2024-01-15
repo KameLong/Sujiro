@@ -13,6 +13,15 @@ namespace Sujiro.Data
         {
 
         }
+        public void Update(ref SqliteCommand command)
+        {
+            command.CommandText = @"UPDATE trips SET direct=$direct,name=$name,number=$number,type=$type WHERE tripID=$tripID";
+            command.Parameters.AddWithValue("$tripID", TripID);
+            command.Parameters.AddWithValue("$direct", direct);
+            command.Parameters.AddWithValue("$name", Name);
+            command.Parameters.AddWithValue("$number", Number);
+            command.Parameters.AddWithValue("$type", Type);
+        }
         public Trip(SqliteDataReader reader)
         {
             TripID = (int)(long)reader["tripID"];

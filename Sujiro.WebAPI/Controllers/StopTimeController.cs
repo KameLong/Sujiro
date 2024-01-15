@@ -26,14 +26,13 @@ namespace Sujiro.WebAPI.Controllers
                     conn.Open();
                     var tran = conn.BeginTransaction();
                     var command = conn.CreateCommand();
-
-                    command = conn.CreateCommand();
                     command.CommandText = @"UPDATE stop_time set ariTime=:ariTime , depTime=:depTime, stopType=:stopType where StopTimeID=:id";
                     command.Parameters.AddWithValue(":id", stopTime.StopTimeID);
                     command.Parameters.AddWithValue(":ariTime", stopTime.ariTime);
                     command.Parameters.AddWithValue(":depTime", stopTime.depTime);
                     command.Parameters.AddWithValue(":stopType", stopTime.stopType);
                     command.ExecuteNonQuery();
+                    tran.Commit();
                 }
                 await _hubContext.Clients.All.SendAsync("UpdateStoptime", stopTime);
 
