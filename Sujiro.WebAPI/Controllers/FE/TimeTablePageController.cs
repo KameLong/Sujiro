@@ -16,9 +16,13 @@ namespace Sujiro.WebAPI.Controllers
 
         public class TimetableTrip : Trip
         {
+            public TimetableTrip()
+            {
+
+            }
+
             public List<StopTime> stopTimes { get; set; } = new List<StopTime>();
             public TrainType trainType { get; set; } = new TrainType();
-
             
             public TimetableTrip(SqliteDataReader reader) : base(reader)
             {
@@ -109,7 +113,6 @@ namespace Sujiro.WebAPI.Controllers
             try
             {
                Debug.WriteLine($"PostTrip");
-                /*
                 using (var conn = new SqliteConnection("Data Source=" + Configuration["ConnectionStrings:DBpath"]))
                 {
                     conn.Open();
@@ -119,13 +122,21 @@ namespace Sujiro.WebAPI.Controllers
                     command.ExecuteNonQuery();
                     foreach(var stopTime in trip.stopTimes)
                     {
-                        stopTime.Update(ref command);
-                        command.ExecuteNonQuery();
+                        var command2 = conn.CreateCommand();
+                        stopTime.Update(ref command2);
+                        try
+                        {
+                            command2.ExecuteNonQuery();
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine(ex);
+                        }
                     }
 
                     tran.Commit();
                 }
-                */
+                await _hubContext.Clients.All.SendAsync("UpdateTripStopTime", trip);
                 return Ok("");
             }
             catch (Exception ex)

@@ -4,6 +4,7 @@ import {Station, StopTime, Trip} from "../SujiroData/DiaData";
 import * as PIXI from 'pixi.js'
 import {DisplayObject, ICanvas} from "pixi.js";
 import {DiagramData, DiagramStation, DiagramTrip} from "./DiagramData";
+import {TimeTableTrip} from "../TimeTable/TimeTableData";
 const connection = new signalR.HubConnectionBuilder()
     .withUrl(`${process.env.REACT_APP_SERVER_URL}/chatHub`)
     .build();
@@ -145,6 +146,31 @@ function DiagramPage() {
                 return next;
             });
         });
+        connection.on("UpdateTripStopTime", (trip: TimeTableTrip) => {
+            console.log("UpdateTripStopTime",trip.stopTimes[0].depTime);
+            setUpTrips(prev=> {
+                const tripIndex=prev.findIndex(item=>item.tripID===trip.tripID);
+                if(tripIndex>=0){
+                    const next=[...prev];
+                    next[tripIndex]=Object.assign({...next[tripIndex]}, trip);
+                    console.log(next[tripIndex].stopTimes[0].depTime);
+                    return next;
+                }
+                return prev;
+            });
+            setDownTrips(prev=> {
+                const tripIndex=prev.findIndex(item=>item.tripID===trip.tripID);
+                if(tripIndex>=0){
+                    const next=[...prev];
+                    next[tripIndex]=Object.assign({...next[tripIndex]}, trip);
+                    console.log(next[tripIndex].stopTimes[0].depTime);
+                    return next;
+                }
+                return prev;
+            });
+
+        });
+
 
 
     },[])
