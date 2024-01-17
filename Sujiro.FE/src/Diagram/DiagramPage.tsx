@@ -27,23 +27,12 @@ function DiagramPage() {
         trips.forEach(trip=>{
 
             let diagramLine:DiagramLine={
-                color:0x000000,
+                color:Number.parseInt(trip.trainType.color.slice(1),16),
                 points:[],
                 number:trip.number,
                 number2 : new PIXI.Text(trip.number , { fontSize:48,fill: 0x000000 }),
 
             };
-            switch(trip.type){
-                case 0:
-                    diagramLine.color=0x000000;
-                    break;
-                case 1:
-                    diagramLine.color=0x008000;
-                    break;
-                case 2:
-                    diagramLine.color=0xFF8000;
-                    break;
-            }
             const stopTimes=trip.direct==0?trip.stopTimes:[...trip.stopTimes].reverse();
             for(let i=0;i<stopTimes.length;i++){
                 const st=stopTimes[i];
