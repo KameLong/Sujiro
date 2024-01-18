@@ -9,18 +9,21 @@ namespace Sujiro.Data
         public string? Name { get; set; } = "";
         public string? Number { get; set; } = "";
         public int Type { get; set; } = -1;
+
+        public int Seq { get; set; } = -1;
         public Trip()
         {
 
         }
         public void Update(ref SqliteCommand command)
         {
-            command.CommandText = @"UPDATE trips SET direct=$direct,name=$name,number=$number,type=$type WHERE tripID=$tripID";
+            command.CommandText = @"UPDATE trips SET direct=$direct,name=$name,number=$number,type=$type WHERE tripID=$tripID seq=$seq";
             command.Parameters.AddWithValue("$tripID", TripID);
             command.Parameters.AddWithValue("$direct", direct);
             command.Parameters.AddWithValue("$name", Name);
             command.Parameters.AddWithValue("$number", Number);
             command.Parameters.AddWithValue("$type", Type);
+            command.Parameters.AddWithValue("$seq", Seq);
         }
         public Trip(SqliteDataReader reader)
         {

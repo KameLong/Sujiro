@@ -443,11 +443,50 @@ function TimeTablePage() {
                         e.preventDefault();
                     }
                     break;
+                case "c":
+                    if(e.ctrlKey){
+                        console.log(e);
+                        const trip=trips.find(item=>item.tripID===selected?.tripID);
+                        if(!trip)return;
+                        if (!navigator.clipboard) {
+                            alert("このブラウザは対応していません");
+                            return;
+                        }
+                        navigator.clipboard.writeText(JSON.stringify(trip)).then(
+                            () => {
+                            },
+                            () => {
+                                alert('コピーに失敗しました。');
+                            });
+                        e.preventDefault();
+                    }
+                    break;
+
                 default:
                     break;
             }
+        }}
+             onPaste={e=>{
+                 console.log(e);
+                 var clipboardData = e.clipboardData;
 
-        }}>
+                 if(clipboardData != null){
+
+                     var text = clipboardData.getData("text/plain");
+                     const trip:TimeTableTrip=JSON.parse(text);
+                     if(trip.tripID===undefined) {
+                         return;
+                     }
+                     axios.post(""+process.env.REACT_APP_SERVER_URL+"/api/timetablePage/addTrip",trip).then(res=>{
+                            console.log(res);
+                        });
+
+
+
+                     console.log(text);
+                 }
+             }}
+        >
             <StationView stations={stations} direct={Number(direct)}/>
             <div className={style.trainListLayout}>
                 <div className={style.trainListView}>

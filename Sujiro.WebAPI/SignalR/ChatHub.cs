@@ -13,7 +13,6 @@ namespace Sujiro.WebAPI.SignalR
         public async Task DeleteTrip(long tripID)
         {
 
-
             await Clients.All.SendAsync("DeleteTrip", tripID);
 
         }
