@@ -342,6 +342,15 @@ function TimeTablePage() {
             });
 
         });
+        connection.on("UpdateTrips", () => {
+            console.log("UpdateTrips");
+            fetch(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/0/${direct}`).then(res=>res.json())
+                .then((res)=>{
+                    setTrips(res.trips);
+                    setStations(res.stations);
+                })
+
+        });
 
 
     },[])
@@ -477,7 +486,11 @@ function TimeTablePage() {
                      if(trip.tripID===undefined) {
                          return;
                      }
-                     axios.post(""+process.env.REACT_APP_SERVER_URL+"/api/timetablePage/addTrip",trip).then(res=>{
+                     const selectedTrip=trips.find(item=>item.tripID===selected?.tripID);
+                        if(!selectedTrip)return;
+
+                     axios.post(""+process.env.REACT_APP_SERVER_URL+"/api/timetablePage/insertTrip",
+                         {trip:trip,insertSeq:trips.indexOf(selectedTrip)}).then(res=>{
                             console.log(res);
                         });
 

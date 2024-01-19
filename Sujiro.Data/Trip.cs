@@ -38,6 +38,7 @@ namespace Sujiro.Data
             }
             direct = (int)(long)reader["direct"];
             Type = (int)(long)reader["type"];
+            Seq = (int)(long)reader["seq"];
 
         }
 
