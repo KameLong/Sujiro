@@ -1,9 +1,13 @@
 ﻿using Microsoft.Data.Sqlite;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Sujiro.Data
 {
+    [Table(TABLE_NAME)]
     public class TrainType
     {
+        public const string TABLE_NAME = "train_types";
+
         public long? TrainTypeID { get; set; }
         public string Name { get; set; } = "";
         public string ShortName { get; set; } = "";

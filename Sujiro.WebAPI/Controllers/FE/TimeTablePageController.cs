@@ -63,7 +63,7 @@ namespace Sujiro.WebAPI.Controllers
 
                     var command = conn.CreateCommand();
 
-                    command.CommandText = @"SELECT * FROM stations";
+                    command.CommandText = $"SELECT * FROM {Station.TABLE_NAME}";
 
                     using (var reader = command.ExecuteReader())
                     {
@@ -73,7 +73,7 @@ namespace Sujiro.WebAPI.Controllers
                             result.stations.Add(trip);
                         }
                     }
-                    command.CommandText = @"SELECT * FROM traintypes";
+                    command.CommandText = $"SELECT * FROM {TrainType.TABLE_NAME}";
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
@@ -83,7 +83,7 @@ namespace Sujiro.WebAPI.Controllers
                         }
                     }
 
-                    command.CommandText = @"SELECT * FROM stop_time inner join trips on stop_time.tripID=trips.tripID where trips.direct=:direct order by trips.seq";
+                    command.CommandText = $"SELECT * FROM {StopTime.TABLE_NAME} inner join {Trip.TABLE_NAME} on {StopTime.TABLE_NAME}.{nameof(StopTime.tripID)}={Trip.TABLE_NAME}.{nameof(Trip.TripID)} where {Trip.TABLE_NAME}.{nameof(Trip.direct)}=:direct order by {Trip.TABLE_NAME}.{nameof(Trip.Seq)}";
                     command.Parameters.Add(new SqliteParameter(":direct", direct));
                     using (var reader = command.ExecuteReader())
                     {
@@ -139,7 +139,6 @@ namespace Sujiro.WebAPI.Controllers
                             Debug.WriteLine(ex);
                         }
                     }
-
                     tran.Commit();
                 }
                 await _hubContext.Clients.All.SendAsync("UpdateTripStopTime", trip);
@@ -164,7 +163,7 @@ namespace Sujiro.WebAPI.Controllers
                     var tran = conn.BeginTransaction();
                     var command = conn.CreateCommand();
 
-                    command.CommandText = @"select seq from trips WHERE direct=:direct and tripID=:tripID";
+                    command.CommandText = $"select seq from {Trip.TABLE_NAME} WHERE direct=:direct and tripID=:tripID";
                     command.Parameters.Add(new SqliteParameter(":direct", trip.direct));
                     command.Parameters.Add(new SqliteParameter(":tripID", insert.insertTripID));
                     int seq=(int)(long)command.ExecuteScalar();
@@ -172,13 +171,13 @@ namespace Sujiro.WebAPI.Controllers
 
 
                     command = conn.CreateCommand();
-                    command.CommandText = @"UPDATE trips SET seq=seq+1 WHERE direct=:direct and seq>=:seq";
+                    command.CommandText = $"UPDATE {Trip.TABLE_NAME} SET seq=seq+1 WHERE direct=:direct and seq>=:seq";
                     command.Parameters.Add(new SqliteParameter(":direct", trip.direct));
                     command.Parameters.Add(new SqliteParameter(":seq", seq));
                     command.ExecuteNonQuery();
 
                     command = conn.CreateCommand();
-                    command.CommandText = @"INSERT INTO trips (tripID,direct,name,number,type,seq) VALUES (:tripID,:direct,:name,:number,:type,:seq)";
+                    command.CommandText = $"INSERT INTO {Trip.TABLE_NAME} (tripID,direct,name,number,type,seq) VALUES (:tripID,:direct,:name,:number,:type,:seq)";
                     command.Parameters.Add(new SqliteParameter(":tripID", trip.TripID));
                     command.Parameters.Add(new SqliteParameter(":direct", trip.direct));
                     command.Parameters.Add(new SqliteParameter(":name", trip.Name));
@@ -192,7 +191,7 @@ namespace Sujiro.WebAPI.Controllers
                     foreach (var stop in trip.stopTimes)
                     {
                         command=    conn.CreateCommand();
-                        command.CommandText = @"INSERT INTO stop_time (tripID,stationID,ariTime,depTime,stopType) VALUES (:tripID,:stationID,:ariTime,:depTime,:stopType)";
+                        command.CommandText = $"INSERT INTO {StopTime.TABLE_NAME} (tripID,stationID,ariTime,depTime,stopType) VALUES (:tripID,:stationID,:ariTime,:depTime,:stopType)";
                         command.Parameters.Add(new SqliteParameter(":tripID", trip.TripID));
                             command.Parameters.Add(new SqliteParameter(":stationID", stop.stationID));
                         command.Parameters.Add(new SqliteParameter(":ariTime", stop.ariTime));

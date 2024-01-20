@@ -1,9 +1,14 @@
 ﻿using Microsoft.Data.Sqlite;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Sujiro.Data
 {
+
+    [Table(TABLE_NAME)]
     public class Trip 
     {
+        public const string TABLE_NAME = "trips";
+
         public long? TripID { get; set; } = -1;
         public long direct { get; set; } = -1;
         public string? Name { get; set; } = "";

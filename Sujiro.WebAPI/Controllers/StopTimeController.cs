@@ -26,7 +26,11 @@ namespace Sujiro.WebAPI.Controllers
                     conn.Open();
                     var tran = conn.BeginTransaction();
                     var command = conn.CreateCommand();
-                    command.CommandText = @"UPDATE stop_time set ariTime=:ariTime , depTime=:depTime, stopType=:stopType where StopTimeID=:id";
+                    command.CommandText = $@"UPDATE {StopTime.TABLE_NAME} set 
+                            {nameof(StopTime.ariTime)}=:ariTime ,
+                            {nameof(StopTime.depTime)}=:depTime, 
+                            {nameof(StopTime.stopType)}=:stopType 
+                               where {nameof(StopTime.StopTimeID)}=:id";
                     command.Parameters.AddWithValue(":id", stopTime.StopTimeID);
                     command.Parameters.AddWithValue(":ariTime", stopTime.ariTime);
                     command.Parameters.AddWithValue(":depTime", stopTime.depTime);

@@ -35,7 +35,7 @@ namespace Sujiro.WebAPI.Controllers
                 var tran = conn.BeginTransaction();
                 var command = conn.CreateCommand();
 
-                command.CommandText = @"SELECT * FROM trips where direct=:direct";
+                command.CommandText = $"SELECT * FROM {Trip.TABLE_NAME} where {nameof(Trip.direct)}=:direct";
                 command.Parameters.Add(new SqliteParameter(":direct", direct));
 
                 using (var reader = command.ExecuteReader())
@@ -47,7 +47,7 @@ namespace Sujiro.WebAPI.Controllers
                     }
                 }
                     var command2 = conn.CreateCommand();
-                    command2.CommandText = @"SELECT * FROM stop_time";
+                    command2.CommandText = $"SELECT * FROM {StopTime.TABLE_NAME}";
                     using (var reader2 = command2.ExecuteReader())
                     {
                         while (reader2.Read())
@@ -83,12 +83,12 @@ namespace Sujiro.WebAPI.Controllers
                 conn.Open();
                 var tran = conn.BeginTransaction();
                 var command = conn.CreateCommand();
-                command.CommandText = @"DELETE from trips where tripID=:tripID";
+                command.CommandText = $"DELETE from {Trip.TABLE_NAME} where {nameof(Trip.TripID)}=:tripID";
                 command.Parameters.Add(new SqliteParameter(":tripID", tripID));
                 command.ExecuteNonQuery();
 
                 command = conn.CreateCommand();
-                command.CommandText = @"DELETE from stop_time where tripID=:tripID";
+                command.CommandText = $"DELETE from {StopTime.TABLE_NAME} where {nameof(StopTime.tripID)}=:tripID";
                 command.Parameters.Add(new SqliteParameter(":tripID", tripID));
                 command.ExecuteNonQuery();
 

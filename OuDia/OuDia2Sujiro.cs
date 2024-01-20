@@ -86,7 +86,7 @@ namespace OuDia
                     stopTime.ariTime = train.times[i].AriTime;
                     stopTime.depTime = train.times[i].DepTime;
                     stopTime.stopType = train.times[i].StopType;
-                    routeContext.stop_time.Add(stopTime);
+                    routeContext.stop_times.Add(stopTime);
 
                 }
 
@@ -109,7 +109,7 @@ namespace OuDia
                     stopTime.ariTime = train.times[i].AriTime;
                     stopTime.depTime = train.times[i].DepTime;
                     stopTime.stopType = train.times[i].StopType;
-                    routeContext.stop_time.Add(stopTime);
+                    routeContext.stop_times.Add(stopTime);
 
                 }
 
@@ -123,7 +123,7 @@ namespace OuDia
     {
         public DbSet<Sujiro.Data.Station>? stations { get; set; }
         public DbSet<Sujiro.Data.Trip>? trips { get; set; }
-        public DbSet<Sujiro.Data.StopTime>? stop_time { get; set; }
+        public DbSet<Sujiro.Data.StopTime>? stop_times { get; set; }
         public DbSet<Sujiro.Data.TrainType>? trainTypes { get; set; }
 
         public string DbPath { get; }

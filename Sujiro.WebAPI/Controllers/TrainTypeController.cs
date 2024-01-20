@@ -33,7 +33,7 @@ namespace Sujiro.WebAPI.Controllers
                 var command = conn.CreateCommand();
 
                 command = conn.CreateCommand();
-                command.CommandText = @"SELECT * FROM traintypes";
+                command.CommandText = $"SELECT * FROM {TrainType.TABLE_NAME}";
 
                 using (var reader = command.ExecuteReader())
                 {

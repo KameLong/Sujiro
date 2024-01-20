@@ -1,9 +1,14 @@
 ﻿using Microsoft.Data.Sqlite;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Sujiro.Data
 {
+    [Table(TABLE_NAME)]
+
     public class StopTime
     {
+        public const string TABLE_NAME = "stop_times";
+
         public long? StopTimeID { get; set; }
         public long? tripID { get; set; } = -1;
         public long? stationID { get; set; } = -1;
@@ -17,7 +22,7 @@ namespace Sujiro.Data
         }
         public void Update(ref SqliteCommand command)
         {
-            command.CommandText = @"UPDATE stop_time SET tripID=$tripID,stationID=$stationID,ariTime=$ariTime,depTime=$depTime,stopType=$stopType WHERE stopTimeID=$stopTimeID";
+            command.CommandText = @"UPDATE stop_times SET tripID=$tripID,stationID=$stationID,ariTime=$ariTime,depTime=$depTime,stopType=$stopType WHERE stopTimeID=$stopTimeID";
             command.Parameters.AddWithValue("$stopTimeID", StopTimeID);
             command.Parameters.AddWithValue("$tripID", tripID);
             command.Parameters.AddWithValue("$stationID", stationID);

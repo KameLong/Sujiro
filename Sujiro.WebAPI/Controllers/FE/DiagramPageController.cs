@@ -56,7 +56,7 @@ namespace Sujiro.WebAPI.Controllers
                     conn.Open();
 
                     var command = conn.CreateCommand();
-                    command.CommandText = @"SELECT * FROM stations";
+                    command.CommandText = $"SELECT * FROM {Station.TABLE_NAME}";
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
@@ -67,7 +67,7 @@ namespace Sujiro.WebAPI.Controllers
                     
                     }
 
-                    command.CommandText = @"SELECT * FROM traintypes";
+                    command.CommandText = $"SELECT * FROM {TrainType.TABLE_NAME}";
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
@@ -77,13 +77,17 @@ namespace Sujiro.WebAPI.Controllers
                         }
                     }
 
-                    command.CommandText = @"SELECT * FROM stop_time inner join trips on stop_time.tripID=trips.tripID  order by stop_time.tripID,stop_time.stationID";
+                    command.CommandText = 
+                        $@"SELECT * FROM {StopTime.TABLE_NAME} 
+                            inner join {Trip.TABLE_NAME} on {StopTime.TABLE_NAME}.{nameof(StopTime.tripID)}={Trip.TABLE_NAME}.tripID
+                            order by {StopTime.TABLE_NAME}.{nameof(StopTime.tripID)},
+                            {StopTime.TABLE_NAME}.{nameof(StopTime.stationID)}";
                     using (var reader = command.ExecuteReader())
                     {
                         DiagramTrip trip = null;
                         while (reader.Read())
                         {
-                            if (trip == null || trip.TripID != (long)reader["tripID"])
+                            if (trip == null || trip.TripID != (long)reader[nameof(Trip.TripID)])
                             {
                                 trip = new DiagramTrip(reader);
                                 if (trip.direct == 0)
