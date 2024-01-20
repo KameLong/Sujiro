@@ -147,7 +147,6 @@ namespace Sujiro.WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex);
                 return StatusCode(500);
             }
         }

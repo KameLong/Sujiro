@@ -5,6 +5,7 @@ import * as PIXI from 'pixi.js'
 import {DisplayObject, ICanvas} from "pixi.js";
 import {DiagramData, DiagramStation, DiagramTrip} from "./DiagramData";
 import {TimeTableTrip} from "../TimeTable/TimeTableData";
+import {TimetableSelected} from "../TimeTable/TimeTablePage";
 const connection = new signalR.HubConnectionBuilder()
     .withUrl(`${process.env.REACT_APP_SERVER_URL}/chatHub`)
     .build();
@@ -158,6 +159,25 @@ function DiagramPage() {
                 return prev;
             });
 
+        });
+        connection.on("UpdateTrips", () => {
+            console.log("UpdateTrips");
+            fetch(`${process.env.REACT_APP_SERVER_URL}/api/DiagramPage/0`).then(res=>res.json())
+                .then((res:DiagramData)=>{
+                    setDownTrips(res.downTrips);
+                    setUpTrips(res.upTrips);
+                    setStations(res.stations);
+                })
+
+        });
+        connection.on("DeleteTrip", (tripID: number) => {
+            let selected:TimetableSelected|null={tripID:-1,stationID:0,viewID:0};
+            fetch(`${process.env.REACT_APP_SERVER_URL}/api/DiagramPage/0`).then(res=>res.json())
+                .then((res:DiagramData)=>{
+                    setDownTrips(res.downTrips);
+                    setUpTrips(res.upTrips);
+                    setStations(res.stations);
+                })
         });
 
 

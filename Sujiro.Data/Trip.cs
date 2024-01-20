@@ -17,7 +17,7 @@ namespace Sujiro.Data
         }
         public void Update(ref SqliteCommand command)
         {
-            command.CommandText = @"UPDATE trips SET direct=$direct,name=$name,number=$number,type=$type WHERE tripID=$tripID seq=$seq";
+            command.CommandText = @"UPDATE trips SET direct=$direct,name=$name,number=$number,type=$type,seq=$seq WHERE tripID=$tripID ";
             command.Parameters.AddWithValue("$tripID", TripID);
             command.Parameters.AddWithValue("$direct", direct);
             command.Parameters.AddWithValue("$name", Name);
