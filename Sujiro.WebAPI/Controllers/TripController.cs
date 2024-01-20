@@ -83,15 +83,18 @@ namespace Sujiro.WebAPI.Controllers
                 conn.Open();
                 var tran = conn.BeginTransaction();
                 var command = conn.CreateCommand();
-                command.CommandText = @"DELETE from trips where id=:id";
-                command.Parameters.Add(new SqliteParameter(":id", tripID));
-                int res=command.ExecuteNonQuery();
+                command.CommandText = @"DELETE from trips where tripID=:tripID";
+                command.Parameters.Add(new SqliteParameter(":tripID", tripID));
+                command.ExecuteNonQuery();
+
+                command = conn.CreateCommand();
+                command.CommandText = @"DELETE from stop_time where tripID=:tripID";
+                command.Parameters.Add(new SqliteParameter(":tripID", tripID));
+                command.ExecuteNonQuery();
+
+
                 tran.Commit();
 
-                if (res == 0)
-                {
-                    return NotFound();
-                }
                 await _hubContext.Clients.All.SendAsync("DeleteTrip", tripID);
                 return NoContent();
             }

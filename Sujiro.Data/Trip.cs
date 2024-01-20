@@ -27,7 +27,7 @@ namespace Sujiro.Data
         }
         public Trip(SqliteDataReader reader)
         {
-            TripID = (int)(long)reader["tripID"];
+            TripID = (long)reader["tripID"];
             if (reader["number"] != DBNull.Value)
             {
                 Number = (string)(reader["number"] ?? "");

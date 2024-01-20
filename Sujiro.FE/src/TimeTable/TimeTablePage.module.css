@@ -46,6 +46,7 @@
     width:0px;
     flex-grow: 1;
     overflow-x: scroll;
+    outline: none;
 
 }
 .trainListLayout::-webkit-scrollbar {

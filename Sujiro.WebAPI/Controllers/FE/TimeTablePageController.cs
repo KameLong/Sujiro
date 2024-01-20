@@ -16,7 +16,7 @@ namespace Sujiro.WebAPI.Controllers
         public class InsertTimetableTrip 
         {
             public TimetableTrip trip { get; set; } = new TimetableTrip();
-            public int insertSeq { get; set; } = -1;
+            public long insertTripID { get; set; } = -1;
 
         }
 
@@ -164,22 +164,32 @@ namespace Sujiro.WebAPI.Controllers
                     conn.Open();
                     var tran = conn.BeginTransaction();
                     var command = conn.CreateCommand();
+
+                    command.CommandText = @"select seq from trips WHERE direct=:direct and tripID=:tripID";
+                    command.Parameters.Add(new SqliteParameter(":direct", trip.direct));
+                    command.Parameters.Add(new SqliteParameter(":tripID", insert.insertTripID));
+                    int seq=(int)(long)command.ExecuteScalar();
+
+
+
+                    command = conn.CreateCommand();
                     command.CommandText = @"UPDATE trips SET seq=seq+1 WHERE direct=:direct and seq>=:seq";
                     command.Parameters.Add(new SqliteParameter(":direct", trip.direct));
-                    command.Parameters.Add(new SqliteParameter(":seq", insert.insertSeq));
+                    command.Parameters.Add(new SqliteParameter(":seq", seq));
                     command.ExecuteNonQuery();
 
                     command = conn.CreateCommand();
-                    command.CommandText = @"INSERT INTO trips (direct,name,number,type,seq) VALUES (:direct,:name,:number,:type,:seq)";
+                    command.CommandText = @"INSERT INTO trips (tripID,direct,name,number,type,seq) VALUES (:tripID,:direct,:name,:number,:type,:seq)";
+                    command.Parameters.Add(new SqliteParameter(":tripID", trip.TripID));
                     command.Parameters.Add(new SqliteParameter(":direct", trip.direct));
                     command.Parameters.Add(new SqliteParameter(":name", trip.Name));
                     command.Parameters.Add(new SqliteParameter(":number", trip.Number));
                     command.Parameters.Add(new SqliteParameter(":type", trip.Type));
-                    command.Parameters.Add(new SqliteParameter(":seq", insert.insertSeq));
+                    command.Parameters.Add(new SqliteParameter(":seq", seq));
                     command.ExecuteNonQuery();
-                    command=    conn.CreateCommand();
-                    command.CommandText = @"SELECT last_insert_rowid()";
-                    trip.TripID= (long)command.ExecuteScalar();
+//                    command=    conn.CreateCommand();
+//                    command.CommandText = @"SELECT last_insert_rowid()";
+//                    trip.TripID= (long)command.ExecuteScalar();
                     foreach (var stop in trip.stopTimes)
                     {
                         command=    conn.CreateCommand();

@@ -132,7 +132,7 @@ function TimeTablePage() {
     useEffect(() => {
         console.log(selected);
     }, [selected]);
-    const onRightKeyDown=(e:React.KeyboardEvent<HTMLDivElement>)=>{
+    const onRightKeyDown=(e:React.KeyboardEvent<HTMLDivElement>|undefined)=>{
         let open=false;
         setOpen(prev=>{
             open=prev;
@@ -158,7 +158,9 @@ function TimeTablePage() {
             }
             return prev;
         });
-        e.preventDefault();
+        if(e){
+            e.preventDefault();
+        }
 
     };
     const onLeftKeyDown=(e:React.KeyboardEvent<HTMLDivElement>)=>{
@@ -351,6 +353,40 @@ function TimeTablePage() {
                 })
 
         });
+        connection.on("DeleteTrip", (tripID: number) => {
+            let selected:TimetableSelected|null={tripID:-1,stationID:0,viewID:0};
+            setSelected(prev=>{
+                selected=prev;
+                return prev;
+            });
+
+            if(selected?.tripID ===tripID) {
+                console.log("DeleteTrip",tripID);
+                let trips: TimeTableTrip[] = [];
+                setTrips(prev => {
+                    trips = prev;
+                    return prev;
+                })
+                setSelected((prev) => {
+                    if (prev === null) {
+                        return null;
+                    }
+                    const tripIndex = trips.findIndex(item => item.tripID === prev.tripID);
+                    console.log(tripIndex)
+                    const newTrip = trips[tripIndex + 1];
+                    if (newTrip) {
+                        return {tripID: newTrip.tripID, stationID: prev.stationID, viewID: prev.viewID};
+                    }
+                    return prev;
+                });
+            }
+
+
+
+            setTrips(prev=> {
+                return prev.filter(item=>item.tripID!==tripID);
+            });
+        });
 
 
     },[])
@@ -381,127 +417,138 @@ function TimeTablePage() {
 
 
     return (
-        <div tabIndex={-1} className={style.timetableMain} onKeyDown={e=>{
-            switch (e.key) {
-                case "Enter":
-                    onEnterKeyDown(e);
-                    break;
-                case "ArrowDown":
-                    onDownKeyDown(e);
-                    break;
-                case "ArrowUp":
-                    onUpKeyDown(e);
-                    break;
-                case "ArrowRight":
-                    onRightKeyDown(e);
-                    break;
-                case "ArrowLeft":
-                    onLeftKeyDown(e);
-                    break;
-                case "L":
-                    if(e.ctrlKey){
-                        console.log(e);
-                        //以後の駅をすべて１分遅らせる
-                        const addSec=60;
-                        const trip=trips.find(item=>item.tripID===selected?.tripID);
-                        if(!trip)return;
-                        let flag=false;
-                        for(let i=0;i<trip.stopTimes.length;i++) {
-                            if(trip.stopTimes[i].stationID===selected?.stationID&&selected?.viewID===0){
-                                flag=true;
-                            }
-                            if(flag&&trip.stopTimes[i].ariTime>=0){
-                                trip.stopTimes[i].ariTime+=addSec;
-                            }
-                            if(trip.stopTimes[i].stationID===selected?.stationID&&selected?.viewID===2){
-                                flag=true;
-                            }
-                            if(flag&&trip.stopTimes[i].depTime>=0){
-                                trip.stopTimes[i].depTime+=addSec;
-                            }
-                        }
-                        console.log(trip);
-                        axios.put(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/trip`,trip);
-                        e.preventDefault();
-
-                    }
-                    break;
-                case "J":
-                    if(e.ctrlKey){
-                        console.log(e);
-                        const addSec=-60;
-                        const trip=trips.find(item=>item.tripID===selected?.tripID);
-                        if(!trip)return;
-                        let flag=false;
-                        for(let i=0;i<trip.stopTimes.length;i++) {
-                            if(trip.stopTimes[i].stationID===selected?.stationID&&selected?.viewID===0){
-                                flag=true;
-                            }
-                            if(flag&&trip.stopTimes[i].ariTime>=0){
-                                trip.stopTimes[i].ariTime+=addSec;
-                            }
-                            if(trip.stopTimes[i].stationID===selected?.stationID&&selected?.viewID===2){
-                                flag=true;
-                            }
-                            if(flag&&trip.stopTimes[i].depTime>=0){
-                                trip.stopTimes[i].depTime+=addSec;
-                            }
-                        }
-                        console.log(trip);
-                        axios.put(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/trip`,trip);
-                        e.preventDefault();
-                    }
-                    break;
-                case "c":
-                    if(e.ctrlKey){
-                        console.log(e);
-                        const trip=trips.find(item=>item.tripID===selected?.tripID);
-                        if(!trip)return;
-                        if (!navigator.clipboard) {
-                            alert("このブラウザは対応していません");
-                            return;
-                        }
-                        navigator.clipboard.writeText(JSON.stringify(trip)).then(
-                            () => {
-                            },
-                            () => {
-                                alert('コピーに失敗しました。');
-                            });
-                        e.preventDefault();
-                    }
-                    break;
-
-                default:
-                    break;
-            }
-        }}
-             onPaste={e=>{
-                 console.log(e);
-                 var clipboardData = e.clipboardData;
-
-                 if(clipboardData != null){
-
-                     var text = clipboardData.getData("text/plain");
-                     const trip:TimeTableTrip=JSON.parse(text);
-                     if(trip.tripID===undefined) {
-                         return;
-                     }
-                     const selectedTrip=trips.find(item=>item.tripID===selected?.tripID);
-                        if(!selectedTrip)return;
-
-                     axios.post(""+process.env.REACT_APP_SERVER_URL+"/api/timetablePage/insertTrip",
-                         {trip:trip,insertSeq:trips.indexOf(selectedTrip)}).then(res=>{
-                            console.log(res);
-                        });
-
-
-
-                     console.log(text);
-                 }
-             }}
+        <div className={style.timetableMain}
         >
             <StationView stations={stations} direct={Number(direct)}/>
-            <div className={style.trainListLayout}>
+            <div className={style.trainListLayout} tabIndex={-1}
+                 onKeyDown={e=>{
+                     switch (e.key) {
+                         case "Enter":
+                             onEnterKeyDown(e);
+                             break;
+                         case "ArrowDown":
+                             onDownKeyDown(e);
+                             break;
+                         case "ArrowUp":
+                             onUpKeyDown(e);
+                             break;
+                         case "ArrowRight":
+                             onRightKeyDown(e);
+                             break;
+                         case "ArrowLeft":
+                             onLeftKeyDown(e);
+                             break;
+                         case "L":
+                             if(e.ctrlKey){
+                                 console.log(e);
+                                 //以後の駅をすべて１分遅らせる
+                                 const addSec=60;
+                                 const trip=trips.find(item=>item.tripID===selected?.tripID);
+                                 if(!trip)return;
+                                 let flag=false;
+                                 for(let i=0;i<trip.stopTimes.length;i++) {
+                                     if(trip.stopTimes[i].stationID===selected?.stationID&&selected?.viewID===0){
+                                         flag=true;
+                                     }
+                                     if(flag&&trip.stopTimes[i].ariTime>=0){
+                                         trip.stopTimes[i].ariTime+=addSec;
+                                     }
+                                     if(trip.stopTimes[i].stationID===selected?.stationID&&selected?.viewID===2){
+                                         flag=true;
+                                     }
+                                     if(flag&&trip.stopTimes[i].depTime>=0){
+                                         trip.stopTimes[i].depTime+=addSec;
+                                     }
+                                 }
+                                 console.log(trip);
+                                 axios.put(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/trip`,trip);
+                                 e.preventDefault();
+
+                             }
+                             break;
+                         case "J":
+                             if(e.ctrlKey){
+                                 console.log(e);
+                                 const addSec=-60;
+                                 const trip=trips.find(item=>item.tripID===selected?.tripID);
+                                 if(!trip)return;
+                                 let flag=false;
+                                 for(let i=0;i<trip.stopTimes.length;i++) {
+                                     if(trip.stopTimes[i].stationID===selected?.stationID&&selected?.viewID===0){
+                                         flag=true;
+                                     }
+                                     if(flag&&trip.stopTimes[i].ariTime>=0){
+                                         trip.stopTimes[i].ariTime+=addSec;
+                                     }
+                                     if(trip.stopTimes[i].stationID===selected?.stationID&&selected?.viewID===2){
+                                         flag=true;
+                                     }
+                                     if(flag&&trip.stopTimes[i].depTime>=0){
+                                         trip.stopTimes[i].depTime+=addSec;
+                                     }
+                                 }
+                                 console.log(trip);
+                                 axios.put(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/trip`,trip);
+                                 e.preventDefault();
+                             }
+                             break;
+                         case "c":
+                             if(e.ctrlKey){
+                                 console.log(e);
+                                 const trip=trips.find(item=>item.tripID===selected?.tripID);
+                                 if(!trip)return;
+                                 if (!navigator.clipboard) {
+                                     alert("このブラウザは対応していません");
+                                     return;
+                                 }
+                                 navigator.clipboard.writeText(JSON.stringify(trip)).then(
+                                     () => {
+                                     },
+                                     () => {
+                                         alert('コピーに失敗しました。');
+                                     });
+                                 e.preventDefault();
+                             }
+                             break;
+                         case "Delete":
+                             if(selected?.tripID===undefined) {
+                                 return;
+                             }
+                             axios.delete(`${process.env.REACT_APP_SERVER_URL}/api/trip/${selected?.tripID}`);
+                             e.preventDefault();
+                             break;
+
+                         default:
+                             break;
+                     }
+                 }}
+                 onPaste={e=>{
+                     console.log(e);
+                     var clipboardData = e.clipboardData;
+
+                     if(clipboardData != null){
+
+                         var text = clipboardData.getData("text/plain");
+                         const trip:TimeTableTrip=JSON.parse(text);
+                         if(trip.tripID===undefined) {
+                             return;
+                         }
+                         trip.tripID=Math.floor(Math.random()*Number.MAX_SAFE_INTEGER);
+                         const selectedTrip=trips.find(item=>item.tripID===selected?.tripID);
+                         if(!selectedTrip)return;
+                         console.log({trip:trip,insertTripID:selected?.tripID});
+
+                         axios.post(""+process.env.REACT_APP_SERVER_URL+"/api/timetablePage/insertTrip",
+                             {trip:trip,insertTripID:selected?.tripID}).then(res=>{
+                             console.log(res);
+                         });
+
+
+
+                         console.log(text);
+                     }
+                 }}
+            >
                 <div className={style.trainListView}>
                     {trips.map((trip) => {
                         return (
