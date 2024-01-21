@@ -6,12 +6,10 @@ import TrainView from "./TrainView";
 import {Station, StopTime} from "../SujiroData/DiaData";
 import {TimeTableTrip} from "./TimeTableData";
 import {useParams} from "react-router-dom";
-import {useKey, useLongPress} from 'react-use';
 import {
     Button,
     Dialog,
     DialogTitle,
-    FormControlLabel,
     Input,
     List,
     ListItem,
@@ -33,106 +31,6 @@ connection.start().catch((err) => console.error(err));
 
 const MemoTrainView = memo(TrainView);
 
-export interface SimpleDialogProps {
-    open: boolean;
-    selectedValue: string;
-    onClose: (value: string) => void;
-    stopTime:StopTime|null;
-    focusIndex:number;
-}
-function SimpleDialog(props: SimpleDialogProps) {
-
-    const { onClose, selectedValue, open,stopTime,focusIndex } = props;
-
-
-    console.log(open);
-
-    const handleClose = () => {
-        const dep=timeS2int(depTime);
-        const ari=timeS2int(ariTime);
-        if(dep<-1||ari<-1) {
-            console.error("異常な値");
-            return;
-        }
-        console.log(dep,ari);
-        //stopTimeの更新
-        if(stopTime===null) {
-            return;
-        }
-        const newStopTime:StopTime={
-            stopTimeID:stopTime.stopTimeID,
-            stationID:stopTime.stationID,
-            tripID:stopTime.tripID,
-            stopType:stopTime.stopType,
-            depTime:dep,
-            ariTime:ari
-        };
-        console.log(newStopTime);
-        axios.put(`${process.env.REACT_APP_SERVER_URL}/api/stopTime`,newStopTime);
-
-
-
-
-        onClose(selectedValue);
-    };
-    const time2Str=(time:number|undefined)=>{
-        if(time===undefined){
-            return "";
-        }
-        if(time<0){
-            return "";
-        }
-        const ss=time%60;
-        time-=ss;
-        time/=60;
-        const mm=time%60;
-        time-=mm;
-        time/=60;
-        const hh=time%24;
-        return hh+mm.toString().padStart(2,"0");
-    }
-    const timeS2int=(time:string)=>{
-        if(time.length===0){
-            return -1;
-        }
-        if(time.length>4){
-            return -2;
-        }
-        time=time.padStart(4,"0");
-        const hh=Number(time.substr(0,2));
-        const mm=Number(time.substr(2,2));
-        return hh*3600+mm*60;
-    }
-    const [depTime,setDepTime]=useState(time2Str(stopTime?.depTime));
-    const [ariTime,setAriTime]=useState(time2Str(stopTime?.ariTime));
-    useEffect(()=>{
-        setDepTime(time2Str(stopTime?.depTime));
-        setAriTime(time2Str(stopTime?.ariTime));
-    },[stopTime])
-
-
-
-    return (
-        <Dialog  onClose={handleClose} open={open}>
-            <div style={{margin:'20px'}} onKeyDown={e=>{if(open&&e.key==="Enter"){console.log(e);handleClose();e.preventDefault()}}}>
-                <DialogTitle>駅時刻編集</DialogTitle>
-            <List sx={{ pt: 0 }} >
-                <ListItem >
-                    着時刻
-                    <Input type={"number"} style={{marginLeft:'20px',width:'4em'}} autoFocus={focusIndex===0} value={ariTime} onChange={e=>setAriTime(e.target.value)}/>
-                </ListItem>
-                <ListItem >
-                    発時刻
-                    <Input type={"number"} style={{marginLeft:'20px',width:'4em'}}  autoFocus={focusIndex===2} value={depTime} onChange={e=>setDepTime(e.target.value)}/>
-                </ListItem>
-            </List>
-            <Button onClick={()=> {
-                handleClose();
-            }}>OK</Button>
-        </div>
-        </Dialog>
-    );
-}
 
 function TimeTablePage() {
     const [stations, setStations] = useState<Station[]>([]);
@@ -142,9 +40,7 @@ function TimeTablePage() {
 
 
     const [selected, setSelected] = useState<TimetableSelected | null>(null);
-    useEffect(() => {
-        console.log(selected);
-    }, [selected]);
+
     const onRightKeyDown = (e: React.KeyboardEvent<HTMLDivElement> | undefined) => {
         let open = false;
         setOpen(prev => {
@@ -309,7 +205,6 @@ function TimeTablePage() {
                 setStations(res.stations);
             })
         connection.on("UpdateStoptime", (stoptime: StopTime) => {
-            console.log("UpdateStoptime", stoptime);
             setTrips(prev => {
                 const tripIndex = prev.findIndex(item => item.tripID === stoptime.tripID);
                 if (tripIndex < 0) {
@@ -491,7 +386,6 @@ function TimeTablePage() {
                                  break;
                              case "L":
                                  if (e.ctrlKey) {
-                                     console.log(e);
                                      //以後の駅をすべて１分遅らせる
                                      const addSec = 60;
                                      const trip = trips.find(item => item.tripID === selected?.tripID);
@@ -511,7 +405,6 @@ function TimeTablePage() {
                                              trip.stopTimes[i].depTime += addSec;
                                          }
                                      }
-                                     console.log(trip);
                                      axios.put(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/trip`, trip);
                                      e.preventDefault();
 
@@ -519,7 +412,6 @@ function TimeTablePage() {
                                  break;
                              case "J":
                                  if (e.ctrlKey) {
-                                     console.log(e);
                                      const addSec = -60;
                                      const trip = trips.find(item => item.tripID === selected?.tripID);
                                      if (!trip) return;
@@ -538,7 +430,6 @@ function TimeTablePage() {
                                              trip.stopTimes[i].depTime += addSec;
                                          }
                                      }
-                                     console.log(trip);
                                      axios.put(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/trip`, trip);
                                      e.preventDefault();
                                  }
@@ -586,18 +477,26 @@ function TimeTablePage() {
                         })}
                     </div>
                 </div>
-                <SimpleDialog
-                    selectedValue={selectedValue}
-                    open={open}
-                    onClose={handleClose}
-                    stopTime={selected ? trips.find(item => item.tripID === selected.tripID)?.stopTimes.find(item => item.stationID === selected.stationID)! : null}
-                    focusIndex={selected?.viewID || 0}
-                />
+                <Dialog  open={open}   sx={{
+                    '.MuiPaper-root': {
+                        padding: 5,
+                    },
+                }}>
+                    <TimeEditView close={()=>handleClose("")} focusIndex={selected?.viewID} stopTime={selected ? trips.find(item => item.tripID === selected.tripID)?.stopTimes.find(item => item.stationID === selected.stationID)! : null}/>
+                    {/*<TimeEditView2*/}
+                    {/*    selectedValue={selectedValue}*/}
+                    {/*    open={open}*/}
+                    {/*    onClose={handleClose}*/}
+                    {/*    stopTime={selected ? trips.find(item => item.tripID === selected.tripID)?.stopTimes.find(item => item.stationID === selected.stationID)! : null}*/}
+                    {/*    focusIndex={selected?.viewID || 0}*/}
+                    {/*/>*/}
+                </Dialog>
+
 
             </div>
             {
                 ((selected!==null) ?
-                    <TimeEditView  stopTime={selected ? trips.find(item => item.tripID === selected.tripID)?.stopTimes.find(item => item.stationID === selected.stationID)! : null}
+                    <TimeEditView close={undefined} focusIndex={undefined} stopTime={selected ? trips.find(item => item.tripID === selected.tripID)?.stopTimes.find(item => item.stationID === selected.stationID)! : null}
                     /> : null)
             }
             <Dialog  onClose={handleClose2} open={openEditTrain}>

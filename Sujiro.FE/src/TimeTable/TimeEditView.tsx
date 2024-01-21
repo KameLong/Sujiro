@@ -1,54 +1,55 @@
-import {FormControlLabel, Radio, RadioGroup, TextField} from "@mui/material";
-import React from "react";
+import {Button, FormControlLabel, Radio, RadioGroup, TextField} from "@mui/material";
+import React, {useEffect, useRef, useState} from "react";
 import {StopTime} from "../SujiroData/DiaData";
 import axios from "axios";
+import {time2Str, timeS2int} from "./TimeTableData";
 
 
 interface TimeEditViewProps {
     stopTime:StopTime|null;
+    focusIndex:number|undefined;
+    close:(()=>void)|undefined;
 
 }
 
-const time2Str=(time:number|undefined)=>{
-    if(time===undefined){
-        return "";
-    }
-    if(time<0){
-        return "";
-    }
-    const ss=time%60;
-    time-=ss;
-    time/=60;
-    const mm=time%60;
-    time-=mm;
-    time/=60;
-    const hh=time%24;
-    return hh+mm.toString().padStart(2,"0");
-}
-const timeS2int=(time:string)=>{
-    if(time.length===0){
-        return -1;
-    }
-    if(time.length>4){
-        return -2;
-    }
-    time=time.padStart(4,"0");
-    const hh=Number(time.substr(0,2));
-    const mm=Number(time.substr(2,2));
-    return hh*3600+mm*60;
+export function useSSS(stopTime:StopTime|null) {
+    const [depTime,setDepTime]=useState(time2Str(stopTime?.depTime));
+    const [ariTime,setAriTime]=useState(time2Str(stopTime?.ariTime));
+    useEffect(() => {
+
+    }, []);
 }
 
-export function TimeEditView({stopTime}:TimeEditViewProps){
-    console.log(stopTime);
-    const [depTime,setDepTime]=React.useState(time2Str(stopTime?.depTime));
-    const [ariTime,setAriTime]=React.useState(time2Str(stopTime?.ariTime));
+
+
+
+export function TimeEditView({stopTime,focusIndex,close}:TimeEditViewProps){
+    const [depTime,setDepTime]=useState(time2Str(stopTime?.depTime));
+    const [ariTime,setAriTime]=useState(time2Str(stopTime?.ariTime));
+    const ariInput=useRef<HTMLInputElement>(null);
+    const depInput=useRef<HTMLInputElement>(null);
+
     React.useEffect(()=>{
+        console.log("useEffect");
         if(stopTime===null||stopTime===undefined){
             return;
         }
         setDepTime(time2Str(stopTime.depTime));
         setAriTime(time2Str(stopTime.ariTime));
     },[stopTime]);
+    const updateStopTime=()=>{
+        const newStopTime={...stopTime};
+        newStopTime.ariTime=timeS2int(ariTime);
+        newStopTime.depTime=timeS2int(depTime);
+        console.log(newStopTime);
+        if(JSON.stringify(newStopTime)!==JSON.stringify(stopTime)){
+            axios.put(`${process.env.REACT_APP_SERVER_URL}/api/stopTime`,newStopTime);
+
+        }
+    }
+
+
+
 
 
     if(stopTime===null){
@@ -61,7 +62,6 @@ export function TimeEditView({stopTime}:TimeEditViewProps){
                 <div style={{display: "flex", height: '100%'}}>
                     <div style={{width: "150px", backgroundColor: '#FFF', height: '100%'}}>
                         <RadioGroup aria-label="gender" name="gender1" value={stopTime?.stopType} onChange={e=>{
-                            console.log(e.target.value);
                             const newStopTime={...stopTime};
                             newStopTime.stopType=parseInt(e.target.value);
                             axios.put(`${process.env.REACT_APP_SERVER_URL}/api/stopTime`,newStopTime);
@@ -73,23 +73,37 @@ export function TimeEditView({stopTime}:TimeEditViewProps){
                         </RadioGroup>
 
                     </div>
-                    <div style={{marginLeft: '10px'}}>
-                        <TextField id="outlined-basic" label="着時刻" variant="standard" type={"number"} value={ariTime} onChange={e=>{  setAriTime(e.target.value);}}
-                                   onBlur={e=>{
-                                        const newStopTime={...stopTime};
-                                        newStopTime.ariTime=timeS2int(ariTime);
-                                        axios.put(`${process.env.REACT_APP_SERVER_URL}/api/stopTime`,newStopTime);
+                    <div style={{marginLeft: '10px'}} onKeyDown={e=>{
+                        if(e.key==="Enter"){
+                            console.log(e);
+                            updateStopTime();
+                            if(close!==undefined){
+                                close();
+                            }
+                            e.preventDefault();
+                        }}}>
+                        <TextField  id="outlined-basic" label="着時刻" variant="standard" type={"number"} value={ariTime}
+                                   ref={ariInput}
+                                   autoFocus={focusIndex===0}
+                                   onChange={e=>{
+                                       setAriTime(e.target.value);
                                    }}
-                                   style={{width: '120px', margin: '10px', overflow: "auto"}}
+                                   style={{display:"block",width: '120px', margin: '10px', overflow: "auto"}}
 
                         />
-                        <TextField id="outlined-basic" label="発時刻" variant="standard" type={"number"} value={depTime} onChange={e=>{  setDepTime(e.target.value);}}
-                                   onBlur={e=>{
-                                       const newStopTime={...stopTime};
-                                       newStopTime.depTime=timeS2int(depTime);
-                                       axios.put(`${process.env.REACT_APP_SERVER_URL}/api/stopTime`,newStopTime);
-                                   }}
-                                   style={{width: '120px', margin: '10px', overflow: "auto"}}/>
+                        <TextField id="outlined-basic" label="発時刻" variant="standard" type={"number"} value={depTime}
+                                   ref={depInput}
+                                   autoFocus={focusIndex===2}
+                                   onChange={e=>{  setDepTime(e.target.value);}}
+                                   style={{display:"block",width: '120px', margin: '10px', overflow: "auto"}}/>
+
+                        <Button onClick={e=>{
+                            updateStopTime();
+                            if(close!==undefined){
+                                close();
+                            }
+                        }}>OK</Button>
+
                     </div>
 
 

@@ -104,7 +104,7 @@ function App() {
                   ml: { sm: `${drawerWidth}px` },
               }}
           >
-              <Toolbar>
+              <Toolbar variant="dense" >
                   <IconButton
                       color="inherit"
                       aria-label="open drawer"
@@ -156,7 +156,7 @@ function App() {
               component="main"
               sx={{display:'flex',flexDirection:'column', flexGrow: 1,  width: { sm: `calc(100% - ${drawerWidth}px)` } ,height:'100%'}}
           >
-              <Toolbar />
+              <Toolbar variant="dense" />
                    <Routes >
                        <Route path="/" element={<DiagramPage/>}></Route>
                        <Route path="/Diagram" element={<DiagramPage/>}></Route>

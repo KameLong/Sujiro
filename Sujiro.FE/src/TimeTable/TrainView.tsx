@@ -3,7 +3,7 @@ import style from "./TimeTablePage.module.css";
 import {Station, StopTime} from "../SujiroData/DiaData";
 import {Button, Checkbox, Dialog, DialogTitle, List, ListItem, ListItemButton} from "@mui/material";
 import axios from "axios";
-import {TimeTableTrip} from "./TimeTableData";
+import {time2Str, TimeTableTrip} from "./TimeTableData";
 import {TimetableSelected} from "./TimeTablePage";
 interface TrainViewProps {
     trip:TimeTableTrip;
@@ -49,14 +49,8 @@ function TrainView({trip,stations,direct,selected,setSelected,onDoubleClick}:Tra
         if(stopTime.depTime>=0){
             time=stopTime.depTime;
         }
-        const ss=time%60;
-        time-=ss;
-        time/=60;
-        const mm=time%60;
-        time-=mm;
-        time/=60;
-        const hh=time%24;
-        return hh+mm.toString().padStart(2,"0");
+        return time2Str(time);
+
     }
     const getAriTimeStr=(station:Station,stopTime:StopTime)=>{
         if(stopTime.stopType===0){
@@ -72,14 +66,7 @@ function TrainView({trip,stations,direct,selected,setSelected,onDoubleClick}:Tra
         if(stopTime.ariTime>=0){
             time=stopTime.ariTime;
         }
-        const ss=time%60;
-        time-=ss;
-        time/=60;
-        const mm=time%60;
-        time-=mm;
-        time/=60;
-        const hh=time%24;
-        return hh+mm.toString().padStart(2,"0");
+        return time2Str(time);
     }
 
 
