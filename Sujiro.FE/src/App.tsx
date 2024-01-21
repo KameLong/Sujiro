@@ -154,7 +154,7 @@ function App() {
           </Box>
           <Box
               component="main"
-              sx={{ flexGrow: 1,  width: { sm: `calc(100% - ${drawerWidth}px)` } ,height:'100%'}}
+              sx={{display:'flex',flexDirection:'column', flexGrow: 1,  width: { sm: `calc(100% - ${drawerWidth}px)` } ,height:'100%'}}
           >
               <Toolbar />
                    <Routes >

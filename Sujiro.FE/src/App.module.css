@@ -21,11 +21,5 @@
 }
 
 @media screen and (max-width: 700px) {
-  .app {
-      display: block;
-  }
-    .main{
-        width:100%;
-    }
 
 }

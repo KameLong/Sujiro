@@ -11,8 +11,9 @@ interface TrainViewProps {
     direct:number;
     selected:TimetableSelected|null;
     setSelected:Dispatch<SetStateAction<TimetableSelected | null>>;
+    onDoubleClick:()=>void;
 }
-function TrainView({trip,stations,direct,selected,setSelected}:TrainViewProps) {
+function TrainView({trip,stations,direct,selected,setSelected,onDoubleClick}:TrainViewProps) {
     const [open, setOpen] = React.useState(false);
     const showStations=(direct===0)?stations: [...stations].reverse();
 
@@ -129,7 +130,13 @@ function TrainView({trip,stations,direct,selected,setSelected}:TrainViewProps) {
                                         stationID:station.stationID,
                                         viewID:0
                                     });
-                                }}>
+                                }}
+                                 onDoubleClick={(e)=>{
+                                        console.log("double click");
+                                     onDoubleClick();
+
+                                     e.preventDefault();
+                                 }}>
                                 {getAriTimeStr(station, getStopTime(station.stationID))}
                             </div>:null
                         }
@@ -148,7 +155,13 @@ function TrainView({trip,stations,direct,selected,setSelected}:TrainViewProps) {
                                              stationID:station.stationID,
                                              viewID:2
                                          });
+                                     }}
+                                     onDoubleClick={(e)=>{
+                                         console.log("double click");
+                                         onDoubleClick();
+                                         e.preventDefault();
                                      }}>
+
                                     {getDepTimeStr(station, getStopTime(station.stationID))}
                                 </div>:null
                         }
