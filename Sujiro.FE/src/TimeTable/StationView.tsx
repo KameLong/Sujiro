@@ -15,8 +15,6 @@ function StationView({stations,direct}:StationViewProps){
                 <input className={style.checkbox} type={"checkbox"} style={{visibility: "hidden"}}/>
             </div>
             <div style={{borderBottom: "2px solid #000"}}></div>
-
-
             <div className={style.timeView}>
                 列車番号
             </div>

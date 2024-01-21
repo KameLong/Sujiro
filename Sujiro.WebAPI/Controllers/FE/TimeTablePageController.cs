@@ -185,9 +185,6 @@ namespace Sujiro.WebAPI.Controllers
                     command.Parameters.Add(new SqliteParameter(":type", trip.Type));
                     command.Parameters.Add(new SqliteParameter(":seq", seq));
                     command.ExecuteNonQuery();
-//                    command=    conn.CreateCommand();
-//                    command.CommandText = @"SELECT last_insert_rowid()";
-//                    trip.TripID= (long)command.ExecuteScalar();
                     foreach (var stop in trip.stopTimes)
                     {
                         command=    conn.CreateCommand();

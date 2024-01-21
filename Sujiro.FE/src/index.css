@@ -1,11 +1,11 @@
 @font-face {
   font-family: 'Noto Sans JP';   /* フォント名 */
-  src: url('../public/NotoSansJP.ttf') format('truetype');   /* フォントファイル */
+  src: url('../public/font/NotoSansJP.ttf') format('truetype');   /* フォントファイル */
 }
 
 @font-face {
   font-family: 'DiaPro';   /* フォント名 */
-  src: url('../public/DiaPro-Regular.ttf') format('truetype');   /* フォントファイル */
+  src: url('../public/font/DiaPro-Regular.ttf') format('truetype');   /* フォントファイル */
 }
 
 body {

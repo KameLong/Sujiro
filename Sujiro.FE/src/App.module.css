@@ -1,6 +1,31 @@
 
-#app{
-display: flex;
-flexDirection: row;
-height: 100%;
+.app{
+    display: flex;
+    flexDirection: row;
+    height: 100%;
+}
+.nav{
+    width: 250px;
+    height: 100%;
+    overflow: auto;
+    border-right:1px solid #000;
+}
+.main{
+    width:0px;
+    flex-grow:1;
+}
+.AppTile{
+    width:100%;
+    background-color: #ffe;
+    height:40px;
+}
+
+@media screen and (max-width: 700px) {
+  .app {
+      display: block;
+  }
+    .main{
+        width:100%;
+    }
+
 }
