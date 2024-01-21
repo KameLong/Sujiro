@@ -1,0 +1,6 @@
+
+#app{
+display: flex;
+flexDirection: row;
+height: 100%;
+}
