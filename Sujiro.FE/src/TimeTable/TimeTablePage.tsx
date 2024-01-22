@@ -9,53 +9,35 @@ import {useParams} from "react-router-dom";
 import {
     Button,
     Dialog,
-    DialogTitle,
-    Input,
     List,
     ListItem,
-    ListItemButton,
-    Menu,
-    MenuItem,
-    Radio,
-    RadioGroup,
-    TextField
 } from '@mui/material';
 import axios from "axios";
 import {TimeEditView} from "./TimeEditView";
-
-const connection = new signalR.HubConnectionBuilder()
-    .withUrl(`${process.env.REACT_APP_SERVER_URL}/chatHub`)
-    .build();
-connection.start().catch((err) => console.error(err));
-
-
 const MemoTrainView = memo(TrainView);
 
-
 function TimeTablePage() {
+    const {direct} = useParams<{ direct: string }>();
+
     const [stations, setStations] = useState<Station[]>([]);
     const [trips, setTrips] = useState<TimeTableTrip[]>([]);
-    const {direct} = useParams<{ direct: string }>();
+    const [connection,setConnection]=useState<signalR.HubConnection>(()=>{
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl(`${process.env.REACT_APP_SERVER_URL}/chatHub`)
+            .build();
+        connection.start().catch((err) => console.error(err));
+        return connection;
+    });
 
 
 
     const [selected, setSelected] = useState<TimetableSelected | null>(null);
 
     const onRightKeyDown = (e: React.KeyboardEvent<HTMLDivElement> | undefined) => {
-        let open = false;
-        setOpen(prev => {
-            open = prev;
-            return prev;
-        })
         if (open) {
             return;
         }
-
-        let trips: TimeTableTrip[] = [];
-        setTrips(prev => {
-            trips = prev;
-            return prev;
-        })
+        console.log(trips);
         setSelected((prev) => {
             if (prev === null) {
                 return null;
@@ -73,20 +55,9 @@ function TimeTablePage() {
 
     };
     const onLeftKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-        let open = false;
-        setOpen(prev => {
-            open = prev;
-            return prev;
-        })
         if (open) {
             return;
         }
-
-        let trips: TimeTableTrip[] = [];
-        setTrips(prev => {
-            trips = prev;
-            return prev;
-        })
         setSelected((prev) => {
             if (prev === null) {
                 return null;
@@ -101,20 +72,20 @@ function TimeTablePage() {
         e.preventDefault();
     };
     const onUpKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-        let open = false;
-        setOpen(prev => {
-            open = prev;
-            return prev;
-        })
+        // let open = false;
+        // setOpen(prev => {
+        //     open = prev;
+        //     return prev;
+        // })
         if (open) {
             return;
         }
 
-        let stations: Station[] = [];
-        setStations(prev => {
-            stations = prev;
-            return prev;
-        })
+        // let stations: Station[] = [];
+        // setStations(prev => {
+        //     stations = prev;
+        //     return prev;
+        // })
         setSelected((prev) => {
             console.log("s", prev);
             if (prev === null) {
@@ -123,7 +94,7 @@ function TimeTablePage() {
             let stationIndex = stations.findIndex(item => item.stationID === prev.stationID);
             let viewID = prev.viewID;
             while (true) {
-                if (viewID == 0) {
+                if (viewID === 0) {
                     stationIndex--;
                     viewID = 3;
                 }
@@ -144,25 +115,24 @@ function TimeTablePage() {
                         break;
                 }
             }
-            return prev;
         });
         e.preventDefault();
     };
     const onDownKeyDown = (e: React.KeyboardEvent<HTMLDivElement> | undefined) => {
 
-        let open = false;
-        setOpen(prev => {
-            open = prev;
-            return prev;
-        })
+        // let open = false;
+        // setOpen(prev => {
+        //     open = prev;
+        //     return prev;
+        // })
         if (open) {
             return;
         }
-        let stations: Station[] = [];
-        setStations(prev => {
-            stations = prev;
-            return prev;
-        })
+        // let stations: Station[] = [];
+        // setStations(prev => {
+        //     stations = prev;
+        //     return prev;
+        // })
         setSelected((prev) => {
             if (prev === null) {
                 return null;
@@ -171,7 +141,7 @@ function TimeTablePage() {
             let viewID = prev.viewID;
             while (true) {
                 viewID++;
-                if (viewID == 3) {
+                if (viewID === 3) {
                     stationIndex++;
                     viewID = 0;
                 }
@@ -191,7 +161,6 @@ function TimeTablePage() {
                         break;
                 }
             }
-            return prev;
         });
         e?.preventDefault();
     };
@@ -204,90 +173,97 @@ function TimeTablePage() {
                 setTrips(res.trips);
                 setStations(res.stations);
             })
-        connection.on("UpdateStoptime", (stoptime: StopTime) => {
-            setTrips(prev => {
-                const tripIndex = prev.findIndex(item => item.tripID === stoptime.tripID);
-                if (tripIndex < 0) {
-                    console.error("tripIndex<0");
-                    return prev;
-                }
-                const stopTimeIndex = prev[tripIndex].stopTimes.findIndex(item => item.stopTimeID === stoptime.stopTimeID);
-                if (stopTimeIndex < 0) {
-                    console.error("stopTimeIndex<0");
-                    return prev;
-                }
-                const next = [...prev];
-                next[tripIndex] = {...next[tripIndex]};
-                next[tripIndex].stopTimes = [...next[tripIndex].stopTimes];
-                next[tripIndex].stopTimes[stopTimeIndex] = stoptime;
-
-                return next;
-            });
-        });
-        connection.on("UpdateTripStopTime", (trip: TimeTableTrip) => {
-            console.log("UpdateTripStopTime", trip.stopTimes[0].depTime);
-            setTrips(prev => {
-                const tripIndex = prev.findIndex(item => item.tripID === trip.tripID);
-                if (tripIndex < 0) {
-                    console.error("tripIndex<0");
-                    return prev;
-                }
-                const next = [...prev];
-                next[tripIndex] = Object.assign({...next[tripIndex]}, trip);
-                console.log(next[tripIndex].stopTimes[0].depTime);
-                return next;
-            });
-
-        });
-        connection.on("UpdateTrips", () => {
-            console.log("UpdateTrips");
-            fetch(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/0/${direct}`).then(res => res.json())
-                .then((res) => {
-                    setTrips(res.trips);
-                    setStations(res.stations);
-                })
-
-        });
-        connection.on("DeleteTrip", (tripID: number) => {
-            let selected: TimetableSelected | null = {tripID: -1, stationID: 0, viewID: 0};
-            setSelected(prev => {
-                selected = prev;
-                return prev;
-            });
-
-            if (selected?.tripID === tripID) {
-                console.log("DeleteTrip", tripID);
-                let trips: TimeTableTrip[] = [];
-                setTrips(prev => {
-                    trips = prev;
-                    return prev;
-                })
-                setSelected((prev) => {
-                    if (prev === null) {
-                        return null;
-                    }
-                    const tripIndex = trips.findIndex(item => item.tripID === prev.tripID);
-                    console.log(tripIndex)
-                    const newTrip = trips[tripIndex + 1];
-                    if (newTrip) {
-                        return {tripID: newTrip.tripID, stationID: prev.stationID, viewID: prev.viewID};
-                    }
-                    return prev;
-                });
-            }
-
-
-            setTrips(prev => {
-                return prev.filter(item => item.tripID !== tripID);
-            });
-        });
-
 
     }, [])
 
+    connection.off("UpdateStoptime");
+    connection.on("UpdateStoptime", (stoptime: StopTime) => {
+        setTrips(prev => {
+            const tripIndex = prev.findIndex(item => item.tripID === stoptime.tripID);
+            if (tripIndex < 0) {
+                console.error("tripIndex<0");
+                return prev;
+            }
+            const stopTimeIndex = prev[tripIndex].stopTimes.findIndex(item => item.stopTimeID === stoptime.stopTimeID);
+            if (stopTimeIndex < 0) {
+                console.error("stopTimeIndex<0");
+                return prev;
+            }
+            const next = [...prev];
+            next[tripIndex] = {...next[tripIndex]};
+            next[tripIndex].stopTimes = [...next[tripIndex].stopTimes];
+            next[tripIndex].stopTimes[stopTimeIndex] = stoptime;
+
+            return next;
+        });
+    });
+    connection.off("UpdateTripStopTime");
+
+    connection.on("UpdateTripStopTime", (trip: TimeTableTrip) => {
+        console.log("UpdateTripStopTime", trip.stopTimes[0].depTime);
+        setTrips(prev => {
+            const tripIndex = prev.findIndex(item => item.tripID === trip.tripID);
+            if (tripIndex < 0) {
+                console.error("tripIndex<0");
+                return prev;
+            }
+            const next = [...prev];
+            next[tripIndex] = Object.assign({...next[tripIndex]}, trip);
+            console.log(next[tripIndex].stopTimes[0].depTime);
+            return next;
+        });
+
+    });
+    connection.off("UpdateTrips");
+    connection.on("UpdateTrips", () => {
+        console.log("UpdateTrips");
+        fetch(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/0/${direct}`).then(res => res.json())
+            .then((res) => {
+                setTrips(res.trips);
+                setStations(res.stations);
+            })
+
+    });
+    connection.off("DeleteTrip");
+
+    connection.on("DeleteTrip", (tripID: number) => {
+        // let selected: TimetableSelected | null = {tripID: -1, stationID: 0, viewID: 0};
+        // setSelected(prev => {
+        //     selected = prev;
+        //     return prev;
+        // });
+        console.log(tripID,selected?.tripID);
+
+        if (selected?.tripID === tripID) {
+            console.log("DeleteTrip", tripID);
+            // let trips: TimeTableTrip[] = [];
+            // setTrips(prev => {
+            //     trips = prev;
+            //     return prev;
+            // })
+            setSelected((prev) => {
+                if (prev === null) {
+                    return null;
+                }
+                const tripIndex = trips.findIndex(item => item.tripID === prev.tripID);
+                console.log(tripIndex)
+                const newTrip = trips[tripIndex + 1];
+                if (newTrip) {
+                    return {tripID: newTrip.tripID, stationID: prev.stationID, viewID: prev.viewID};
+                }
+                return prev;
+            });
+        }
+
+
+        setTrips(prev => {
+            return prev.filter(item => item.tripID !== tripID);
+        });
+    });
+
+
 
     const [open, setOpen] = React.useState(false);
-    const [selectedValue, setSelectedValue] = React.useState("");
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -308,20 +284,15 @@ function TimeTablePage() {
         }
     }
 
-    // const onLongPress = () => {
-    //     console.log("test");
-    //     setOpenEditTrain(true);
-    // };
-    const [onDoubleClick,setOnDoubleClick]=useState(()=>()=>{
+    // const [onDoubleClick,setOnDoubleClick]=useState(()=>()=>{
+    // });
+
+    const onDoubleClick=()=>{
         setOpenEditTrain(true);
-    });
+
+    }
 
 
-    const defaultOptions = {
-        isPreventDefault: false,
-        delay: 300,
-    };
-    // const longPressEvent = useLongPress(onLongPress, defaultOptions);
 
     const [openEditTrain, setOpenEditTrain] = React.useState(false);
 
@@ -483,16 +454,7 @@ function TimeTablePage() {
                     },
                 }}>
                     <TimeEditView close={()=>handleClose("")} focusIndex={selected?.viewID} stopTime={selected ? trips.find(item => item.tripID === selected.tripID)?.stopTimes.find(item => item.stationID === selected.stationID)! : null}/>
-                    {/*<TimeEditView2*/}
-                    {/*    selectedValue={selectedValue}*/}
-                    {/*    open={open}*/}
-                    {/*    onClose={handleClose}*/}
-                    {/*    stopTime={selected ? trips.find(item => item.tripID === selected.tripID)?.stopTimes.find(item => item.stationID === selected.stationID)! : null}*/}
-                    {/*    focusIndex={selected?.viewID || 0}*/}
-                    {/*/>*/}
                 </Dialog>
-
-
             </div>
             {
                 ((selected!==null) ?
