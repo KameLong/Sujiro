@@ -41,7 +41,7 @@ app.UseAuthorization();
 
 
 app.MapControllers();
-app.MapHub<ChatHub>("/chatHub");
+app.MapHub<ChatHub>("/ws/chatHub");
 
 //https://learn.microsoft.com/en-gb/aspnet/core/tutorials/web-api-javascript?view=aspnetcore-8.0&viewFallbackFrom=aspnetcore-3.0
 //react‚ðwwwroot‚Ö

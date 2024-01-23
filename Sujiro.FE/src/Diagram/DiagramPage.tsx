@@ -7,7 +7,7 @@ import {DiagramData, DiagramStation, DiagramTrip} from "./DiagramData";
 import {TimeTableTrip} from "../TimeTable/TimeTableData";
 import {TimetableSelected} from "../TimeTable/TimeTablePage";
 const connection = new signalR.HubConnectionBuilder()
-    .withUrl(`${process.env.REACT_APP_SERVER_URL}/chatHub`)
+    .withUrl(`${process.env.REACT_APP_SERVER_URL}/ws/chatHub`)
     .build();
 connection.start().catch((err) => console.error(err));
 

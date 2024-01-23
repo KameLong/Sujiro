@@ -23,7 +23,7 @@ function TimeTablePage() {
     const [trips, setTrips] = useState<TimeTableTrip[]>([]);
     const [connection,setConnection]=useState<signalR.HubConnection>(()=>{
         const connection = new signalR.HubConnectionBuilder()
-            .withUrl(`${process.env.REACT_APP_SERVER_URL}/chatHub`)
+            .withUrl(`${process.env.REACT_APP_SERVER_URL}/ws/chatHub`)
             .build();
         connection.start().catch((err) => console.error(err));
         return connection;
@@ -72,20 +72,9 @@ function TimeTablePage() {
         e.preventDefault();
     };
     const onUpKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-        // let open = false;
-        // setOpen(prev => {
-        //     open = prev;
-        //     return prev;
-        // })
         if (open) {
             return;
         }
-
-        // let stations: Station[] = [];
-        // setStations(prev => {
-        //     stations = prev;
-        //     return prev;
-        // })
         setSelected((prev) => {
             console.log("s", prev);
             if (prev === null) {
@@ -119,20 +108,9 @@ function TimeTablePage() {
         e.preventDefault();
     };
     const onDownKeyDown = (e: React.KeyboardEvent<HTMLDivElement> | undefined) => {
-
-        // let open = false;
-        // setOpen(prev => {
-        //     open = prev;
-        //     return prev;
-        // })
         if (open) {
             return;
         }
-        // let stations: Station[] = [];
-        // setStations(prev => {
-        //     stations = prev;
-        //     return prev;
-        // })
         setSelected((prev) => {
             if (prev === null) {
                 return null;
@@ -216,7 +194,6 @@ function TimeTablePage() {
     });
     connection.off("UpdateTrips");
     connection.on("UpdateTrips", () => {
-        console.log("UpdateTrips");
         fetch(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/0/${direct}`).then(res => res.json())
             .then((res) => {
                 setTrips(res.trips);
@@ -227,26 +204,13 @@ function TimeTablePage() {
     connection.off("DeleteTrip");
 
     connection.on("DeleteTrip", (tripID: number) => {
-        // let selected: TimetableSelected | null = {tripID: -1, stationID: 0, viewID: 0};
-        // setSelected(prev => {
-        //     selected = prev;
-        //     return prev;
-        // });
-        console.log(tripID,selected?.tripID);
 
         if (selected?.tripID === tripID) {
-            console.log("DeleteTrip", tripID);
-            // let trips: TimeTableTrip[] = [];
-            // setTrips(prev => {
-            //     trips = prev;
-            //     return prev;
-            // })
             setSelected((prev) => {
                 if (prev === null) {
                     return null;
                 }
                 const tripIndex = trips.findIndex(item => item.tripID === prev.tripID);
-                console.log(tripIndex)
                 const newTrip = trips[tripIndex + 1];
                 if (newTrip) {
                     return {tripID: newTrip.tripID, stationID: prev.stationID, viewID: prev.viewID};
@@ -283,19 +247,11 @@ function TimeTablePage() {
             e.preventDefault();
         }
     }
-
-    // const [onDoubleClick,setOnDoubleClick]=useState(()=>()=>{
-    // });
-
     const onDoubleClick=()=>{
         setOpenEditTrain(true);
-
     }
 
-
-
     const [openEditTrain, setOpenEditTrain] = React.useState(false);
-
     const handleClose2 = () => {
     };
 
