@@ -33,11 +33,31 @@ function TrainView({trip,stations,direct,selected,setSelected,onDoubleClick}:Tra
         }
     };
 
-    const getStopTime = (stationID:number)=>{
-        return trip.stopTimes.filter(item=>item.stationID===stationID)[0];
-    }
-    const getDepTimeStr=(station:Station,stopTime:StopTime)=>{
+    // const getStopTime = (stationID:number)=>{
+    //     return trip.stopTimes.filter(item=>item.stationID===stationID)[0];
+    // }
+    const getDepTimeStr=(station:Station,stopTimes:StopTime[])=>{
+        const stopTimeIndex=stopTimes.findIndex(item=>item.stationID===station.stationID);
+        const stopTime=stopTimes[stopTimeIndex];
+
+        if((station.style& 0x03)===3){
+            //発着の時
+            if(stopTimeIndex+1<stopTimes.length){
+                const nextStopTime=stopTimes[stopTimeIndex+1];
+                console.log(nextStopTime);
+                if(nextStopTime.stopType===0){
+                    return "‥";
+                }
+                if(nextStopTime.stopType===3){
+                    return "║";
+                }
+            }
+        }
+
         if(stopTime.stopType===0){
+            // if((station.style&0x03)===1){
+            //     return "┄"
+            // }
             return "‥";
         }
         if(stopTime.stopType===2){
@@ -53,7 +73,23 @@ function TrainView({trip,stations,direct,selected,setSelected,onDoubleClick}:Tra
         return time2Str(time);
 
     }
-    const getAriTimeStr=(station:Station,stopTime:StopTime)=>{
+    const getAriTimeStr=(station:Station,stopTimes:StopTime[])=>{
+        const stopTimeIndex=stopTimes.findIndex(item=>item.stationID===station.stationID);
+        const stopTime=stopTimes[stopTimeIndex];
+        if((station.style& 0x03)===3) {
+            if (stopTimeIndex - 1 >= 0) {
+                const befStopTime = stopTimes[stopTimeIndex - 1];
+                console.log(befStopTime);
+                if (befStopTime.stopType === 0) {
+                    return "‥";
+                }
+                if (befStopTime.stopType === 3) {
+                    return "║";
+                }
+            }
+        }
+
+
         if(stopTime.stopType===0){
             return "‥";
         }
@@ -127,7 +163,7 @@ function TrainView({trip,stations,direct,selected,setSelected,onDoubleClick}:Tra
 
                                      e.preventDefault();
                                  }}>
-                                {getAriTimeStr(station, getStopTime(station.stationID))}
+                                {getAriTimeStr(station, trip.stopTimes)}
                             </div>:null
                         }
                         {
@@ -154,7 +190,7 @@ function TrainView({trip,stations,direct,selected,setSelected,onDoubleClick}:Tra
                                          e.preventDefault();
                                      }}>
 
-                                    {getDepTimeStr(station, getStopTime(station.stationID))}
+                                    {getDepTimeStr(station,trip.stopTimes)}
                                 </div>:null
                         }
                     </div>

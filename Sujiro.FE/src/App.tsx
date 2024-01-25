@@ -28,6 +28,7 @@ import MailIcon from '@mui/icons-material/Mail';
 import MenuIcon from '@mui/icons-material/Menu';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
+import {TimeTablePDF} from "./TimeTable/TimeTablePDF/TimeTablePDF";
 
 
 function App() {
@@ -162,6 +163,7 @@ function App() {
                        <Route path="/Diagram" element={<DiagramPage/>}></Route>
                        <Route path="/TimeTable/:direct" element={<TimeTablePage/>}></Route>
                        <Route path="/License" element={<HelpPage/>}></Route>
+                       <Route path="/PDF/:direct" element={<TimeTablePDF/>}></Route>
 
                    </Routes>
           </Box>

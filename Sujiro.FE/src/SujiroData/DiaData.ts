@@ -2,6 +2,7 @@ export interface Station{
     stationID:number;
     name:string;
     style:number;
+
 }
 export interface Trip{
     tripID:number;

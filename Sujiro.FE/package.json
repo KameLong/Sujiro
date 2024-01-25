@@ -11,6 +11,7 @@
     "@mui/material": "^5.15.3",
     "@mui/x-tree-view": "^6.17.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.3",
+    "@react-pdf/renderer": "3.3.3",
     "@svgr/webpack": "^5.5.0",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -71,6 +72,10 @@
     "webpack-dev-server": "^4.6.0",
     "webpack-manifest-plugin": "^4.0.2",
     "workbox-webpack-plugin": "^6.4.1"
+  },
+  "overrides": {
+    "@react-pdf/image": "2.2.3",
+    "@react-pdf/pdfkit": "3.0.4"
   },
   "scripts": {
     "start": "set HOST=0.0.0.0&&set PORT=80&&node scripts/start.js",
