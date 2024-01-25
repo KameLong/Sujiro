@@ -1,4 +1,4 @@
-import React, {memo, useEffect, useState} from 'react';
+import React, {memo, useCallback, useEffect, useState} from 'react';
 import style from './TimeTablePage.module.css';
 import * as signalR from "@microsoft/signalr";
 import StationView from "./StationView";
@@ -37,7 +37,6 @@ function TimeTablePage() {
         if (open) {
             return;
         }
-        console.log(trips);
         setSelected((prev) => {
             if (prev === null) {
                 return null;
@@ -239,17 +238,16 @@ function TimeTablePage() {
     };
     const onEnterKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (open) {
-            // handleClose("");
-            // e.preventDefault();
         } else {
             console.log("enter");
             handleClickOpen();
             e.preventDefault();
         }
     }
-    const onDoubleClick=()=>{
+
+    const onDoubleClick=useCallback(()=>{
         setOpenEditTrain(true);
-    }
+    },[]);
 
     const [openEditTrain, setOpenEditTrain] = React.useState(false);
     const handleClose2 = () => {

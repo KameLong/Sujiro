@@ -10,7 +10,8 @@ interface TrainViewProps {
     stations:Station[]
     direct:number;
     selected:TimetableSelected|null;
-    setSelected:Dispatch<SetStateAction<TimetableSelected | null>>;
+    setSelected:Dispatch<SetStateAction<TimetableSelected | null>>|null;
+
     onDoubleClick:()=>void;
 }
 function TrainView({trip,stations,direct,selected,setSelected,onDoubleClick}:TrainViewProps) {
@@ -112,11 +113,13 @@ function TrainView({trip,stations,direct,selected,setSelected,onDoubleClick}:Tra
                             (station.style&0x02)>0?
                             <div className={`${style.timeView}  ${(selected?.tripID===trip.tripID&&selected.stationID===station.stationID&&selected.viewID===0)?style.selected:""}`}
                                 onClick={(e)=>{
-                                    setSelected({
-                                        tripID:trip.tripID,
-                                        stationID:station.stationID,
-                                        viewID:0
-                                    });
+                                    if(setSelected){
+                                        setSelected({
+                                            tripID:trip.tripID,
+                                            stationID:station.stationID,
+                                            viewID:0
+                                        });
+                                    }
                                 }}
                                  onDoubleClick={(e)=>{
                                         console.log("double click");
@@ -137,11 +140,13 @@ function TrainView({trip,stations,direct,selected,setSelected,onDoubleClick}:Tra
                             (station.style&0x01)>0?
                                 <div className={`${style.timeView}  ${(selected?.tripID===trip.tripID&&selected.stationID===station.stationID&&selected.viewID===2)?style.selected:""}`}
                                      onClick={(e)=>{
-                                         setSelected({
-                                             tripID:trip.tripID,
-                                             stationID:station.stationID,
-                                             viewID:2
-                                         });
+                                         if(setSelected) {
+                                             setSelected({
+                                                 tripID: trip.tripID,
+                                                 stationID: station.stationID,
+                                                 viewID: 2
+                                             });
+                                         }
                                      }}
                                      onDoubleClick={(e)=>{
                                          console.log("double click");

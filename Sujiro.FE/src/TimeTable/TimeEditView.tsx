@@ -43,6 +43,7 @@ export function TimeEditView({stopTime,focusIndex,close}:TimeEditViewProps){
         newStopTime.depTime=timeS2int(depTime);
         console.log(newStopTime);
         if(JSON.stringify(newStopTime)!==JSON.stringify(stopTime)){
+            console.log(JSON.stringify(newStopTime),JSON.stringify(stopTime));
             axios.put(`${process.env.REACT_APP_SERVER_URL}/api/stopTime`,newStopTime);
 
         }
