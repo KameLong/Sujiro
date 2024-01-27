@@ -24,6 +24,9 @@ export function TimeTablePDF() {
             })
 
     }, [])
+    const getPage=()=>{
+       return  [...Array(Math.ceil(trips.length/17))].map((_, i) => i)
+    }
 
 
     const [open, setOpen] = React.useState(false);
@@ -57,39 +60,30 @@ export function TimeTablePDF() {
     return (
         <PDFViewer style={{height:'100%'}}>
             <Document>
-                <Page size="A4" style={styles.tableCell}>
-                <View style={{margin:'10px',display:"flex",flexDirection: "row"}}>
-                    <View style={{alignItems:'stretch',borderLeft:"2px solid black"}}/>
-                    <PDFStationView stations={stations} direct={Number(direct)}/>
-                    <View>
-                        <View style={{display:"flex",flexDirection: "row"}}>
-                            {trips.slice(0,17).map((trip) => {
-                                return (
-                                    <PDFTrainView key={trip.tripID} trip={trip} stations={stations}
-                                                   direct={Number(direct)}
-                                    />
-                                )
-                            })}
-                        </View>
-                    </View>
-                    <View style={{alignItems:'stretch',borderLeft:"1px solid black"}}/>
-                </View>
-                    <View style={{margin:'10px',display:"flex",flexDirection: "row"}}>
-                        <View style={{alignItems:'stretch',borderLeft:"2px solid black"}}/>
-                        <PDFStationView stations={stations} direct={Number(direct)}/>
-                        <View>
-                            <View style={{display:"flex",flexDirection: "row"}}>
-                                {trips.slice(17,17+17).map((trip) => {
-                                    return (
-                                        <PDFTrainView key={trip.tripID} trip={trip} stations={stations}
-                                                      direct={Number(direct)}
-                                        />
-                                    )
-                                })}
-                            </View>
-                        </View>
-                        <View style={{alignItems:'stretch',borderLeft:"1px solid black"}}/>
-                    </View>
+                <Page size="A4" style={styles.tableCell} >
+                    {
+                        getPage().map((page)=> {
+                            return(
+                                <View wrap={false} style={{margin:'10px',display:"flex",flexDirection: "row"}}>
+                                    <View style={{alignItems:'stretch',borderLeft:"2px solid black"}}/>
+                                    <PDFStationView stations={stations} direct={Number(direct)}/>
+                                    <View>
+                                        <View style={{display:"flex",flexDirection: "row"}}>
+                                            {trips.slice(page*17,page*17+17).map((trip) => {
+                                                return (
+                                                    <PDFTrainView key={trip.tripID} trip={trip} stations={stations}
+                                                                  direct={Number(direct)}
+                                                    />
+                                                )
+                                            })}
+                                        </View>
+                                    </View>
+                                    <View style={{alignItems:'stretch',borderLeft:"1px solid black"}}/>
+                                </View>
+
+                            )
+                        })
+                    }
                 </Page>
             </Document>
         </PDFViewer>
