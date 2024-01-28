@@ -24,8 +24,8 @@ code {
 }
 
 *{
-  overflow-x: hidden;
-  overflow-y: hidden;
+  /*overflow-x: hidden;*/
+  /*overflow-y: hidden;*/
 }
 html{
   height:100%;

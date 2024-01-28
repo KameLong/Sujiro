@@ -9,8 +9,10 @@ interface TrainViewProps {
     trip:TimeTableTrip;
     stations:Station[]
     direct:number;
+    width:number;
+    lineHeight:number;
 }
-function PDFTrainView({trip,stations,direct}:TrainViewProps) {
+function PDFTrainView({trip,stations,direct,width,lineHeight}:TrainViewProps) {
     const showStations=(direct===0)?stations: [...stations].reverse();
     const getDepTimeStr=(station:Station,stopTimes:StopTime[])=>{
         const stopTimeIndex=stopTimes.findIndex(item=>item.stationID===station.stationID);
@@ -20,7 +22,6 @@ function PDFTrainView({trip,stations,direct}:TrainViewProps) {
             //発着の時
             if(stopTimeIndex+1<stopTimes.length){
                 const nextStopTime=stopTimes[stopTimeIndex+1];
-                console.log(nextStopTime);
                 if(nextStopTime.stopType===0){
                     return "‥";
                 }
@@ -55,7 +56,6 @@ function PDFTrainView({trip,stations,direct}:TrainViewProps) {
         if((station.style& 0x03)===3) {
             if (stopTimeIndex - 1 >= 0) {
                 const befStopTime = stopTimes[stopTimeIndex - 1];
-                console.log(befStopTime);
                 if (befStopTime.stopType === 0) {
                     return "‥";
                 }
@@ -85,11 +85,12 @@ function PDFTrainView({trip,stations,direct}:TrainViewProps) {
 
 
 
+
     return (
         <View
-             style={{color:trip.trainType.color,width:'28px',borderRight:'1px solid #000',textAlign:'center'}}
+             style={{color:trip.trainType.color,width:(width/10)+'mm',borderRight:'0.5px solid #000',textAlign:'center'}}
         >
-            <div style={{borderBottom: "2px solid #000"}}>
+            <div style={{borderBottom: "1px solid #000"}}>
             </div>
             <div className={`${style.timeView2}`}
             >
@@ -99,8 +100,8 @@ function PDFTrainView({trip,stations,direct}:TrainViewProps) {
                 <Text>{trip.trainType.shortName}</Text>
             </div>
             <div style={{borderBottom: "1px solid #000"}}></div>
-            <div className={`${style.trainNameView}`}>
-            </div>
+            {/*<div className={`${style.trainNameView}`}>*/}
+            {/*</div>*/}
             {
                 showStations.map(station =>
 
@@ -108,12 +109,12 @@ function PDFTrainView({trip,stations,direct}:TrainViewProps) {
                         {
                             (station.style&0x02)>0?
                             <div className={`${style.timeView}`}>
-                                <Text style={{width:'28px',height:'15px',textAlign:'center'}}>{getAriTimeStr(station, trip.stopTimes)}</Text>
+                                <Text style={{width:'100%',height:(lineHeight*0.1)+'px',textAlign:'center'}}>{getAriTimeStr(station, trip.stopTimes)}</Text>
                             </div>:null
                         }
                         {
                             (station.style & 0x03) == 3 ?
-                                <div style={{borderBottom: "1px solid #000"}}></div>
+                                <div style={{borderBottom: "0.5px solid #000"}}></div>
                                 : null
                         }
 
@@ -121,13 +122,13 @@ function PDFTrainView({trip,stations,direct}:TrainViewProps) {
                             (station.style&0x01)>0?
                                 <div className={`${style.timeView}`}>
 
-                                    <Text style={{width:'28px',height:'15px',textAlign:'center'}}>{getDepTimeStr(station,trip.stopTimes)}</Text>
+                                    <Text style={{width:'100%',height:(lineHeight*0.1)+'px',textAlign:'center'}}>{getDepTimeStr(station,trip.stopTimes)}</Text>
                                 </div>:null
                         }
                     </div>
                 )
             }
-            <div style={{borderBottom: "2px solid #000"}}></div>
+            <div style={{borderBottom: "1px solid #000"}}></div>
         </View>
     );
 }

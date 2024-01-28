@@ -163,7 +163,7 @@ function App() {
                        <Route path="/Diagram" element={<DiagramPage/>}></Route>
                        <Route path="/TimeTable/:direct" element={<TimeTablePage/>}></Route>
                        <Route path="/License" element={<HelpPage/>}></Route>
-                       <Route path="/PDF/:direct" element={<TimeTablePDF/>}></Route>
+                       <Route path="/TimeTablePDF/:direct" element={<TimeTablePDF/>}></Route>
 
                    </Routes>
           </Box>

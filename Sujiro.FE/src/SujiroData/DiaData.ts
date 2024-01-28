@@ -11,6 +11,7 @@ export interface Trip{
     name:string;
     type:number;
 }
+
 export interface StopTime{
     stopTimeID:number;
     tripID:number;

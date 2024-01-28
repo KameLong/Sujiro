@@ -8,12 +8,14 @@ import {TimeTableTrip} from "./TimeTableData";
 import {useParams} from "react-router-dom";
 import {
     Button,
-    Dialog,
+    Dialog, Fab,
     List,
     ListItem,
 } from '@mui/material';
 import axios from "axios";
 import {TimeEditView} from "./TimeEditView";
+import Box from "@mui/material/Box";
+import {Settings} from "@mui/icons-material";
 const MemoTrainView = memo(TrainView);
 
 function TimeTablePage() {
@@ -441,16 +443,35 @@ function TimeTablePage() {
                             }}
                         >貼り付け</Button>
                     </ListItem>
+                    {/*<ListItem>*/}
+                    {/*    <Button*/}
+                    {/*        onClick={e=>{*/}
+                    {/*            console.log("編集");*/}
+                    {/*            setOpenEditTrain(false);*/}
+                    {/*        }}*/}
+                    {/*    >削除</Button>*/}
+                    {/*</ListItem>*/}
                     <ListItem>
                         <Button
                             onClick={e=>{
-                                console.log("編集");
                                 setOpenEditTrain(false);
                             }}
-                        >削除</Button>
+                        >キャンセル</Button>
+                    </ListItem>
+                    <ListItem>
+                        <Button
+                            onClick={e=>{
+                                window.location.href="/TimeTablePDF/"+0;
+                            }}
+                        >PDFにする</Button>
                     </ListItem>
                 </List>
             </Dialog>
+            <Box sx={{ '& > :not(style)': { m: 1 }, position: 'fixed', bottom: 20, right: 20 }}>
+                <Fab color="primary" aria-label="add" onClick={()=>setOpenEditTrain(true)}>
+                    <Settings/>
+                </Fab>
+            </Box>
 
 
         </div>
