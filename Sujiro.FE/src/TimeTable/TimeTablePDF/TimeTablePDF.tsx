@@ -19,15 +19,15 @@ export function TimeTablePDF() {
     const [upTrips, setUpTrips] = useState<TimeTableTrip[]>([]);
     const [downTrips, setDownTrips] = useState<TimeTableTrip[]>([]);
     const [layout,setLayout]=useState<PDFTimeTableLayout>({
-        marginTop:5,
+        marginTop:30,
         marginLeft:5,
-        pageMargin:10,
-        stationWidth:30,
-        trainPerPage:17,
+        pageMargin:20,
+        stationWidth:22,
+        trainPerPage:29,
 
-        fontSize:90,
-        trainWidth:90,
-        lineHeight:140
+        fontSize:70,
+        trainWidth:60,
+        lineHeight:102
     });
 
 
@@ -50,7 +50,7 @@ export function TimeTablePDF() {
 
             return  [...Array(1)].map((_, i) => i)
         }
-        return  [...Array(1)].map((_, i) => i)
+        // return  [...Array(1)].map((_, i) => i)
        return  [...Array(Math.ceil(tripnum/layout.trainPerPage))].map((_, i) => i)
     }
 
