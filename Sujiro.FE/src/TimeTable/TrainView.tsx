@@ -44,7 +44,6 @@ function TrainView({trip,stations,direct,selected,setSelected,onDoubleClick}:Tra
             //発着の時
             if(stopTimeIndex+1<stopTimes.length){
                 const nextStopTime=stopTimes[stopTimeIndex+1];
-                console.log(nextStopTime);
                 if(nextStopTime.stopType===0){
                     return "‥";
                 }
@@ -79,7 +78,6 @@ function TrainView({trip,stations,direct,selected,setSelected,onDoubleClick}:Tra
         if((station.style& 0x03)===3) {
             if (stopTimeIndex - 1 >= 0) {
                 const befStopTime = stopTimes[stopTimeIndex - 1];
-                console.log(befStopTime);
                 if (befStopTime.stopType === 0) {
                     return "‥";
                 }

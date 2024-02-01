@@ -29,6 +29,9 @@ import MenuIcon from '@mui/icons-material/Menu';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import {TimeTablePDF} from "./TimeTable/TimeTablePDF/TimeTablePDF";
+import { initializeApp } from 'firebase/app';
+import Signin from './Auth/Signin';
+
 
 
 function App() {
@@ -159,7 +162,8 @@ function App() {
           >
               <Toolbar variant="dense" />
                    <Routes >
-                       <Route path="/" element={<DiagramPage/>}></Route>
+                       <Route path="/" element={<DiagramPage/>}/>
+                       <Route path="login" element={<Signin/>}/>
                        <Route path="/Diagram" element={<DiagramPage/>}></Route>
                        <Route path="/TimeTable/:direct" element={<TimeTablePage/>}></Route>
                        <Route path="/License" element={<HelpPage/>}></Route>

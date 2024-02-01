@@ -16,6 +16,11 @@ import axios from "axios";
 import {TimeEditView} from "./TimeEditView";
 import Box from "@mui/material/Box";
 import {Settings} from "@mui/icons-material";
+
+import {
+    auth
+} from '../firebase';
+
 const MemoTrainView = memo(TrainView);
 
 function TimeTablePage() {
@@ -30,11 +35,7 @@ function TimeTablePage() {
         connection.start().catch((err) => console.error(err));
         return connection;
     });
-
-
-
     const [selected, setSelected] = useState<TimetableSelected | null>(null);
-
     const onRightKeyDown = (e: React.KeyboardEvent<HTMLDivElement> | undefined) => {
         if (open) {
             return;
@@ -144,16 +145,22 @@ function TimeTablePage() {
         e?.preventDefault();
     };
 
-
-
     useEffect(() => {
-        fetch(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/0/${direct}`).then(res => res.json())
-            .then((res) => {
-                setTrips(res.trips);
-                setStations(res.stations);
-            })
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                console.log(user);
+                fetch(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/0/${direct}`).then(res => res.json())
+                    .then((res) => {
+                        setTrips(res.trips);
+                        setStations(res.stations);
+                    })
+            }else{
+                console.error("ログインされていない");
+            }
+        });
+    }, []);
 
-    }, [])
+
 
     connection.off("UpdateStoptime");
     connection.on("UpdateStoptime", (stoptime: StopTime) => {
