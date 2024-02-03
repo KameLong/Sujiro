@@ -1,4 +1,7 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Sujiro.WebAPI.SignalR;
+using System.Security.Claims;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -25,6 +28,31 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(JwtBearerDefaults.AuthenticationScheme, policy =>
+    {
+        policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
+        policy.RequireClaim(ClaimTypes.Name);
+    });
+});
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = "https://securetoken.google.com/sujiro-e4a58";
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = "https://securetoken.google.com/sujiro-e4a58",
+            ValidateAudience = true,
+            ValidAudience = "sujiro-e4a58",
+            ValidateLifetime = true
+        };
+    });
+
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -37,8 +65,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors(MyAllowSpecificOrigins);
 
+app.UseAuthentication();
 app.UseAuthorization();
-
 
 app.MapControllers();
 app.MapHub<ChatHub>("/ws/chatHub");

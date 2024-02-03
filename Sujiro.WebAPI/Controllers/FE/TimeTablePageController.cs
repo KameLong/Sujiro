@@ -1,14 +1,17 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.Sqlite;
 using Sujiro.Data;
 using Sujiro.WebAPI.SignalR;
 using System.Diagnostics;
+using System.Security.Claims;
 using static System.Formats.Asn1.AsnWriter;
 
 namespace Sujiro.WebAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class TimeTablePageController : SujiroAPIController
@@ -49,9 +52,9 @@ namespace Sujiro.WebAPI.Controllers
         [HttpGet("{routeID}/{direct}")]
         public async Task<ActionResult> GetTimeTaleData(long routeID,int direct)
         {
+            string userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
             try
             {
-
                 Debug.WriteLine($"GetTimeTaleData {routeID} {direct}");
                 var result = new TimeTableData();
                 var trainTypes= new List<TrainType>();

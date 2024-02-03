@@ -20,12 +20,13 @@ import {Settings} from "@mui/icons-material";
 import {
     auth
 } from '../firebase';
+import {useIdToken} from "react-firebase-hooks/auth";
 
 const MemoTrainView = memo(TrainView);
 
 function TimeTablePage() {
     const {direct} = useParams<{ direct: string }>();
-
+    const [user] = useIdToken(auth);
     const [stations, setStations] = useState<Station[]>([]);
     const [trips, setTrips] = useState<TimeTableTrip[]>([]);
     const [connection,setConnection]=useState<signalR.HubConnection>(()=>{
@@ -146,10 +147,17 @@ function TimeTablePage() {
     };
 
     useEffect(() => {
-        auth.onAuthStateChanged((user) => {
+        auth.onAuthStateChanged(async(user) => {
             if (user) {
+                const token=await user.getIdToken();
                 console.log(user);
-                fetch(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/0/${direct}`).then(res => res.json())
+                fetch(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/0/${direct}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                ).then(res => res.json())
                     .then((res) => {
                         setTrips(res.trips);
                         setStations(res.stations);
@@ -202,7 +210,13 @@ function TimeTablePage() {
     });
     connection.off("UpdateTrips");
     connection.on("UpdateTrips", () => {
-        fetch(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/0/${direct}`).then(res => res.json())
+        const token=user?.getIdToken();
+        fetch(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/0/${direct}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            }).then(res => res.json())
             .then((res) => {
                 setTrips(res.trips);
                 setStations(res.stations);
