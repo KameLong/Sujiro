@@ -1,4 +1,4 @@
-﻿namespace Sujiro.WebAPI
+﻿namespace Sujiro.Data
 {
     public static class MyRandom
     {

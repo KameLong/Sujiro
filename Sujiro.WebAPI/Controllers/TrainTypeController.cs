@@ -22,8 +22,6 @@ namespace Sujiro.WebAPI.Controllers
         [HttpGet]
         public IEnumerable<TrainType> Get()
         {
-
-
             DateTime now = DateTime.Now;
             var trainTypes = new List<TrainType>();
             using (var conn = new SqliteConnection("Data Source=" + Configuration["ConnectionStrings:DBpath"]))

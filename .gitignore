@@ -9,3 +9,5 @@
 /Sujiro.FE/build
 /Sujiro.FE/node_modules
 
+/Test.WebAPI/bin
+/Test.WebAPI/obj
