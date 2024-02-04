@@ -81,13 +81,13 @@ function CompanyListPage() {
                     >管理しているCompany一覧</Typography>
                     <Grid container>
                     {myCompany.map(company=>(
-                        <Grid item  xs={12} md={6} lg={4} >
-                            <Card variant="outlined" style={{height:'100%'}}>
+                        <Grid item  xs={12} md={6} lg={4} sx={{padding:1}}>
+                            <Card variant="outlined" style={{height:'100%',backgroundColor:'#EEF5FF',boxShadow:'0 5px 5px 0 rgba(0, 0, 0, .3)'}}>
                             <CardContent style={{height:'100%'}}>
                                 <Typography  color="textSecondary" gutterBottom>
                                 </Typography>
                                 <Typography variant="h5" component="h2" >
-                                    <a href={`../company/${company.companyID}`}>
+                                    <a href={`../company/${company.companyID}`} >
                                         {company.name}
                                     </a>
                                 </Typography>
@@ -107,7 +107,7 @@ function CompanyListPage() {
                         </Card>
                         </Grid>
                 ))}
-                        <Grid item xs={12} md={6} lg={4}>
+                        <Grid item xs={12} md={6} lg={4} sx={{padding:1}}>
                             <Card  variant="outlined" style={{height:'100%'}}>
                                 <CardContent style={{textAlign:'center',cursor:'pointer'}}
                                              onClick={()=>{

@@ -23,6 +23,7 @@ import Typography from '@mui/material/Typography';
 import {TimeTablePDF} from "./TimeTable/TimeTablePDF/TimeTablePDF";
 import Signin from './Auth/Signin';
 import CompanyListPage from "./Company/CompanyListPage";
+import CompanyPage from "./Company/CompanyPage";
 
 
 
@@ -163,6 +164,7 @@ function App() {
                        <Route path="/License" element={<HelpPage/>}></Route>
                        <Route path="/TimeTablePDF/:direct" element={<TimeTablePDF/>}></Route>
                        <Route path="/Company" element={<CompanyListPage/>}> </Route>
+                       <Route path="/Company/:companyID" element={<CompanyPage/>}> </Route>
                    </Routes>
           </Box>
       </Box>

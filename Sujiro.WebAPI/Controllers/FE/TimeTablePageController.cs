@@ -31,7 +31,7 @@ namespace Sujiro.WebAPI.Controllers
             }
 
             public List<StopTime> stopTimes { get; set; } = new List<StopTime>();
-            public TrainType trainType { get; set; } = new TrainType();
+            public OldTrainType trainType { get; set; } = new OldTrainType();
             
             public TimetableTrip(SqliteDataReader reader) : base(reader)
             {
@@ -41,7 +41,7 @@ namespace Sujiro.WebAPI.Controllers
         public class TimeTableData
         {
             public List<TimetableTrip> trips { get; set; }=new List<TimetableTrip>();
-            public List<Station> stations { get; set; } = new List<Station>();
+            public List<OldStation> stations { get; set; } = new List<OldStation>();
         }
 
 
@@ -57,7 +57,7 @@ namespace Sujiro.WebAPI.Controllers
             {
                 Debug.WriteLine($"GetTimeTaleData {routeID} {direct}");
                 var result = new TimeTableData();
-                var trainTypes= new List<TrainType>();
+                var trainTypes= new List<OldTrainType>();
 
 
                 using (var conn = new SqliteConnection("Data Source=" + Configuration["ConnectionStrings:DBpath"]))
@@ -66,22 +66,22 @@ namespace Sujiro.WebAPI.Controllers
 
                     var command = conn.CreateCommand();
 
-                    command.CommandText = $"SELECT * FROM {Station.TABLE_NAME}";
+                    command.CommandText = $"SELECT * FROM {OldStation.TABLE_NAME}";
 
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            Station trip = new Station(reader);
+                            OldStation trip = new OldStation(reader);
                             result.stations.Add(trip);
                         }
                     }
-                    command.CommandText = $"SELECT * FROM {TrainType.TABLE_NAME}";
+                    command.CommandText = $"SELECT * FROM {OldTrainType.TABLE_NAME}";
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            TrainType trainType = new TrainType(reader);
+                            OldTrainType trainType = new OldTrainType(reader);
                             trainTypes.Add(trainType);
                         }
                     }

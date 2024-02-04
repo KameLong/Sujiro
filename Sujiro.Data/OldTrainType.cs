@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Sujiro.Data
 {
     [Table(TABLE_NAME)]
-    public class TrainType
+    public class OldTrainType
     {
         public const string TABLE_NAME = "train_types";
 
@@ -13,11 +13,11 @@ namespace Sujiro.Data
         public string ShortName { get; set; } = "";
         public string color { get; set; } = "#000000";
 
-        public TrainType()
+        public OldTrainType()
         {
 
         }
-        public TrainType(SqliteDataReader reader)
+        public OldTrainType(SqliteDataReader reader)
         {
             TrainTypeID = (long)reader["trainTypeID"];
             Name = (string)reader["name"];

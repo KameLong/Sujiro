@@ -79,6 +79,7 @@ namespace Sujiro.WebAPI.Controllers
             {
                 //新規追加
                 Company.InsertCompany(dbPath, company);
+                CompanySqlite.CreateCompanySqlite(Configuration["ConnectionStrings:DBdir"], company.CompanyID);
                 return Created();
             }
             if(oldCompany.UserID != userId)

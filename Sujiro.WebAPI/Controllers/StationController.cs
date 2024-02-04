@@ -20,12 +20,12 @@ namespace Sujiro.WebAPI.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<Station> Get()
+        public IEnumerable<OldStation> Get()
         {
             try
             {
                 DateTime now = DateTime.Now;
-                var stations =new List<Station>();
+                var stations =new List<OldStation>();
                 using (var conn = new SqliteConnection("Data Source=" + Configuration["ConnectionStrings:DBpath"]))
                 {
                     conn.Open();
@@ -33,13 +33,13 @@ namespace Sujiro.WebAPI.Controllers
                     var command = conn.CreateCommand();
 
                     command = conn.CreateCommand();
-                    command.CommandText = $"SELECT * FROM {Station.TABLE_NAME}";
+                    command.CommandText = $"SELECT * FROM {OldStation.TABLE_NAME}";
 
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            Station station = new Station(reader);
+                            OldStation station = new OldStation(reader);
                             stations.Add(station);
                         }
                     }

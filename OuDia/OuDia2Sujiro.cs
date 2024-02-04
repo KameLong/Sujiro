@@ -37,7 +37,7 @@ namespace OuDia
             foreach (var station in route.Stations)
             {
                 Console.WriteLine(station.Name);
-                Sujiro.Data.Station station1 = new Sujiro.Data.Station();
+                Sujiro.Data.OldStation station1 = new Sujiro.Data.OldStation();
                 station1.StationID = route.Stations.IndexOf(station);
                 station1.Name = station.Name;
                 switch (station.type)
@@ -61,7 +61,7 @@ namespace OuDia
             routeContext.AddRange(
             route.TrainTypes.Select(type =>
             {
-                Sujiro.Data.TrainType trainType = new Sujiro.Data.TrainType();
+                Sujiro.Data.OldTrainType trainType = new Sujiro.Data.OldTrainType();
                 trainType.TrainTypeID = route.TrainTypes.IndexOf(type);
                 trainType.Name = type.Name;
                 trainType.ShortName = type.ShortName;
@@ -121,10 +121,10 @@ namespace OuDia
     }
     internal class RouteContext : DbContext
     {
-        public DbSet<Sujiro.Data.Station>? stations { get; set; }
+        public DbSet<Sujiro.Data.OldStation>? stations { get; set; }
         public DbSet<Sujiro.Data.Trip>? trips { get; set; }
         public DbSet<Sujiro.Data.StopTime>? stop_times { get; set; }
-        public DbSet<Sujiro.Data.TrainType>? trainTypes { get; set; }
+        public DbSet<Sujiro.Data.OldTrainType>? trainTypes { get; set; }
 
         public string DbPath { get; }
 

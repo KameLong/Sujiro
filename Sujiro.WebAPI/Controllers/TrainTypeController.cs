@@ -20,10 +20,10 @@ namespace Sujiro.WebAPI.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<TrainType> Get()
+        public IEnumerable<OldTrainType> Get()
         {
             DateTime now = DateTime.Now;
-            var trainTypes = new List<TrainType>();
+            var trainTypes = new List<OldTrainType>();
             using (var conn = new SqliteConnection("Data Source=" + Configuration["ConnectionStrings:DBpath"]))
             {
                 conn.Open();
@@ -31,13 +31,13 @@ namespace Sujiro.WebAPI.Controllers
                 var command = conn.CreateCommand();
 
                 command = conn.CreateCommand();
-                command.CommandText = $"SELECT * FROM {TrainType.TABLE_NAME}";
+                command.CommandText = $"SELECT * FROM {OldTrainType.TABLE_NAME}";
 
                 using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        trainTypes.Add(new TrainType(reader));
+                        trainTypes.Add(new OldTrainType(reader));
                     }
                 }
             }

@@ -12,7 +12,7 @@ namespace Sujiro.WebAPI.Controllers
     [ApiController]
     public class DiagramPageController : SujiroAPIController
     {
-        class DiagramStation : Station
+        class DiagramStation : OldStation
         {
             public int stationTime { get; set; } = 0;
             public DiagramStation(SqliteDataReader reader) : base(reader)
@@ -25,7 +25,7 @@ namespace Sujiro.WebAPI.Controllers
             {
             }
             public List<StopTime> stopTimes { get; set; } = new List<StopTime>();
-            public TrainType trainType { get; set; } = new TrainType();
+            public OldTrainType trainType { get; set; } = new OldTrainType();
         }
 
 
@@ -48,7 +48,7 @@ namespace Sujiro.WebAPI.Controllers
             {
                 var result = new DiagramData();
 
-                var trainTypes = new List<TrainType>();
+                var trainTypes = new List<OldTrainType>();
 
 
                 using (var conn = new SqliteConnection("Data Source=" + Configuration["ConnectionStrings:DBpath"]))
@@ -56,7 +56,7 @@ namespace Sujiro.WebAPI.Controllers
                     conn.Open();
 
                     var command = conn.CreateCommand();
-                    command.CommandText = $"SELECT * FROM {Station.TABLE_NAME}";
+                    command.CommandText = $"SELECT * FROM {OldStation.TABLE_NAME}";
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
@@ -67,12 +67,12 @@ namespace Sujiro.WebAPI.Controllers
                     
                     }
 
-                    command.CommandText = $"SELECT * FROM {TrainType.TABLE_NAME}";
+                    command.CommandText = $"SELECT * FROM {OldTrainType.TABLE_NAME}";
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            TrainType trainType = new TrainType(reader);
+                            OldTrainType trainType = new OldTrainType(reader);
                             trainTypes.Add(trainType);
                         }
                     }
