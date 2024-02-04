@@ -2,7 +2,7 @@
 {
     public static class MyRandom
     {
-        private static Random random;
+        private static Random random = new Random();
 
         public static int Next()
         {

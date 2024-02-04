@@ -27,3 +27,9 @@ export interface TrainType{
     shortName:string;
     color:string;
 }
+
+export interface Company{
+    companyID:number;
+    name:string;
+    userID:string;
+}

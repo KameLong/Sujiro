@@ -2,7 +2,6 @@ import React from 'react';
 import style from './App.module.css';
 
 import './App.module.css';
-import * as signalR from "@microsoft/signalr";
 import TimeTablePage from "./TimeTable/TimeTablePage";
 import DiagramPage from "./Diagram/DiagramPage";
 import {Route, Router, Routes } from 'react-router-dom';
@@ -18,19 +17,12 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import MailIcon from '@mui/icons-material/Mail';
 import MenuIcon from '@mui/icons-material/Menu';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import {TimeTablePDF} from "./TimeTable/TimeTablePDF/TimeTablePDF";
-import { initializeApp } from 'firebase/app';
 import Signin from './Auth/Signin';
+import CompanyListPage from "./Company/CompanyListPage";
 
 
 
@@ -81,8 +73,10 @@ function App() {
                                   onClick={e=>{
                                       window.location.href="/Diagram"
                                   }}
+
                         />
                     </TreeItem>
+
                 </TreeItem>
                 <TreeItem style={{marginTop:'10px'}} nodeId={"200"} label={"LICENSE"}
                           onClick={e=>{
@@ -168,7 +162,7 @@ function App() {
                        <Route path="/TimeTable/:direct" element={<TimeTablePage/>}></Route>
                        <Route path="/License" element={<HelpPage/>}></Route>
                        <Route path="/TimeTablePDF/:direct" element={<TimeTablePDF/>}></Route>
-
+                       <Route path="/Company" element={<CompanyListPage/>}> </Route>
                    </Routes>
           </Box>
       </Box>

@@ -8,18 +8,19 @@ using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using static System.Net.Mime.MediaTypeNames;
 namespace Sujiro.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ConpanyController :SujiroAPIController
+    public class CompanyController :SujiroAPIController
     {
-        public ConpanyController(IHubContext<ChatHub> hubContext, IConfiguration configuration) : base(hubContext, configuration)
+        public CompanyController(IHubContext<ChatHub> hubContext, IConfiguration configuration) : base(hubContext, configuration)
         {
 
         }
-        [HttpGet("/get/{companyID}")]
+        [HttpGet("get/{companyID}")]
         public async Task<ActionResult> GetCompany(long companyID)
         {
             string dbPath = Configuration["ConnectionStrings:DBdir"] + MasterData.MASTER_DATA_FILE;
@@ -40,9 +41,12 @@ namespace Sujiro.WebAPI.Controllers
             }
             return Ok(company);
         }
-        [HttpGet("/getAll")]
+        [HttpGet("getAll")]
         public async Task<ActionResult> GetAllCompany()
         {
+            try
+            {
+
             string dbPath = Configuration["ConnectionStrings:DBdir"] + MasterData.MASTER_DATA_FILE;
 
             string? userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
@@ -52,11 +56,20 @@ namespace Sujiro.WebAPI.Controllers
             }
             List<Company> company = Company.GetUserCompany(dbPath, userId);
             return Ok(company);
+            }catch(Exception ex) {
+                Debug.WriteLine(ex);
+                return BadRequest(ex.Message);
+
+            }
+
         }
 
         [HttpPut]
         public async Task<ActionResult> PutCompany(Company company)
         {
+            try
+            {
+
             string dbPath = Configuration["ConnectionStrings:DBdir"]+MasterData.MASTER_DATA_FILE;
             string? userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
@@ -76,6 +89,14 @@ namespace Sujiro.WebAPI.Controllers
             //新しい情報で更新する。
             Company.UpdateCompany(dbPath, company);
             return Ok();
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                return BadRequest(ex.Message);
+
+            }
 
 
 

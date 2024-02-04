@@ -35,7 +35,7 @@ namespace Sujiro.Data
         }
         public void InsertSqlite(ref SqliteCommand command)
         {
-            command.CommandText = $@"INSERT INTO {TABLE_NAME} (companyID=:companyID,name=:name,UserID=:userID";
+            command.CommandText = $@"INSERT INTO {TABLE_NAME} (companyID,name,UserID)values(:companyID,:name,:userID)";
             command.Parameters.Add(new SqliteParameter(":companyID", CompanyID));
             command.Parameters.Add(new SqliteParameter(":name", Name));
             command.Parameters.Add(new SqliteParameter(":userID", UserID));
@@ -78,7 +78,7 @@ namespace Sujiro.Data
             {
                 conn.Open();
                 var command = conn.CreateCommand();
-                command.CommandText = @$"SELECT FROM {TABLE_NAME} where companyID=:companyID";
+                command.CommandText = @$"SELECT * FROM {TABLE_NAME} where companyID=:companyID";
                 command.Parameters.Add(new SqliteParameter(":companyID", id));
                 using (var reader = command.ExecuteReader())
                 {
@@ -99,7 +99,7 @@ namespace Sujiro.Data
 
                 conn.Open();
                 var command = conn.CreateCommand();
-                command.CommandText = @$"SELECT FROM {TABLE_NAME} where userID=:userID";
+                command.CommandText = @$"SELECT * FROM {TABLE_NAME} where userID=:userID";
                 command.Parameters.Add(new SqliteParameter(":userID", userID));
                 using (var reader = command.ExecuteReader())
                 {
