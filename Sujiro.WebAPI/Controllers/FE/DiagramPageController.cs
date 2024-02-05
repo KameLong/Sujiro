@@ -84,7 +84,7 @@ namespace Sujiro.WebAPI.Controllers
                             {StopTime.TABLE_NAME}.{nameof(StopTime.stationID)}";
                     using (var reader = command.ExecuteReader())
                     {
-                        DiagramTrip trip = null;
+                        DiagramTrip? trip = null;
                         while (reader.Read())
                         {
                             if (trip == null || trip.TripID != (long)reader[nameof(Trip.TripID)])

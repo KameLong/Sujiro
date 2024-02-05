@@ -29,40 +29,59 @@ namespace Sujiro.Data
         {
             return $"create table {TABLE_NAME} (stationID integer primary key not null,name text)";
         }
-        public void InsertSqlite(ref SqliteCommand command)
+        public void ReplaceSqlite(ref SqliteCommand command)
         {
-            command.CommandText = $@"INSERT INTO {TABLE_NAME} (stationID,name)values(:stationID,:name)";
-            command.Parameters.Add(new SqliteParameter(":stationID", StationID));
-            command.Parameters.Add(new SqliteParameter(":name", Name));
-        }
-        public void UpdateSqlite(ref SqliteCommand command)
-        {
-            command.CommandText = $@"UPDATE {TABLE_NAME} SET name=:name WHERE stationID=:stationID";
+            command.CommandText = $@"REPLACE INTO {TABLE_NAME} (stationID,name)values(:stationID,:name)";
             command.Parameters.Add(new SqliteParameter(":stationID", StationID));
             command.Parameters.Add(new SqliteParameter(":name", Name));
         }
 
-        public static void InsertStation(string dbPath, Station station)
+
+
+
+        public static void PutStation(string dbPath, Station station)
         {
             using (var conn = new SqliteConnection("Data Source=" + dbPath))
             {
                 conn.Open();
                 var command = conn.CreateCommand();
-                station.InsertSqlite(ref command);
+                station.ReplaceSqlite(ref command);
                 command.ExecuteNonQuery();
                 conn.Close();
             }
         }
-        public static void UpdateStation(string dbPath, Station station)
+        public static void DeleteStation(string dbPath, long stationID)
         {
+            //todo : routeStationの確認
             using (var conn = new SqliteConnection("Data Source=" + dbPath))
             {
                 conn.Open();
                 var command = conn.CreateCommand();
-                station.UpdateSqlite(ref command);
+                command.CommandText = @$"DELETE FROM {TABLE_NAME} where stationID=:stationID";
+                command.Parameters.Add(new SqliteParameter(":stationID", stationID));
                 command.ExecuteNonQuery();
                 conn.Close();
             }
+        }
+        public static List<Station>GetAllStation(string dbPath)
+        {
+            List<Station> stations = new List<Station>();
+            using (var conn = new SqliteConnection("Data Source=" + dbPath))
+            {
+                conn.Open();
+                var command = conn.CreateCommand();
+                command.CommandText = @$"SELECT * FROM {TABLE_NAME}";
+                using (var reader = command.ExecuteReader())
+                {
+
+                    while (reader.Read())
+                    {
+                        stations.Add(new Station(reader));
+                    }
+                }
+            }
+            return stations;
+
         }
 
         public static Station? GetStation(string dbPath, long id)

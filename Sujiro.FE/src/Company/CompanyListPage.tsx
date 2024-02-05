@@ -154,8 +154,6 @@ function CompanyEdit({close,company}:CompanyEditProps){
     return (
         <div>
             <DialogTitle>{"Company名を編集"}</DialogTitle>
-            <form onSubmit={() => {
-            }}>
                 <DialogContent>
                     <TextField fullWidth={true} label={"Company名"} required={true} value={companyName} onChange={e=>setCompanyName(e.target.value)}/>
                 </DialogContent>
@@ -176,7 +174,6 @@ function CompanyEdit({close,company}:CompanyEditProps){
                         }
                     }}>決定</Button>
                 </DialogActions>
-            </form>
         </div>
     )
 }

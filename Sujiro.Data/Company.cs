@@ -18,11 +18,11 @@ namespace Sujiro.Data
         public string Name { get; set; } = "";
 
         public string UserID { get; set; }
-
         public Company()
         {
             CompanyID = MyRandom.NextSafeLong();
         }
+
         public Company(SqliteDataReader reader)
         {
             CompanyID = (long)reader["companyID"];

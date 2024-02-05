@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using OuDia;
@@ -14,6 +15,8 @@ namespace Sujiro.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
+
     public class CompanyController :SujiroAPIController
     {
         public CompanyController(IHubContext<ChatHub> hubContext, IConfiguration configuration) : base(hubContext, configuration)
@@ -21,7 +24,7 @@ namespace Sujiro.WebAPI.Controllers
 
         }
         [HttpGet("get/{companyID}")]
-        public async Task<ActionResult> GetCompany(long companyID)
+        public ActionResult GetCompany(long companyID)
         {
             string dbPath = Configuration["ConnectionStrings:DBdir"] + MasterData.MASTER_DATA_FILE;
 
@@ -42,7 +45,7 @@ namespace Sujiro.WebAPI.Controllers
             return Ok(company);
         }
         [HttpGet("getAll")]
-        public async Task<ActionResult> GetAllCompany()
+        public ActionResult GetAllCompany()
         {
             try
             {

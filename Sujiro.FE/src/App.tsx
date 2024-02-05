@@ -4,7 +4,7 @@ import style from './App.module.css';
 import './App.module.css';
 import TimeTablePage from "./TimeTable/TimeTablePage";
 import DiagramPage from "./Diagram/DiagramPage";
-import {Route, Router, Routes } from 'react-router-dom';
+import {Route, Routes } from 'react-router-dom';
 import {TreeItem, TreeView} from "@mui/x-tree-view";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';

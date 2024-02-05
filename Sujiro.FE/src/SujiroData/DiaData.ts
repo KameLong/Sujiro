@@ -4,6 +4,11 @@ export interface Station{
     style:number;
 
 }
+export interface Route{
+    routeID:number;
+    name:string;
+    color:string;
+}
 export interface Trip{
     tripID:number;
     direct:number;

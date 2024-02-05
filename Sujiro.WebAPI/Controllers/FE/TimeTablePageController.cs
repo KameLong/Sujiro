@@ -149,7 +149,7 @@ namespace Sujiro.WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500);
+                return BadRequest(ex);
             }
         }
         [HttpPost("insertTrip")]
