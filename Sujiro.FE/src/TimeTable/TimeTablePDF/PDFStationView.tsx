@@ -1,7 +1,6 @@
-import React, {useEffect, useState} from "react";
+import React from "react";
 import style from "../TimeTablePage.module.css";
 import {Station} from "../../SujiroData/DiaData";
-import {Checkbox} from "@mui/material";
 
 import {Text, View} from "@react-pdf/renderer";
 interface StationViewProps {
@@ -11,7 +10,7 @@ interface StationViewProps {
     fontSize:number;
 }
 function PDFStationView({stations,direct,lineHeight,fontSize}:StationViewProps){
-    const showStations=(direct==0)?stations: [...stations].reverse();
+    const showStations=(direct===0)?stations: [...stations].reverse();
     return (
         <View style={{width:'100%',borderRight:"1px solid black"}}>
             <div style={{borderBottom: "1px solid #000"}}></div>

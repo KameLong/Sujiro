@@ -1,14 +1,13 @@
-import React, {memo, useEffect, useState} from 'react';
-import style from '../TimeTablePage.module.css';
-import {Station, StopTime} from "../../SujiroData/DiaData";
+import React, { useEffect, useState} from 'react';
+import {Station} from "../../SujiroData/DiaData";
 import {TimeTableTrip} from "../TimeTableData";
 import {useParams} from "react-router-dom";
 import PDFStationView from "./PDFStationView";
 import PDFTrainView from './PDFTrainView';
 
 
-import {Page, PDFViewer, Document, Text, Font,StyleSheet,View} from "@react-pdf/renderer";
-import {Button, Dialog, Divider, Fab, FilledInput, TextField} from "@mui/material";
+import {Page, PDFViewer, Document, Font,StyleSheet,View} from "@react-pdf/renderer";
+import {Button, Dialog, Fab, TextField} from "@mui/material";
 import {Settings} from "@mui/icons-material";
 import Box from "@mui/material/Box";
 export function TimeTablePDF() {

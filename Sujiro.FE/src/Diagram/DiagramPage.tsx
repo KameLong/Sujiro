@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import * as signalR from "@microsoft/signalr";
-import {Station, StopTime, Trip} from "../SujiroData/DiaData";
+import {StopTime} from "../SujiroData/DiaData";
 import * as PIXI from 'pixi.js'
-import {DisplayObject, ICanvas} from "pixi.js";
+import {DisplayObject} from "pixi.js";
 import {DiagramData, DiagramStation, DiagramTrip} from "./DiagramData";
 import {TimeTableTrip} from "../TimeTable/TimeTableData";
 import {TimetableSelected} from "../TimeTable/TimeTablePage";
@@ -34,7 +34,7 @@ function DiagramPage() {
                 number2 : new PIXI.Text(trip.number , { fontSize:48,fill: 0x000000 }),
 
             };
-            const stopTimes=trip.direct==0?trip.stopTimes:[...trip.stopTimes].reverse();
+            const stopTimes=trip.direct===0?trip.stopTimes:[...trip.stopTimes].reverse();
             for(let i=0;i<stopTimes.length;i++){
                 const st=stopTimes[i];
                 if(st.ariTime>=0){
@@ -171,7 +171,6 @@ function DiagramPage() {
 
         });
         connection.on("DeleteTrip", (tripID: number) => {
-            let selected:TimetableSelected|null={tripID:-1,stationID:0,viewID:0};
             fetch(`${process.env.REACT_APP_SERVER_URL}/api/DiagramPage/0`).then(res=>res.json())
                 .then((res:DiagramData)=>{
                     setDownTrips(res.downTrips);
@@ -224,10 +223,10 @@ function DiagramPage() {
         for(let station of stations){
             const line = new PIXI.Graphics();
             let width=1;
-            if(station.style==(3|3<<4)){
+            if(station.style===3){
                 width=2;
             }
-            if(stations[0]==station||stations.slice(-1)[0]==station){
+            if(stations[0]===station||stations.slice(-1)[0]===station){
                 width=2;
             }
             line.lineStyle(width, 0x808080, 1);
@@ -288,10 +287,10 @@ function DiagramPage() {
         for(let station of stations){
             const line = new PIXI.Graphics();
             let width=1;
-            if(station.style==(3|3<<4)){
+            if(station.style===3){
                 width=2;
             }
-            if(stations[0]==station||stations.slice(-1)[0]==station){
+            if(stations[0]===station||stations.slice(-1)[0]===station){
                 width=2;
             }
             line.lineStyle(width, 0x808080, 1);
@@ -318,14 +317,14 @@ function DiagramPage() {
     return (
         <canvas id="test"  style={{width:'100%',height:'100%',overflowY:'hidden'}}
             onTouchStart={(e)=>{
-                if(e.touches.length==1) {
+                if(e.touches.length===1) {
                     setGesture({
                         isDrag:true,
                         start1:{x:e.touches[0].clientX,y:e.touches[0].clientY},
                         moveing1:{x:e.touches[0].clientX,y:e.touches[0].clientY}
                     });
                 }
-                if(e.touches.length==2) {
+                if(e.touches.length===2) {
                     setGesture2({
                         isXDrag:Math.abs(e.touches[0].clientX-e.touches[1].clientX)>100,
                         isYDrag:Math.abs(e.touches[0].clientY-e.touches[1].clientY)>100,
@@ -338,7 +337,7 @@ function DiagramPage() {
                 }
             }}
             onTouchMove={(e)=>{
-                if(e.touches.length==1) {
+                if(e.touches.length===1) {
                     setTransform(prev => {
                         const res = {
                             x: prev.x - (e.touches[0].clientX - gesture.moveing1.x) / prev.xScale,
@@ -355,7 +354,7 @@ function DiagramPage() {
                         moveing1: {x: e.touches[0].clientX, y: e.touches[0].clientY}
                     }});
                 }
-                if(e.touches.length==2) {
+                if(e.touches.length===2) {
                     const nowPos1={x:e.touches[0].clientX,y:e.touches[0].clientY};
                     const nowPos2={x:e.touches[1].clientX,y:e.touches[1].clientY};
                     const prevTransform=gesture2.transform;
@@ -400,14 +399,14 @@ function DiagramPage() {
 
             }}
                 onTouchEnd={(e)=>{
-                    if(e.touches.length==1) {
+                    if(e.touches.length===1) {
                         setGesture({
                             isDrag:true,
                             start1:{x:e.touches[0].clientX,y:e.touches[0].clientY},
                             moveing1:{x:e.touches[0].clientX,y:e.touches[0].clientY}
                         });
                     }
-                    if(e.touches.length==2) {
+                    if(e.touches.length===2) {
                         setGesture2({
                             isXDrag:Math.abs(e.touches[0].clientX-e.touches[1].clientX)>100,
                             isYDrag:Math.abs(e.touches[0].clientY-e.touches[1].clientY)>100,

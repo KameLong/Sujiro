@@ -10,12 +10,12 @@ import {
     ListItem,
     TextField
 } from "@mui/material";
-import {Add, Home} from "@mui/icons-material";
+import {Add} from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import React, {useEffect, useState} from "react";
 import {getAuth} from "firebase/auth";
 import axios from "axios";
-import {Route, Station} from "../SujiroData/DiaData";
+import {Route} from "../SujiroData/DiaData";
 import {auth} from "../firebase";
 import { GiRailway } from "react-icons/gi";
 export interface RouteListViewProps {
@@ -46,7 +46,7 @@ export default function RouteListView({companyID}:RouteListViewProps) {
                 console.error("ログインされていない");
             }
         });
-    }, []);
+    },[]);
 
     return (
         <>
@@ -116,7 +116,6 @@ export default function RouteListView({companyID}:RouteListViewProps) {
             <Dialog open={openEditRouteDialog} onClose={()=>{setOpenEditRouteDialog(false);}}>
                 <RouteEdit close={async()=>{
                     setOpenEditRouteDialog(false);
-                    const token=await getAuth().currentUser?.getIdToken();
                     await loadRouteFromServer();
 
 

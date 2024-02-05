@@ -45,7 +45,7 @@ export default function StationListView({companyID}:StationListViewProps) {
                 console.error("ログインされていない");
             }
         });
-    }, []);
+    },[]);
 
     return (
         <>

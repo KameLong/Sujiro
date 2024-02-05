@@ -1,8 +1,6 @@
-import React, {Dispatch, SetStateAction, useContext} from "react";
+import React from "react";
 import style from "../TimeTablePage.module.css";
 import {Station, StopTime} from "../../SujiroData/DiaData";
-import {Button, Checkbox, Dialog, DialogTitle, List, ListItem, ListItemButton} from "@mui/material";
-import axios from "axios";
 import {time2Str, TimeTableTrip} from "../TimeTableData";
 import {Text, View} from "@react-pdf/renderer";
 interface TrainViewProps {
@@ -113,7 +111,7 @@ function PDFTrainView({trip,stations,direct,width,lineHeight}:TrainViewProps) {
                             </div>:null
                         }
                         {
-                            (station.style & 0x03) == 3 ?
+                            (station.style & 0x03) === 3 ?
                                 <div style={{borderBottom: "0.5px solid #000"}}></div>
                                 : null
                         }

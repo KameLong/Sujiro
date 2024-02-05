@@ -1,26 +1,10 @@
-import React, { useEffect, useState} from 'react';
-import {
-    Button, Card, CardActions, CardContent, Container,
-    Dialog, DialogContent, DialogTitle,
-    Grid, Paper, DialogActions, TextField, Tabs, useTheme, Tab, List, ListItem, Fab, Divider,
-} from '@mui/material';
-import axios from "axios";
-import {Add, Home, Settings} from "@mui/icons-material";
-
-import {
-    auth
-} from '../firebase';
+import React from 'react';
+import {Container, Paper, Tabs, useTheme, Tab} from '@mui/material';
 import Typography from "@mui/material/Typography";
-import {Company, Station} from "../SujiroData/DiaData";
-import {getAuth} from "firebase/auth";
 import Box from "@mui/material/Box";
-import {useParams} from "react-router-dom";
 import StationListView from "./StationListView";
 import {useRequiredParams} from "../Hooks/useRequiredParams";
 import RouteListView from "./RouteListView";
-
-
-
 function a11yProps(index: number) {
     return {
         id: `full-width-tab-${index}`,
@@ -36,9 +20,7 @@ function CompanyPage() {
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
     };
-    const handleChangeIndex = (index: number) => {
-        setValue(index);
-    };
+
 
 
     return (

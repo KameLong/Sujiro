@@ -1,14 +1,13 @@
-import React, {useEffect, useState} from "react";
+import React from "react";
 import style from "./TimeTablePage.module.css";
 import {Station} from "../SujiroData/DiaData";
-import {Checkbox} from "@mui/material";
 
 interface StationViewProps {
     stations:Station[];
     direct:number;
 }
 function StationView({stations,direct}:StationViewProps){
-    const showStations=(direct==0)?stations: [...stations].reverse();
+    const showStations=(direct===0)?stations: [...stations].reverse();
     return (
         <div className={style.stationListView}>
             <div style={{textAlign: "center"}}>

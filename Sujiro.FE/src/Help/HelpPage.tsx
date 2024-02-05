@@ -1,6 +1,5 @@
 import React from 'react';
 import {Box, Card, CardContent} from "@mui/material";
-import {Title} from "@mui/icons-material";
 
 
 function HelpPage() {

@@ -1,7 +1,7 @@
-import React, {Dispatch, SetStateAction, useContext} from "react";
+import React, {Dispatch, SetStateAction} from "react";
 import style from "./TimeTablePage.module.css";
 import {Station, StopTime} from "../SujiroData/DiaData";
-import {Button, Checkbox, Dialog, DialogTitle, List, ListItem, ListItemButton} from "@mui/material";
+import {Button, Dialog, DialogTitle, List, ListItem} from "@mui/material";
 import axios from "axios";
 import {time2Str, TimeTableTrip} from "./TimeTableData";
 import {TimetableSelected} from "./TimeTablePage";
@@ -165,7 +165,7 @@ function TrainView({trip,stations,direct,selected,setSelected,onDoubleClick}:Tra
                             </div>:null
                         }
                         {
-                            (station.style & 0x03) == 3 ?
+                            (station.style & 0x03) === 3 ?
                                 <div style={{borderBottom: "1px solid #000"}}></div>
                                 : null
                         }
