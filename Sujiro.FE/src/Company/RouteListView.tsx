@@ -80,8 +80,9 @@ export default function RouteListView({companyID}:RouteListViewProps) {
                     <List>
                         <ListItem>
                             <Button  onClick={()=>{
-                                setOpenActionRouteDialog(false);
-                                setOpenEditRouteDialog(true);
+                                window.location.href=`/route/${companyID}/${editRoute?.routeID}`
+                                // setOpenActionRouteDialog(false);
+                                // setOpenEditRouteDialog(true);
                             }}>編集する</Button>
                         </ListItem>
                         <ListItem>

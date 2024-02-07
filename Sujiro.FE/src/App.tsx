@@ -24,6 +24,7 @@ import {TimeTablePDF} from "./TimeTable/TimeTablePDF/TimeTablePDF";
 import Signin from './Auth/Signin';
 import CompanyListPage from "./Company/CompanyListPage";
 import CompanyPage from "./Company/CompanyPage";
+import RoutePage from "./Route/RoutePage";
 
 
 
@@ -157,7 +158,7 @@ function App() {
           >
               <Toolbar variant="dense" />
                    <Routes >
-                       <Route path="/" element={<DiagramPage/>}/>
+                       <Route path="/" element={<CompanyListPage/>}/>
                        <Route path="login" element={<Signin/>}/>
                        <Route path="/Diagram" element={<DiagramPage/>}></Route>
                        <Route path="/TimeTable/:direct" element={<TimeTablePage/>}></Route>
@@ -165,6 +166,7 @@ function App() {
                        <Route path="/TimeTablePDF/:direct" element={<TimeTablePDF/>}></Route>
                        <Route path="/Company" element={<CompanyListPage/>}> </Route>
                        <Route path="/Company/:companyID" element={<CompanyPage/>}> </Route>
+                       <Route path="/Route/:companyID/:routeID" element={<RoutePage/>}> </Route>
                    </Routes>
           </Box>
       </Box>

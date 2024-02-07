@@ -9,6 +9,14 @@ export interface Route{
     name:string;
     color:string;
 }
+export interface RouteStation{
+    routeStationID:number;
+    routeID:number;
+    stationID:number;
+    order:number;
+    stopType:number;
+
+}
 export interface Trip{
     tripID:number;
     direct:number;
