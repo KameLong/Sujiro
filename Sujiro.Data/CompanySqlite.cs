@@ -21,6 +21,9 @@ namespace Sujiro.Data
                 command=conn.CreateCommand();
                 command.CommandText =Station.CreateTableSqlite();
                 command.ExecuteNonQuery();
+                command = conn.CreateCommand();
+                command.CommandText = RouteStation.CreateTableSqlite();
+                command.ExecuteNonQuery();
                 tran.Commit();
             }
         }

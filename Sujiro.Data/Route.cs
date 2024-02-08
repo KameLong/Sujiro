@@ -21,10 +21,15 @@ namespace Sujiro.Data
         }
         public Route(SqliteDataReader reader)
         {
+            loadSqlite(reader);
+        }
+        public void loadSqlite(SqliteDataReader reader)
+        {
             RouteID = (long)reader["routeID"];
             Name = (string)reader["name"];
             CompanyID = (long)reader["companyID"];
         }
+
         public static string CreateTableSqlite()
         {
             return $"create table {TABLE_NAME} (routeID integer primary key not null,name text,companyID integer)";
@@ -78,6 +83,29 @@ namespace Sujiro.Data
             }
             return routes;
         }
+        public static T? GetRoute<T>(string dbPath, long routeID) where T : Route,new()
+        {
+            using (var conn = new SqliteConnection("Data Source=" + dbPath))
+            {
+                conn.Open();
+                var command = conn.CreateCommand();
+                command.CommandText = @$"SELECT * FROM {TABLE_NAME} where routeID=:routeID";
+                command.Parameters.Add(new SqliteParameter(":routeID", routeID));
+                using (var reader = command.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        T route = new T();
+                        route.loadSqlite(reader);
+                        return route;
+                    }
+                }
+                conn.Close();
+            }
+            return null;
+        }
+
+
 
 
     }

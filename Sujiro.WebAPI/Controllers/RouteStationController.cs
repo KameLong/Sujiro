@@ -39,7 +39,50 @@ namespace Sujiro.WebAPI.Controllers
                 return BadRequest(e.Message);
             }
         }
-
+        [HttpPut("{companyID}")]
+        public async Task<ActionResult> Put(long companyID, [FromBody]RouteStation routeStation)
+        {
+            if (!AuthService.HasAccessPrivileges(Configuration["ConnectionStrings:DBdir"], User, companyID))
+            {
+                return Forbid();
+            }
+            try
+            {
+                string filePath = Configuration["ConnectionStrings:DBdir"] + $"company_{companyID}.sqlite";
+                if (!System.IO.File.Exists(filePath))
+                {
+                    return NotFound();
+                }
+                RouteStation.PutRouteStation(filePath, routeStation);
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+        [HttpDelete("{companyID}/{routeStationID}")]
+        public async Task<ActionResult> Delete(long companyID, long routeStationID)
+        {
+            if (!AuthService.HasAccessPrivileges(Configuration["ConnectionStrings:DBdir"], User, companyID))
+            {
+                return Forbid();
+            }
+            try
+            {
+                string filePath = Configuration["ConnectionStrings:DBdir"] + $"company_{companyID}.sqlite";
+                if (!System.IO.File.Exists(filePath))
+                {
+                    return NotFound();
+                }
+                RouteStation.DeleteRouteStation(filePath, routeStationID);
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
 
     }
 }

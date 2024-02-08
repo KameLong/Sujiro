@@ -10,12 +10,12 @@ import {
     ListItem,
     TextField
 } from "@mui/material";
-import {Add} from "@mui/icons-material";
+import {Add, Home} from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import React, {useEffect, useState} from "react";
 import {getAuth} from "firebase/auth";
 import axios from "axios";
-import {Route, RouteStation} from "../SujiroData/DiaData";
+import {Route, RouteStation, Station} from "../SujiroData/DiaData";
 import {auth} from "../firebase";
 import { GiRailway } from "react-icons/gi";
 import {useRequiredParams} from "../Hooks/useRequiredParams";
@@ -26,26 +26,46 @@ export default function RoutePage({}:RoutePageProps) {
     const {routeID} = useRequiredParams<{ routeID: string }>();
 
     const [route,setRoute]=useState<EditRoute|undefined>(undefined);
+    const [stations,setStations]=useState<Station[]>([]);
+    const [openInsertStationDialog,setOpenInsertStationDialog]=useState(false);
+    const [openChangeStationDialog,setOpenChangeStationDialog]=useState(false);
+    const [openSelectStationDialog,setOpenSelectStationDialog]=useState(false);
+    const [insertRouteStation,setInsertRouteStation]=useState<RouteStation|undefined>(undefined);
 
 
     // const [openEditRouteDialog,setOpenEditRouteDialog]=useState(false);
     // const [openActionRouteDialog,setOpenActionRouteDialog]=useState(false);
     const loadRouteFromServer=async()=>{
         const token=await getAuth().currentUser?.getIdToken();
-        axios.get(`${process.env.REACT_APP_SERVER_URL}/api/route/${companyID}?timestamp=${new Date().getTime()}`,
+        axios.get(`${process.env.REACT_APP_SERVER_URL}/api/RouteEditPage/${companyID}/${routeID}?timestamp=${new Date().getTime()}`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             }
         ).then(res => {
-//            setRoute(res.data);
+            console.log(res.data);
+            setRoute(res.data);
+        })
+    }
+    const loadStationFromServer=async()=>{
+        const token=await getAuth().currentUser?.getIdToken();
+        axios.get(`${process.env.REACT_APP_SERVER_URL}/api/station/${companyID}?timestamp=${new Date().getTime()}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        ).then(res => {
+            console.log(res.data)
+            setStations(res.data);
         })
     }
     useEffect(() => {
         auth.onAuthStateChanged((user) => {
             if (user) {
                 loadRouteFromServer();
+                loadStationFromServer();
             }else{
                 console.error("ログインされていない");
             }
@@ -60,6 +80,11 @@ export default function RoutePage({}:RoutePageProps) {
     if(route===undefined){
         return <>route is undefined</>
     }
+    const appendStation=(routeStation:RouteStation|undefined)=>{
+        setInsertRouteStation(routeStation);
+        setOpenInsertStationDialog(true);
+
+    }
 
     return (
         <>
@@ -68,63 +93,104 @@ export default function RoutePage({}:RoutePageProps) {
                 <Divider  component="li" />
                 {route.routeStations.map((routeStation) => {
                     return (<><ListItem onClick={()=>{
-                    }}><GiRailway /><span>{routeStation.stationID}</span>
-                    </ListItem><Divider  component="li" /></>)
+                        setInsertRouteStation(routeStation);
+                        setOpenSelectStationDialog(true);
+                    }}><Home /><span>{stations.find(station=>station.stationID===routeStation.stationID)?.name}</span>
+                    </ListItem><Divider  component="li" />
+                    </>)
                 })}
+                <Button onClick={()=>appendStation(undefined)}>新規追加</Button>
+
             </List>
 
-            {/*<Dialog open={openActionRouteDialog}　onClose={()=>{setOpenActionRouteDialog(false)}}>*/}
-            {/*    <DialogTitle>{route?.name??""}</DialogTitle>*/}
-            {/*    <DialogContent>*/}
-            {/*        <List>*/}
-            {/*            <ListItem>*/}
-            {/*                <Button  onClick={()=>{*/}
-            {/*                    setOpenActionRouteDialog(false);*/}
-            {/*                    setOpenEditRouteDialog(true);*/}
-            {/*                }}>編集する</Button>*/}
-            {/*            </ListItem>*/}
-            {/*            <ListItem>*/}
-            {/*                <Button  onClick={async()=>{*/}
-            {/*                    const token=await getAuth().currentUser?.getIdToken();*/}
-            {/*                    const deleteAction=await axios.delete(`${process.env.REACT_APP_SERVER_URL}/api/route/${companyID}/${route?.routeID}`,*/}
-            {/*                        {*/}
-            {/*                            headers: {*/}
-            {/*                                Authorization: `Bearer ${token}`*/}
-            {/*                            }*/}
-            {/*                        }*/}
-            {/*                    );*/}
-            {/*                    switch (deleteAction.status) {*/}
-            {/*                        case 200:*/}
-            {/*                            console.log("削除成功");*/}
-            {/*                            break;*/}
-            {/*                        case 404:*/}
-            {/*                            console.log("削除失敗");*/}
-            {/*                            break;*/}
-            {/*                        default:*/}
-            {/*                            console.log("削除失敗");*/}
-            {/*                            break;*/}
-            {/*                    }*/}
-            {/*                    await loadRouteFromServer();*/}
-            {/*                    setOpenActionRouteDialog(false);*/}
-            {/*                }}>削除する</Button>*/}
-            {/*            </ListItem>*/}
-            {/*        </List>*/}
+            <Dialog open={openInsertStationDialog}　onClose={()=>{setOpenInsertStationDialog(false)}}>
+                <DialogTitle>追加する駅を選択</DialogTitle>
+                <StationSelector stations={stations} onSelectStation={async (station:Station)=>{
+                    console.log(station);
+                    setOpenInsertStationDialog(false);
+                    const token = await getAuth().currentUser?.getIdToken();
 
-            {/*    </DialogContent>*/}
-            {/*</Dialog>*/}
-            {/*<Dialog open={openEditRouteDialog} onClose={()=>{setOpenEditRouteDialog(false);}}>*/}
-            {/*    <RouteEdit close={async()=>{*/}
-            {/*        setOpenEditRouteDialog(false);*/}
-            {/*        await loadRouteFromServer();*/}
+                    axios.put(`${process.env.REACT_APP_SERVER_URL}/api/RouteEditPage/insert/${companyID}/${routeID}`,{stationID:station.stationID,routeStationID:insertRouteStation?.routeStationID} ,
+                        {                headers: {
+                                Authorization: `Bearer ${token}`
+                            }
+                        })
+                        .then(res=>{
+                            loadRouteFromServer();
+                        }
+                        )
+                }}/>
+            </Dialog>
+            <Dialog open={openChangeStationDialog}　onClose={()=>{setOpenChangeStationDialog(false)}}>
+                <DialogTitle>変更する駅を選択</DialogTitle>
+                <StationSelector stations={stations} onSelectStation={async (station:Station)=>{
+                    console.log(station);
+                    setOpenChangeStationDialog(false);
+                    const token = await getAuth().currentUser?.getIdToken();
+                    if(insertRouteStation===undefined) {
+                        console.error("おかしい");
+                        return;
+                    }
+                    const routeStation={...insertRouteStation,stationID:station.stationID};
+                    await axios.put(`${process.env.REACT_APP_SERVER_URL}/api/RouteStation/${companyID}`, routeStation,
+                        {                headers: {
+                                Authorization: `Bearer ${token}`
+                            }
+                        })
+                                loadRouteFromServer();
+                }}/>
+            </Dialog>
+            <Dialog open={openSelectStationDialog} onClose={()=>{setOpenSelectStationDialog(false);}}>
+                <List>
+                    <ListItem>
+                        <Button onClick={()=>{
+                            console.log(insertRouteStation);
+                            appendStation(insertRouteStation);
 
+                            setOpenSelectStationDialog(false);
+                        }}>駅を挿入する</Button>
+                    </ListItem>
+                    <ListItem>
+                        <Button onClick={()=>{
+                            setOpenChangeStationDialog(true);
 
-            {/*    }} route={route} companyID={companyID}/>*/}
+                            setOpenSelectStationDialog(false);
+                        }}>駅を変更する</Button>
+                    </ListItem>
+                    <ListItem>
+                        <Button onClick={async ()=>{
+                            await axios.delete(`${process.env.REACT_APP_SERVER_URL}/api/RouteStation/${companyID}/${insertRouteStation?.routeStationID}`,{headers: {Authorization: `Bearer ${await getAuth().currentUser?.getIdToken()}`}});
+                            loadRouteFromServer();
+                            setOpenSelectStationDialog(false);
+                        }}>駅を削除する</Button>
+                    </ListItem>
+                </List>
 
-            {/*</Dialog>*/}
+            </Dialog>
 
         </>
     )
 }
+
+interface StationSelectorProps {
+    stations:Station[];
+    onSelectStation:(station:Station)=>void;
+}
+function StationSelector({stations,onSelectStation}:StationSelectorProps){
+    return(
+            <DialogContent>
+                <List>
+                    {stations.map((station)=>{
+                        return (<ListItem onClick={async()=>{
+                            onSelectStation(station);
+                        }}>{station.name}</ListItem>)
+                    })}
+                </List>
+
+            </DialogContent>
+    )
+}
+
 
 interface RouteEditProps {
     close:()=>void;
