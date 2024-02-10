@@ -30,7 +30,7 @@
          */
         public static long NextSafeLong()
         {
-            return random.NextInt64((1 << 53) - 1);
+            return random.NextInt64((1L << 53) - 1);
         }
     }
 }

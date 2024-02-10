@@ -12,6 +12,7 @@ namespace Sujiro.Data
 
         public long TripID { get; set; }
         public long TrainID { get; set; }
+        public long RouteID { get; set; } = 0;
         public long TypeID { get; set; } = 0;
 
         public long direct { get; set; } = 0;
@@ -30,6 +31,7 @@ namespace Sujiro.Data
             return $@"create table {TABLE_NAME} (
                 tripID integer primary key not null,
                 trainID integer not null,
+                routeID integer not null default 0,
                 direct integer not null default 0,
                 name text not null default '',
                 number text not null default '',
@@ -40,26 +42,32 @@ namespace Sujiro.Data
         
         public void Replace(ref SqliteCommand command)
         {
-            command.CommandText = $@"REPLACE INTO {TABLE_NAME} (tripID,trainID,direct,name,number,typeID,seq)values(:tripID,:trainID,:direct,:name,:number,:type,:seq)";
+            command.CommandText = $@"REPLACE INTO {TABLE_NAME} (tripID,trainID,routeID,direct,name,number,typeID,seq)values(:tripID,:trainID,:routeID,:direct,:name,:number,:typeID,:seq)";
             command.Parameters.Add(new SqliteParameter(":tripID", TripID));
             command.Parameters.Add(new SqliteParameter(":trainID", TrainID));
+            command.Parameters.Add(new SqliteParameter(":routeID", RouteID));
             command.Parameters.Add(new SqliteParameter(":direct", direct));
             command.Parameters.Add(new SqliteParameter(":name", Name));
             command.Parameters.Add(new SqliteParameter(":number", Number));
             command.Parameters.Add(new SqliteParameter(":typeID", TypeID));
             command.Parameters.Add(new SqliteParameter(":seq", Seq));
         }
+        public static void ReplaceTrip(string dbPath,Trip trip)
+        {
+            using (var conn = new SqliteConnection("Data Source=" + dbPath))
+            {
+                conn.Open();
+                var command = conn.CreateCommand();
+                trip.Replace(ref command);
+                command.ExecuteNonQuery();
+                conn.Close();
+            }
+        }
         public Trip(SqliteDataReader reader)
         {
             TripID = (long)reader["tripID"];
-            if (reader["number"] != DBNull.Value)
-            {
-                Number = (string)(reader["number"] ?? "");
-            }
-            if (reader["name"] != DBNull.Value)
-            {
-                Name = (string)(reader["name"] ?? "");
-            }
+            Number = (string)(reader["number"]);
+            Name = (string)(reader["name"]);
             direct = (int)(long)reader["direct"];
             TypeID = (int)(long)reader["typeID"];
             Seq = (int)(long)reader["seq"];

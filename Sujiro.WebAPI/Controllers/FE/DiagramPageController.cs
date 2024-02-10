@@ -81,7 +81,7 @@ namespace Sujiro.WebAPI.Controllers
                         $@"SELECT * FROM {StopTime.TABLE_NAME} 
                             inner join {Trip.TABLE_NAME} on {StopTime.TABLE_NAME}.{nameof(StopTime.tripID)}={Trip.TABLE_NAME}.tripID
                             order by {StopTime.TABLE_NAME}.{nameof(StopTime.tripID)},
-                            {StopTime.TABLE_NAME}.{nameof(StopTime.stationID)}";
+                            {StopTime.TABLE_NAME}.{nameof(StopTime.routeStationID)}";
                     using (var reader = command.ExecuteReader())
                     {
                         DiagramTrip? trip = null;
@@ -102,7 +102,7 @@ namespace Sujiro.WebAPI.Controllers
                             }
                             StopTime stopTime = new StopTime(reader);
                             trip.stopTimes.Add(stopTime);
-                            trip.trainType= trainTypes.Find(x => x.TrainTypeID == trip.Type);
+                            trip.trainType= trainTypes.Find(x => x.TrainTypeID == trip.TypeID);
                         }
                     }
                     for(var i = 0; i < result.stations.Count-1; i++)

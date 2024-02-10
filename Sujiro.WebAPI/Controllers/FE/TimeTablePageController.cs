@@ -96,7 +96,7 @@ namespace Sujiro.WebAPI.Controllers
                             if(trip == null || trip.TripID != (long)reader["tripID"])
                             {
                                 trip = new TimetableTrip(reader);
-                                trip.trainType = trainTypes.Find(x => x.TrainTypeID == trip.Type);
+                                trip.trainType = trainTypes.Find(x => x.TrainTypeID == trip.TypeID);
                                 result.trips.Add(trip);
                             }
                             StopTime stopTime = new StopTime(reader);
@@ -127,12 +127,12 @@ namespace Sujiro.WebAPI.Controllers
                     conn.Open();
                     var tran = conn.BeginTransaction();
                     var command = conn.CreateCommand();
-                    trip.Update(ref command);
+                    trip.Replace(ref command);
                     command.ExecuteNonQuery();
                     foreach(var stopTime in trip.stopTimes)
                     {
                         var command2 = conn.CreateCommand();
-                        stopTime.Update(ref command2);
+                        stopTime.Replace(ref command2);
                         try
                         {
                             command2.ExecuteNonQuery();
@@ -185,7 +185,7 @@ namespace Sujiro.WebAPI.Controllers
                     command.Parameters.Add(new SqliteParameter(":direct", trip.direct));
                     command.Parameters.Add(new SqliteParameter(":name", trip.Name));
                     command.Parameters.Add(new SqliteParameter(":number", trip.Number));
-                    command.Parameters.Add(new SqliteParameter(":type", trip.Type));
+                    command.Parameters.Add(new SqliteParameter(":type", trip.TypeID));
                     command.Parameters.Add(new SqliteParameter(":seq", seq));
                     command.ExecuteNonQuery();
                     foreach (var stop in trip.stopTimes)
@@ -193,7 +193,7 @@ namespace Sujiro.WebAPI.Controllers
                         command=    conn.CreateCommand();
                         command.CommandText = $"INSERT INTO {StopTime.TABLE_NAME} (tripID,stationID,ariTime,depTime,stopType) VALUES (:tripID,:stationID,:ariTime,:depTime,:stopType)";
                         command.Parameters.Add(new SqliteParameter(":tripID", trip.TripID));
-                            command.Parameters.Add(new SqliteParameter(":stationID", stop.stationID));
+                            command.Parameters.Add(new SqliteParameter(":stationID", stop.routeStationID));
                         command.Parameters.Add(new SqliteParameter(":ariTime", stop.ariTime));
                         command.Parameters.Add(new SqliteParameter(":depTime", stop.depTime));
                         command.Parameters.Add(new SqliteParameter(":stopType", stop.stopType));

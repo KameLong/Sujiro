@@ -66,5 +66,24 @@ namespace Sujiro.Data
                 conn.Close();
             }
         }
+        public static List<TrainType>GetAllTrainType(string dbPath)
+        {
+            List<TrainType> trainTypes = new List<TrainType>();
+            using (var conn = new SqliteConnection("Data Source=" + dbPath))
+            {
+                conn.Open();
+                var command = conn.CreateCommand();
+                command.CommandText = $@"SELECT * FROM {TABLE_NAME}";
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        trainTypes.Add(new TrainType(reader));
+                    }
+                }
+                conn.Close();
+            }
+            return trainTypes;
+        }
     }
 }

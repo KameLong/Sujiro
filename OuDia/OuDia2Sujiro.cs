@@ -76,13 +76,13 @@ namespace OuDia
                 trip.direct = 0;
                 trip.Name = train.Name;
                 trip.Number = train.Number;
-                trip.Type = train.Type;
+                trip.TypeID = train.Type;
                 routeContext.trips.Add(trip);
                 for (int i = 0; i < train.times.Count; i++)
                 {
                     StopTime stopTime = new StopTime();
                     stopTime.tripID = trip.TripID;
-                    stopTime.stationID =i;
+                    stopTime.routeStationID =i;
                     stopTime.ariTime = train.times[i].AriTime;
                     stopTime.depTime = train.times[i].DepTime;
                     stopTime.stopType = train.times[i].StopType;
@@ -99,13 +99,13 @@ namespace OuDia
                 trip.direct = 1;
                 trip.Name = train.Name;
                 trip.Number = train.Number;
-                trip.Type = train.Type;
+                trip.TypeID = train.Type;
                 routeContext.trips.Add(trip);
                 for (int i = 0; i < train.times.Count; i++)
                 {
                     StopTime stopTime = new StopTime();
                     stopTime.tripID = trip.TripID;
-                    stopTime.stationID = route.Stations.Count- i-1;
+                    stopTime.routeStationID = route.Stations.Count- i-1;
                     stopTime.ariTime = train.times[i].AriTime;
                     stopTime.depTime = train.times[i].DepTime;
                     stopTime.stopType = train.times[i].StopType;
