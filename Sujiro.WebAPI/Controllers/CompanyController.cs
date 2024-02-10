@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using OuDia;
 using Sujiro.Data;
+using Sujiro.Data.Common;
 using Sujiro.WebAPI.SignalR;
 using System.ComponentModel.Design;
 using System.Diagnostics;

@@ -1,5 +1,6 @@
 import {
-    Button,
+    Backdrop,
+    Button, CircularProgress,
     Dialog,
     DialogActions,
     DialogContent,
@@ -19,6 +20,7 @@ import {Route, RouteStation, Station} from "../SujiroData/DiaData";
 import {auth} from "../firebase";
 import { GiRailway } from "react-icons/gi";
 import {useRequiredParams} from "../Hooks/useRequiredParams";
+import AlertView from "../Common/AlertView";
 export interface RoutePageProps {
 }
 export default function RoutePage({}:RoutePageProps) {
@@ -32,9 +34,9 @@ export default function RoutePage({}:RoutePageProps) {
     const [openSelectStationDialog,setOpenSelectStationDialog]=useState(false);
     const [insertRouteStation,setInsertRouteStation]=useState<RouteStation|undefined>(undefined);
 
+    const [loading,setLoading]=useState(true);
+    const [isLogout,setIsLogout]=useState(false);
 
-    // const [openEditRouteDialog,setOpenEditRouteDialog]=useState(false);
-    // const [openActionRouteDialog,setOpenActionRouteDialog]=useState(false);
     const loadRouteFromServer=async()=>{
         const token=await getAuth().currentUser?.getIdToken();
         axios.get(`${process.env.REACT_APP_SERVER_URL}/api/RouteEditPage/${companyID}/${routeID}?timestamp=${new Date().getTime()}`,
@@ -44,7 +46,6 @@ export default function RoutePage({}:RoutePageProps) {
                 }
             }
         ).then(res => {
-            console.log(res.data);
             setRoute(res.data);
         })
     }
@@ -62,12 +63,14 @@ export default function RoutePage({}:RoutePageProps) {
         })
     }
     useEffect(() => {
-        auth.onAuthStateChanged((user) => {
+        auth.onAuthStateChanged(async (user) => {
             if (user) {
-                loadRouteFromServer();
-                loadStationFromServer();
+                const loadRoute=loadRouteFromServer();
+                const loadStation=loadStationFromServer();
+                await Promise.all([loadRoute,loadStation]);
+                setLoading(false);
             }else{
-                console.error("ログインされていない");
+                setIsLogout(true);
             }
         });
     },[]);
@@ -78,7 +81,9 @@ export default function RoutePage({}:RoutePageProps) {
     }
 
     if(route===undefined){
-        return <>route is undefined</>
+        return (
+            <AlertView loading={loading} isLogout={isLogout}/>
+        );
     }
     const appendStation=(routeStation:RouteStation|undefined)=>{
         setInsertRouteStation(routeStation);
@@ -88,7 +93,7 @@ export default function RoutePage({}:RoutePageProps) {
 
     return (
         <>
-            <TextField fullWidth={true} label={"路線名"}  value={route?.name??""} onChange={e=>setRouteName(e.target.value)}/>
+            <TextField fullWidth={true} label={"路線名"}  value={route.name} onChange={e=>setRouteName(e.target.value)}/>
             <List style={{maxHeight: '100%', overflow: 'auto'}}>
                 <Divider  component="li" />
                 {route.routeStations.map((routeStation) => {
@@ -159,14 +164,17 @@ export default function RoutePage({}:RoutePageProps) {
                     </ListItem>
                     <ListItem>
                         <Button onClick={async ()=>{
+                            setLoading(true);
                             await axios.delete(`${process.env.REACT_APP_SERVER_URL}/api/RouteStation/${companyID}/${insertRouteStation?.routeStationID}`,{headers: {Authorization: `Bearer ${await getAuth().currentUser?.getIdToken()}`}});
-                            loadRouteFromServer();
+                            await loadRouteFromServer();
                             setOpenSelectStationDialog(false);
+                            setLoading(false);
                         }}>駅を削除する</Button>
                     </ListItem>
                 </List>
 
             </Dialog>
+            <AlertView loading={loading} isLogout={isLogout}/>
 
         </>
     )
@@ -215,6 +223,7 @@ function RouteEdit({close,route,companyID}:RouteEditProps){
             <DialogActions>
                 <Button  onClick={async() => {
                     if(routeName.length>0) {
+
                         const route2={...route};
                         route2.name=routeName;
                         const token=await getAuth().currentUser?.getIdToken();

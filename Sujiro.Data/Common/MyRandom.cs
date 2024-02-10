@@ -1,4 +1,4 @@
-﻿namespace Sujiro.Data
+﻿namespace Sujiro.Data.Common
 {
     public static class MyRandom
     {

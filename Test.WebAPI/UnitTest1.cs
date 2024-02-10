@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
-using Sujiro.Data;
+using Sujiro.Data.Common;
 
 namespace Test.WebAPI
 {

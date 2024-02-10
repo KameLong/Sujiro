@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
+using Sujiro.Data.Common;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,6 +19,21 @@ namespace Sujiro.Data
         public long RouteID { get; set; } = 0;
         public long StationID { get; set; } = 0;
         public int Seq { get; set; } = 0;
+        /*
+         *bit　単位で役割を切り替えます。
+         *0:下り発時刻
+         *1:下り発着番線
+         *2:下り着時刻
+         *3-7 下り時刻表予備
+         *8:上り発時刻
+         *9:上り発着番線
+         *10:上り着時刻
+         *11-15:上り時刻表予備
+         *16-23:ダイヤグラム予備
+         *24:主要駅
+         *
+         */
+        public int Style { get; set; } = 0;
         public RouteStation()
         {
             RouteStationID = MyRandom.NextSafeLong();
@@ -28,18 +44,21 @@ namespace Sujiro.Data
             RouteID = (long)reader["routeID"];
             StationID = (long)reader["stationID"];
             Seq = (int)(long)reader["seq"];
+            Style = (int)(long)reader["style"];
         }
         public static string CreateTableSqlite()
         {
-            return $"create table {TABLE_NAME} (routestationID integer PRIMARY KEY,routeID integer not null,stationID integer not null,seq integer default 0)";
+            return $"create table {TABLE_NAME} (routestationID integer PRIMARY KEY,routeID integer not null,stationID integer not null,seq integer default 0,style interger not null default 0)";
         }
         public void ReplaceSqlite(ref SqliteCommand command)
         {
-            command.CommandText = @$"REPLACE INTO {TABLE_NAME} (routeStationID,routeID,stationID,seq) VALUES (:routeStationID,:routeID,:stationID,:seq)";
+            command.CommandText = @$"REPLACE INTO {TABLE_NAME} (routeStationID,routeID,stationID,seq,style) VALUES (:routeStationID,:routeID,:stationID,:seq,:style)";
             command.Parameters.Add(new SqliteParameter(":routeStationID", RouteStationID));
             command.Parameters.Add(new SqliteParameter(":routeID", RouteID));
             command.Parameters.Add(new SqliteParameter(":stationID", StationID));
             command.Parameters.Add(new SqliteParameter(":seq", Seq));
+            command.Parameters.Add(new SqliteParameter(":style", Style));
+
         }
         public static void PutRouteStation(string dbPath, RouteStation routeStation)
         {

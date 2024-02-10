@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
+using Sujiro.Data.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;

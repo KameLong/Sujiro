@@ -5,21 +5,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sujiro.Data
+namespace Sujiro.Data.Common
 {
     public class CompanySqlite
     {
-        public static void CreateCompanySqlite(string DBdir,long companyID)
+        public static void CreateCompanySqlite(string DBdir, long companyID)
         {
-            using (var conn = new SqliteConnection("Data Source=" + DBdir+"company_"+companyID+".sqlite"))
+            using (var conn = new SqliteConnection("Data Source=" + DBdir + "company_" + companyID + ".sqlite"))
             {
                 conn.Open();
                 var tran = conn.BeginTransaction();
                 var command = conn.CreateCommand();
-                command.CommandText =Route.CreateTableSqlite();
+                command.CommandText = Route.CreateTableSqlite();
                 command.ExecuteNonQuery();
-                command=conn.CreateCommand();
-                command.CommandText =Station.CreateTableSqlite();
+                command = conn.CreateCommand();
+                command.CommandText = Station.CreateTableSqlite();
                 command.ExecuteNonQuery();
                 command = conn.CreateCommand();
                 command.CommandText = RouteStation.CreateTableSqlite();
