@@ -8,52 +8,69 @@ namespace Sujiro.Data
     public class StopTime
     {
         public const string TABLE_NAME = "stop_times";
-
-        public long? StopTimeID { get; set; }
-        public long? tripID { get; set; } = -1;
-        public long? stationID { get; set; } = -1;
-        public int? ariTime { get; set; } = -1;
-        public int? depTime { get; set; } = -1;
-        public int? stopType { get; set; } = -1;
+        public long StopTimeID { get; set; }
+        public long tripID { get; set; } = 0;
+        public long routeStationID { get; set; } = 0;
+        public long stopID { get; set; } = -1;
+        public int ariTime { get; set; } = -1;
+        public int depTime { get; set; } = -1;
+        public int stopType { get; set; } = -1;
 
         public StopTime()
         {
 
         }
-        public void Update(ref SqliteCommand command)
-        {
-            command.CommandText = @"UPDATE stop_times SET tripID=$tripID,stationID=$stationID,ariTime=$ariTime,depTime=$depTime,stopType=$stopType WHERE stopTimeID=$stopTimeID";
-            command.Parameters.AddWithValue("$stopTimeID", StopTimeID);
-            command.Parameters.AddWithValue("$tripID", tripID);
-            command.Parameters.AddWithValue("$stationID", stationID);
-            command.Parameters.AddWithValue("$ariTime", ariTime);
-            command.Parameters.AddWithValue("$depTime", depTime);
-            command.Parameters.AddWithValue("$stopType", stopType);
-        }
         public StopTime(SqliteDataReader reader)
         {
             StopTimeID = (long)reader["stopTimeID"];
-            tripID= (long)reader["tripID"];
-            stationID = (long)reader["stationID"];
+            tripID = (long)reader["tripID"];
+            routeStationID = (long)reader["routeStationID"];
+            stopID = (long)reader["stopID"];
+
             ariTime = (int)(long)reader["ariTime"];
             depTime = (int)(long)reader["depTime"];
             stopType = (int)(long)reader["stopType"];
         }
+        public static string CreateTableSqlite()
+        {
+            return $@"create table {TABLE_NAME} (
+                stopTimeID integer primary key not null,
+                tripID integer not null default 0,
+                routeStationID integer not null default 0,
+                stopID integer not null default -1, 
+                ariTime integer not null default -1,
+                depTime integer not null default -1,
+                stopType integer not null default -1
+
+                )";
+        }
+
+        public void Replace(ref SqliteCommand command)
+        {
+            command.CommandText = $@"REPLACE INTO {TABLE_NAME} (stopTimeID,tripID,routeStationID,ariTime,depTime,stopType,stopID)values(:stopTimeID,:tripID,:routeStationID,:ariTime,:depTime,:stopType,:stopID)";
+            command.Parameters.Add(new SqliteParameter(":stopTimeID", StopTimeID));
+            command.Parameters.Add(new SqliteParameter(":tripID", tripID));
+            command.Parameters.Add(new SqliteParameter(":routeStationID", routeStationID));
+            command.Parameters.Add(new SqliteParameter(":ariTime", ariTime));
+            command.Parameters.Add(new SqliteParameter(":depTime", depTime));
+            command.Parameters.Add(new SqliteParameter(":stopType", stopType));
+            command.Parameters.Add(new SqliteParameter(":stopID", stopID));
+        }
         public int GetDAtime()
         {
-            if (!(depTime is null) && depTime >= 0)
+            if (depTime >= 0)
             {
-                return depTime ?? -1;
+                return depTime;
             }
-            return ariTime ?? -1;
+            return ariTime;
         }
         public int GetADtime()
         {
-            if (!(ariTime is null) && ariTime >= 0)
+            if (ariTime >= 0)
             {
-                return ariTime ?? -1;
+                return ariTime;
             }
-            return depTime ?? -1;
+            return depTime;
         }
     }
 }

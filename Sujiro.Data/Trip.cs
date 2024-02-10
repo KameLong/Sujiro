@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
+using Sujiro.Data.Common;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Sujiro.Data
@@ -9,26 +10,44 @@ namespace Sujiro.Data
     {
         public const string TABLE_NAME = "trips";
 
-        public long? TripID { get; set; } = -1;
-        public long direct { get; set; } = -1;
-        public string? Name { get; set; } = "";
-        public string? Number { get; set; } = "";
-        public int Type { get; set; } = -1;
+        public long TripID { get; set; }
+        public long TrainID { get; set; }
+        public long TypeID { get; set; } = 0;
+
+        public long direct { get; set; } = 0;
+        public string Name { get; set; } = "";
+        public string Number { get; set; } = "";
 
         public int Seq { get; set; } = -1;
         public Trip()
         {
+            TripID = MyRandom.NextSafeLong();
+            TrainID=MyRandom.NextSafeLong();
 
         }
-        public void Update(ref SqliteCommand command)
+        public static string CreateTableSqlite()
         {
-            command.CommandText = @"UPDATE trips SET direct=$direct,name=$name,number=$number,type=$type,seq=$seq WHERE tripID=$tripID ";
-            command.Parameters.AddWithValue("$tripID", TripID);
-            command.Parameters.AddWithValue("$direct", direct);
-            command.Parameters.AddWithValue("$name", Name);
-            command.Parameters.AddWithValue("$number", Number);
-            command.Parameters.AddWithValue("$type", Type);
-            command.Parameters.AddWithValue("$seq", Seq);
+            return $@"create table {TABLE_NAME} (
+                tripID integer primary key not null,
+                trainID integer not null,
+                direct integer not null default 0,
+                name text not null default '',
+                number text not null default '',
+                typeID integer not null default 0,
+                seq integer not null default -1
+                )";
+        }
+        
+        public void Replace(ref SqliteCommand command)
+        {
+            command.CommandText = $@"REPLACE INTO {TABLE_NAME} (tripID,trainID,direct,name,number,typeID,seq)values(:tripID,:trainID,:direct,:name,:number,:type,:seq)";
+            command.Parameters.Add(new SqliteParameter(":tripID", TripID));
+            command.Parameters.Add(new SqliteParameter(":trainID", TrainID));
+            command.Parameters.Add(new SqliteParameter(":direct", direct));
+            command.Parameters.Add(new SqliteParameter(":name", Name));
+            command.Parameters.Add(new SqliteParameter(":number", Number));
+            command.Parameters.Add(new SqliteParameter(":typeID", TypeID));
+            command.Parameters.Add(new SqliteParameter(":seq", Seq));
         }
         public Trip(SqliteDataReader reader)
         {
@@ -42,7 +61,7 @@ namespace Sujiro.Data
                 Name = (string)(reader["name"] ?? "");
             }
             direct = (int)(long)reader["direct"];
-            Type = (int)(long)reader["type"];
+            TypeID = (int)(long)reader["typeID"];
             Seq = (int)(long)reader["seq"];
 
         }

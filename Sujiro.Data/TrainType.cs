@@ -24,5 +24,47 @@ namespace Sujiro.Data
             ShortName = (string)reader["shortname"];
             color = (string)reader["color"];
         }
+        public static string CreateTableSqlite()
+        {
+            return $"""
+                create table {TABLE_NAME} (
+                trainTypeID integer primary key not null,
+                name text not null default '',
+                shortname text not null default '',
+                color text not null default '#000000')
+                """;
+        }
+        public void ReplaceSqlite(ref SqliteCommand command)
+        {
+            command.CommandText = $@"REPLACE INTO {TABLE_NAME} (trainTypeID,name,shortname,color)values(:trainTypeID,:name,:shortname,:color)";
+            command.Parameters.Add(new SqliteParameter(":trainTypeID", TrainTypeID));
+            command.Parameters.Add(new SqliteParameter(":name", Name));
+            command.Parameters.Add(new SqliteParameter(":shortname", ShortName));
+            command.Parameters.Add(new SqliteParameter(":color", color));
+        }
+        public static void PutTrainType(string dbPath, TrainType trainType)
+        {
+            using (var conn = new SqliteConnection("Data Source=" + dbPath))
+            {
+                conn.Open();
+                var command = conn.CreateCommand();
+                trainType.ReplaceSqlite(ref command);
+                command.ExecuteNonQuery();
+                conn.Close();
+            }
+        }
+        public static void DeleteTrainType(string dbPath, long trainTypeID)
+        {
+            //todo　使用中チェック
+            using (var conn = new SqliteConnection("Data Source=" + dbPath))
+            {
+                conn.Open();
+                var command = conn.CreateCommand();
+                command.CommandText = $@"DELETE FROM {TABLE_NAME} WHERE trainTypeID=:trainTypeID";
+                command.Parameters.Add(new SqliteParameter(":trainTypeID", trainTypeID));
+                command.ExecuteNonQuery();
+                conn.Close();
+            }
+        }
     }
 }

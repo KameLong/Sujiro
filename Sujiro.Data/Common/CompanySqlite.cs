@@ -24,6 +24,15 @@ namespace Sujiro.Data.Common
                 command = conn.CreateCommand();
                 command.CommandText = RouteStation.CreateTableSqlite();
                 command.ExecuteNonQuery();
+                command = conn.CreateCommand();
+                command.CommandText = Trip.CreateTableSqlite();
+                command.ExecuteNonQuery();
+                command = conn.CreateCommand();
+                command.CommandText = TrainType.CreateTableSqlite();
+                command.ExecuteNonQuery();
+                command = conn.CreateCommand();
+                command.CommandText = StopTime.CreateTableSqlite();
+                command.ExecuteNonQuery();
                 tran.Commit();
             }
         }
