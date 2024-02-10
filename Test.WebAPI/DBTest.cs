@@ -44,7 +44,6 @@ namespace Test.WebAPI
             }
             list.Sort();
             Assert.True(list[list.Count - 1] > 1000000000);
-
         }
 
         [Fact]
@@ -103,7 +102,7 @@ namespace Test.WebAPI
         [Fact]
         public void CreateTrainTypes()
         {
-            CreateStations();
+            CreateRouteStations();
             for (int i = 0; i < 10; i++)
             {
                 TrainType trainType = new TrainType();
@@ -121,9 +120,28 @@ namespace Test.WebAPI
             {
                 Trip trip = new Trip();
                 trip.RouteID = routeID;
-                trip.TypeID = i;
+                trip.TypeID = trainType.TrainTypeID;
                 trip.TripID = MyRandom.NextSafeLong();
                 Trip.ReplaceTrip(DBdir + $"company_{companyID}.sqlite", trip);
+            }
+        }
+        [Fact]
+        public void CreateStopTimes()
+        {
+            CreateTrips();
+            var trips = Trip.GetAllTrip(DBdir + $"company_{companyID}.sqlite", routeID).ToList();
+            var routeStations = RouteStation.GetAllRouteStations(DBdir + $"company_{companyID}.sqlite",routeID).ToList();
+            foreach(var trip in trips)
+            {
+                foreach(var routeStation in routeStations)
+                {
+                    StopTime stopTime = new StopTime();
+                    stopTime.ariTime = Random.Shared.Next(); ;
+                    stopTime.depTime = Random.Shared.Next(); ;
+                    stopTime.routeStationID = routeStation.RouteStationID;
+                    stopTime.tripID = trip.TripID;
+                    StopTime.PutStopTime(DBdir + $"company_{companyID}.sqlite", stopTime);
+                }
             }
         }
     }

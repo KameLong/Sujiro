@@ -39,6 +39,23 @@ namespace Sujiro.Data
                 seq integer not null default -1
                 )";
         }
+
+        public static IEnumerable<Trip> GetAllTrip(string dbPath,long  routeID)
+        {
+            using (var conn = new SqliteConnection("Data Source=" + dbPath))
+            {
+                conn.Open();
+                var command = conn.CreateCommand();
+                command.CommandText = $"select * from {TABLE_NAME} where routeID=:routeID";
+                command.Parameters.Add(new SqliteParameter(":routeID", routeID));
+                var reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    yield return new Trip(reader);
+                }
+                conn.Close();
+            }
+        }
         
         public void Replace(ref SqliteCommand command)
         {

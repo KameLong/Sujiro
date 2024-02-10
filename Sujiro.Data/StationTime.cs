@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
+using Sujiro.Data.Common;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Sujiro.Data
@@ -18,6 +19,7 @@ namespace Sujiro.Data
 
         public StopTime()
         {
+            StopTimeID = MyRandom.NextSafeLong();
 
         }
         public StopTime(SqliteDataReader reader)
@@ -55,6 +57,17 @@ namespace Sujiro.Data
             command.Parameters.Add(new SqliteParameter(":depTime", depTime));
             command.Parameters.Add(new SqliteParameter(":stopType", stopType));
             command.Parameters.Add(new SqliteParameter(":stopID", stopID));
+        }
+       public static void PutStopTime(string dbPath, StopTime stopTime)
+        {
+            using (var conn = new SqliteConnection("Data Source=" + dbPath))
+            {
+                conn.Open();
+                var command = conn.CreateCommand();
+                stopTime.Replace(ref command);
+                command.ExecuteNonQuery();
+                conn.Close();
+            }
         }
         public int GetDAtime()
         {
