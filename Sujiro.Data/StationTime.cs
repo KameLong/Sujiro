@@ -47,8 +47,9 @@ namespace Sujiro.Data
                 )";
         }
 
-        public void Replace(ref SqliteCommand command)
+        public void Replace(SqliteConnection conn)
         {
+            var command = conn.CreateCommand();
             command.CommandText = $@"REPLACE INTO {TABLE_NAME} (stopTimeID,tripID,routeStationID,ariTime,depTime,stopType,stopID)values(:stopTimeID,:tripID,:routeStationID,:ariTime,:depTime,:stopType,:stopID)";
             command.Parameters.Add(new SqliteParameter(":stopTimeID", StopTimeID));
             command.Parameters.Add(new SqliteParameter(":tripID", tripID));
@@ -64,9 +65,7 @@ namespace Sujiro.Data
             using (var conn = new SqliteConnection("Data Source=" + dbPath))
             {
                 conn.Open();
-                var command = conn.CreateCommand();
-                stopTime.Replace(ref command);
-                conn.Close();
+                stopTime.Replace(conn);
             }
         }
         public int GetDAtime()

@@ -34,8 +34,9 @@ namespace Sujiro.Data
                 color text not null default '#000000')
                 """;
         }
-        public void ReplaceSqlite(ref SqliteCommand command)
+        public void ReplaceSqlite(SqliteConnection conn)
         {
+            var command = conn.CreateCommand();
             command.CommandText = $@"REPLACE INTO {TABLE_NAME} (trainTypeID,name,shortname,color)values(:trainTypeID,:name,:shortname,:color)";
             command.Parameters.Add(new SqliteParameter(":trainTypeID", TrainTypeID));
             command.Parameters.Add(new SqliteParameter(":name", Name));
@@ -48,8 +49,7 @@ namespace Sujiro.Data
             using (var conn = new SqliteConnection("Data Source=" + dbPath))
             {
                 conn.Open();
-                var command = conn.CreateCommand();
-                trainType.ReplaceSqlite(ref command);
+                trainType.ReplaceSqlite(conn);
             }
         }
         public static void DeleteTrainType(string dbPath, long trainTypeID)
@@ -70,12 +70,12 @@ namespace Sujiro.Data
             using (var conn = new SqliteConnection("Data Source=" + dbPath))
             {
                 conn.Open();
-                var command = conn.CreateCommand();
-                return GetAllTrainType(command);
+                return GetAllTrainType(conn);
             }
         }
-        public static List<TrainType> GetAllTrainType(SqliteCommand command)
+        public static List<TrainType> GetAllTrainType(SqliteConnection conn)
         {
+            var command = conn.CreateCommand();
             List<TrainType> trainTypes = new List<TrainType>();
             command.CommandText = $@"SELECT * FROM {TABLE_NAME}";
             using (var reader = command.ExecuteReader())

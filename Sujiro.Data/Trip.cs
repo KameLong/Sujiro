@@ -24,8 +24,22 @@ namespace Sujiro.Data
         {
             TripID = MyRandom.NextSafeLong();
             TrainID=MyRandom.NextSafeLong();
-
         }
+        public Trip(SqliteDataReader reader)
+        {
+            LoadFromSqlite(reader);
+        }
+        public void LoadFromSqlite(SqliteDataReader reader)
+        {
+            TripID = (long)reader["tripID"];
+            Number = (string)(reader["number"]);
+            Name = (string)(reader["name"]);
+            direct = (int)(long)reader["direct"];
+            TypeID = (int)(long)reader["typeID"];
+            Seq = (int)(long)reader["seq"];
+        }
+
+
         public static string CreateTableSqlite()
         {
             return $@"create table {TABLE_NAME} (
@@ -57,8 +71,9 @@ namespace Sujiro.Data
             }
         }
         
-        public void Replace(ref SqliteCommand command)
+        public void Replace(SqliteConnection conn)
         {
+            var command = conn.CreateCommand();
             command.CommandText = $@"REPLACE INTO {TABLE_NAME} (tripID,trainID,routeID,direct,name,number,typeID,seq)values(:tripID,:trainID,:routeID,:direct,:name,:number,:typeID,:seq)";
             command.Parameters.Add(new SqliteParameter(":tripID", TripID));
             command.Parameters.Add(new SqliteParameter(":trainID", TrainID));
@@ -70,25 +85,13 @@ namespace Sujiro.Data
             command.Parameters.Add(new SqliteParameter(":seq", Seq));
             command.ExecuteNonQuery();
         }
-        public static void ReplaceTrip(string dbPath,Trip trip)
+        public static void Replace(string dbPath,Trip trip)
         {
             using (var conn = new SqliteConnection("Data Source=" + dbPath))
             {
                 conn.Open();
-                var command = conn.CreateCommand();
-                trip.Replace(ref command);
-                conn.Close();
+                trip.Replace(conn);
             }
-        }
-        public Trip(SqliteDataReader reader)
-        {
-            TripID = (long)reader["tripID"];
-            Number = (string)(reader["number"]);
-            Name = (string)(reader["name"]);
-            direct = (int)(long)reader["direct"];
-            TypeID = (int)(long)reader["typeID"];
-            Seq = (int)(long)reader["seq"];
-
         }
 
     }

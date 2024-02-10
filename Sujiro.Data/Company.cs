@@ -33,20 +33,14 @@ namespace Sujiro.Data
         {
             return $"create table {TABLE_NAME} (companyID integer primary key not null,name text,UserID text)";
         }
-        public void InsertSqlite(ref SqliteCommand command)
+        public void Replace(SqliteConnection conn)
         {
-            command.CommandText = $@"INSERT INTO {TABLE_NAME} (companyID,name,UserID)values(:companyID,:name,:userID)";
+            var command = conn.CreateCommand();
+            command.CommandText = $@"REPLACE INTO {TABLE_NAME} (companyID,name,UserID)values(:companyID,:name,:userID)";
             command.Parameters.Add(new SqliteParameter(":companyID", CompanyID));
             command.Parameters.Add(new SqliteParameter(":name", Name));
             command.Parameters.Add(new SqliteParameter(":userID", UserID));
-
-        }
-        public void UpdateSqlite(ref SqliteCommand command)
-        {
-            command.CommandText = $@"UPDATE {TABLE_NAME} SET name=:name,userID=:userID WHERE companyID=:companyID";
-            command.Parameters.Add(new SqliteParameter(":companyID", CompanyID));
-            command.Parameters.Add(new SqliteParameter(":name", Name));
-            command.Parameters.Add(new SqliteParameter(":userID", UserID));
+            command.ExecuteNonQuery();
         }
 
         public static void InsertCompany(string dbPath, Company company)
@@ -54,10 +48,7 @@ namespace Sujiro.Data
             using (var conn = new SqliteConnection("Data Source=" + dbPath))
             {
                 conn.Open();
-                var command = conn.CreateCommand();
-                company.InsertSqlite(ref command);
-                command.ExecuteNonQuery();
-                conn.Close();
+                company.Replace(conn);
             }
         }
         public static void UpdateCompany(string dbPath, Company company)
@@ -65,10 +56,7 @@ namespace Sujiro.Data
             using (var conn = new SqliteConnection("Data Source=" + dbPath))
             {
                 conn.Open();
-                var command = conn.CreateCommand();
-                company.UpdateSqlite(ref command);
-                command.ExecuteNonQuery();
-                conn.Close();
+                company.Replace(conn);
             }
         }
 

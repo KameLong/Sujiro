@@ -50,14 +50,17 @@ namespace Sujiro.Data
         {
             return $"create table {TABLE_NAME} (routestationID integer PRIMARY KEY,routeID integer not null,stationID integer not null,seq integer default 0,style interger not null default 0)";
         }
-        public void ReplaceSqlite(ref SqliteCommand command)
+        public void ReplaceSqlite(SqliteConnection conn)
         {
+            var command = conn.CreateCommand();
+
             command.CommandText = @$"REPLACE INTO {TABLE_NAME} (routeStationID,routeID,stationID,seq,style) VALUES (:routeStationID,:routeID,:stationID,:seq,:style)";
             command.Parameters.Add(new SqliteParameter(":routeStationID", RouteStationID));
             command.Parameters.Add(new SqliteParameter(":routeID", RouteID));
             command.Parameters.Add(new SqliteParameter(":stationID", StationID));
             command.Parameters.Add(new SqliteParameter(":seq", Seq));
             command.Parameters.Add(new SqliteParameter(":style", Style));
+            command.ExecuteNonQuery();
 
         }
         public static void PutRouteStation(string dbPath, RouteStation routeStation)
@@ -65,9 +68,7 @@ namespace Sujiro.Data
             using (var conn = new SqliteConnection("Data Source=" + dbPath))
             {
                 conn.Open();
-                var command = conn.CreateCommand();
-                routeStation.ReplaceSqlite(ref command);
-                command.ExecuteNonQuery();
+                routeStation.ReplaceSqlite(conn);
                 conn.Close();
             }
         }
@@ -138,9 +139,7 @@ namespace Sujiro.Data
                     command.Parameters.Add(new SqliteParameter(":seq", routeStation.Seq));
                     command.ExecuteNonQuery();
                 }
-                command = conn.CreateCommand();
-                routeStation.ReplaceSqlite(ref command);
-                command.ExecuteNonQuery();
+                routeStation.ReplaceSqlite(conn);
                 tran.Commit();
                 }
                 catch(Exception ex)

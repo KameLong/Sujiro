@@ -126,12 +126,10 @@ namespace Sujiro.WebAPI.Controllers
                 {
                     conn.Open();
                     var tran = conn.BeginTransaction();
-                    var command = conn.CreateCommand();
-                    trip.Replace(ref command);
+                    trip.Replace(conn);
                     foreach(var stopTime in trip.stopTimes)
                     {
-                        var command2 = conn.CreateCommand();
-                        stopTime.Replace(ref command2);
+                        stopTime.Replace(conn);
                     }
                     tran.Commit();
                 }

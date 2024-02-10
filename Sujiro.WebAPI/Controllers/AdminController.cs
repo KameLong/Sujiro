@@ -19,7 +19,7 @@ namespace Sujiro.WebAPI.Controllers
         public async Task<int> Get()
         {
             Debug.WriteLine("Reset");
-            await OuDia2Sujiro.Reset(Configuration["ConnectionStrings:oudPath"], Configuration["ConnectionStrings:DBpath"]);
+//            await OuDia2Sujiro.Reset(Configuration["ConnectionStrings:oudPath"], Configuration["ConnectionStrings:DBpath"]);
             return 0;
         }
     }

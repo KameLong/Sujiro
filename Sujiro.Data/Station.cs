@@ -30,8 +30,9 @@ namespace Sujiro.Data
         {
             return $"create table {TABLE_NAME} (stationID integer primary key not null,name text)";
         }
-        public void ReplaceStation(ref SqliteCommand command)
+        public void ReplaceStation(SqliteConnection conn)
         {
+            var command = conn.CreateCommand();
             command.CommandText = $@"REPLACE INTO {TABLE_NAME} (stationID,name)values(:stationID,:name)";
             command.Parameters.Add(new SqliteParameter(":stationID", StationID));
             command.Parameters.Add(new SqliteParameter(":name", Name));
@@ -47,8 +48,7 @@ namespace Sujiro.Data
             using (var conn = new SqliteConnection("Data Source=" + dbPath))
             {
                 conn.Open();
-                var command = conn.CreateCommand();
-                station.ReplaceStation(ref command);
+                station.ReplaceStation(conn);
                 conn.Close();
             }
         }
@@ -71,11 +71,12 @@ namespace Sujiro.Data
             {
                 conn.Open();
                 var command = conn.CreateCommand();
-                return GetAllStation(command);
+                return GetAllStation(conn);
             }
         }
-        public static List<Station> GetAllStation(SqliteCommand command)
+        public static List<Station> GetAllStation(SqliteConnection conn)
         {
+            var command = conn.CreateCommand();
             List<Station> stations = new List<Station>();
             command.CommandText = @$"SELECT * FROM {TABLE_NAME}";
             using (var reader = command.ExecuteReader())

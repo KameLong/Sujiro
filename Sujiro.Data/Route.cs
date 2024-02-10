@@ -38,8 +38,9 @@ namespace Sujiro.Data
             return $"create table {TABLE_NAME} (routeID integer primary key not null,name text,companyID integer,color text not null default '#000000')";
         }
 
-        public void Replace(ref SqliteCommand command)
+        public void Replace(SqliteConnection conn)
         {
+            var command = conn.CreateCommand();
             command.CommandText = $@"REPLACE INTO {TABLE_NAME} (routeID,name,companyID,color)values(:routeID,:name,:companyID,:color)";
             command.Parameters.Add(new SqliteParameter(":routeID", RouteID));
             command.Parameters.Add(new SqliteParameter(":name", Name));
@@ -52,9 +53,7 @@ namespace Sujiro.Data
             using (var conn = new SqliteConnection("Data Source=" + dbPath))
             {
                 conn.Open();
-                var command = conn.CreateCommand();
-                route.Replace(ref command);
-                conn.Close();
+                route.Replace(conn);
             }
         }
         public static void Delete(string dbPath, long routeID)

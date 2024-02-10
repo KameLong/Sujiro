@@ -122,7 +122,7 @@ namespace Test.WebAPI
                 trip.RouteID = routeID;
                 trip.TypeID = trainType.TrainTypeID;
                 trip.TripID = MyRandom.NextSafeLong();
-                Trip.ReplaceTrip(DBdir + $"company_{companyID}.sqlite", trip);
+                Trip.Replace(DBdir + $"company_{companyID}.sqlite", trip);
             }
         }
         [Fact]

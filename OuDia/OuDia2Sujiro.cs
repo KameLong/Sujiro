@@ -19,8 +19,8 @@ namespace OuDia
                 Sujiro.Data.Route route = new Sujiro.Data.Route();
                 route.Name = ouDiaRoute.Name;
                 route.CompanyID = companyID;
-                route.Replace(ref command);
-                var prevStations= Sujiro.Data.Station.GetAllStation(command);
+                route.Replace(conn);
+                var prevStations= Sujiro.Data.Station.GetAllStation(conn);
                 var routeStations = ouDiaRoute.Stations.Select(oudiaStation =>
                 {
                     //stationの追加
@@ -33,8 +33,7 @@ namespace OuDia
                     }
                     else
                     {
-                        command = conn.CreateCommand();
-                        station.ReplaceStation(ref command);
+                        station.ReplaceStation(conn);
                     }
                     //routeStationの追加
                     Sujiro.Data.RouteStation routeStation = new Sujiro.Data.RouteStation();
@@ -60,12 +59,11 @@ namespace OuDia
                     {
                         routeStation.Style |= 0x01000000;
                     }
-                    command = conn.CreateCommand();
-                    routeStation.ReplaceSqlite(ref command);
+                    routeStation.ReplaceSqlite(conn);
                     return routeStation;
 
                 }).ToList();
-                var prevTrainTypes = Sujiro.Data.TrainType.GetAllTrainType(command);
+                var prevTrainTypes = Sujiro.Data.TrainType.GetAllTrainType(conn);
                 var trainTypes=ouDiaRoute.TrainTypes.Select(type =>
                 {
                     Sujiro.Data.TrainType trainType = new Sujiro.Data.TrainType();
@@ -79,8 +77,7 @@ namespace OuDia
                     }
                     else
                     {
-                        command = conn.CreateCommand();
-                        trainType.ReplaceSqlite(ref command);
+                        trainType.ReplaceSqlite(conn);
                     }   
 
                     return trainType;
@@ -95,8 +92,7 @@ namespace OuDia
                     trip.Name = train.Name;
                     trip.Number = train.Number;
                     trip.TypeID = trainTypes[train.Type].TrainTypeID;
-                    command = conn.CreateCommand();
-                    trip.Replace(ref command);
+                    trip.Replace(conn);
                     for (int i = 0; i < train.times.Count; i++)
                     {
                         StopTime stopTime = new StopTime();
@@ -105,8 +101,7 @@ namespace OuDia
                         stopTime.ariTime = train.times[i].AriTime;
                         stopTime.depTime = train.times[i].DepTime;
                         stopTime.stopType = train.times[i].StopType;
-                        command = conn.CreateCommand();
-                        stopTime.Replace(ref command);
+                        stopTime.Replace(conn);
                     }
 
                 }
@@ -119,8 +114,7 @@ namespace OuDia
                     trip.Name = train.Name;
                     trip.Number = train.Number;
                     trip.TypeID = trainTypes[train.Type].TrainTypeID;
-                    command = conn.CreateCommand();
-                    trip.Replace(ref command);
+                    trip.Replace(conn);
 
                     for (int i = 0; i < train.times.Count; i++)
                     {
@@ -130,8 +124,7 @@ namespace OuDia
                         stopTime.ariTime = train.times[i].AriTime;
                         stopTime.depTime = train.times[i].DepTime;
                         stopTime.stopType = train.times[i].StopType;
-                        command = conn.CreateCommand();
-                        stopTime.Replace(ref command);
+                        stopTime.Replace(conn);
 
                     }
 
