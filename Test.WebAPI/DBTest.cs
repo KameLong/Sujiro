@@ -69,7 +69,7 @@ namespace Test.WebAPI
             route.CompanyID = companyID;
             route.Name = "TestRoute";
             route.RouteID = MyRandom.NextSafeLong();
-            Route.PutRoute(DBdir  + $"company_{companyID}.sqlite", route);
+            Route.Replace(DBdir  + $"company_{companyID}.sqlite", route);
             routeID=route.RouteID;
         }
 
@@ -82,7 +82,7 @@ namespace Test.WebAPI
                 Station station = new Station();
                 station.Name = "Station"+i;
                 station.StationID = MyRandom.NextSafeLong();
-                Station.PutStation(DBdir + $"company_{companyID}.sqlite", station);
+                Station.ReplaceStation(DBdir + $"company_{companyID}.sqlite", station);
             }
         }
         [Fact]
@@ -144,6 +144,19 @@ namespace Test.WebAPI
                 }
             }
         }
+        [Fact]
+        public async void ConvertOudia()
+        {
+            Company company = new Company();
+            company.Name = "Oudia";
+            company.UserID = "TestUser";
+            company.CompanyID = 1;
+            Company.InsertCompany(DBdir + MasterData.MASTER_DATA_FILE, company);
+
+            CompanySqlite.CreateCompanySqlite(DBdir, company.CompanyID);
+            await OuDia.OuDia2Sujiro.OuDia2Sujiraw( @"C:\Users\kamelong\Downloads\ç„ã}ïÛíÀê¸.oud", DBdir + $"company_1.sqlite", 1);
+        }
+
     }
     public class SampleClassFixture : IDisposable
     {

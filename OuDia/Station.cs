@@ -45,7 +45,7 @@ namespace OuDia
                                 //todo
                                 break;
                             case "DiagramRessyajouhouHyoujiNobori":
-                                                                //todo
+                                //todo
                                 break;
                             default:
                                 throw new Exception("Invalid key "+ str);

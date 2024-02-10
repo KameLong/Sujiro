@@ -52,7 +52,7 @@ namespace Sujiro.WebAPI.Controllers
                 {
                     return NotFound();
                 }
-                Route.PutRoute(filePath, route);
+                Route.Replace(filePath, route);
                 return Ok();
             }
             catch (Exception e)
@@ -74,7 +74,7 @@ namespace Sujiro.WebAPI.Controllers
                 {
                     return NotFound();
                 }
-                Route.DeleteRoute(filePath, routeID);
+                Route.Delete(filePath, routeID);
                 return Ok();
             }
             catch (Exception e)

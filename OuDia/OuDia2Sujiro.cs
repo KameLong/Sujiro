@@ -1,148 +1,146 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using System.Reflection.Metadata;
+﻿using Microsoft.Data.Sqlite;
 using Sujiro.Data;
+
 
 namespace OuDia
 {
     public class OuDia2Sujiro
     {
-        public static async  Task<int> Reset(string oudiaFileName,string DbFile)
+        public static async Task<int> OuDia2Sujiraw(string oudiaFileName, string sqliteCompanyFile,long companyID)
         {
-            var now = DateTime.Now;
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-
-           var lineFile = new LineFile(oudiaFileName);
-            if (File.Exists(DbFile))
+            var lineFile = new LineFile(oudiaFileName);
+            var ouDiaRoute = lineFile.routes.First();
+            using (var conn = new SqliteConnection("Data Source=" + sqliteCompanyFile))
             {
-                File.Delete(DbFile);
-            }
-
-
-            var route = lineFile.routes.First();
-            Console.WriteLine((DateTime.Now - now).TotalMilliseconds);
-
-            var routeContext = new RouteContext(DbFile);
-            await routeContext.Database.EnsureCreatedAsync();
-
-            Console.WriteLine((DateTime.Now - now).TotalMilliseconds);
-            routeContext.SaveChanges();
-            foreach (var station in route.Stations)
-            {
-                Console.WriteLine(station.Name);
-                Sujiro.Data.OldStation station1 = new Sujiro.Data.OldStation();
-                station1.StationID = route.Stations.IndexOf(station);
-                station1.Name = station.Name;
-                switch (station.type)
+                conn.Open();
+                var tran = conn.BeginTransaction();
+                var command = conn.CreateCommand();
+                //routeの追加
+                Sujiro.Data.Route route = new Sujiro.Data.Route();
+                route.Name = ouDiaRoute.Name;
+                route.CompanyID = companyID;
+                route.Replace(ref command);
+                var prevStations= Sujiro.Data.Station.GetAllStation(command);
+                var routeStations = ouDiaRoute.Stations.Select(oudiaStation =>
                 {
-                    case "Jikokukeisiki_NoboriChaku":
-                        station1.Style = 0x21;
-                        break;
-                    case "Jikokukeisiki_KudariChaku":
-                        station1.Style = 0x12;
-                        break;
-                    case "Jikokukeisiki_Hatsuchaku":
-                        station1.Style = 0x33;
-                        break;
-                    default:
-                        station1.Style = 0x11;
-                        break;
-                }
-                routeContext.stations.Add(station1);
-            }
-            routeContext.SaveChanges();
-            routeContext.AddRange(
-            route.TrainTypes.Select(type =>
-            {
-                Sujiro.Data.OldTrainType trainType = new Sujiro.Data.OldTrainType();
-                trainType.TrainTypeID = route.TrainTypes.IndexOf(type);
-                trainType.Name = type.Name;
-                trainType.ShortName = type.ShortName;
-                trainType.color = "#" + type.TextColor.Substring(6, 2) + type.TextColor.Substring(4, 2) + type.TextColor.Substring(2, 2);
-                return trainType;
-            }));
-            foreach (var train in route.Diagrams[0].down.trains)
-            {
-                Sujiro.Data.Trip trip = new Sujiro.Data.Trip();
-                trip.TripID = route.Diagrams[0].down.trains.IndexOf(train);
-                trip.Seq = route.Diagrams[0].down.trains.IndexOf(train);
-                trip.direct = 0;
-                trip.Name = train.Name;
-                trip.Number = train.Number;
-                trip.TypeID = train.Type;
-                routeContext.trips.Add(trip);
-                for (int i = 0; i < train.times.Count; i++)
+                    //stationの追加
+                    Console.WriteLine(oudiaStation.Name);
+                    Sujiro.Data.Station station = new Sujiro.Data.Station();
+                    station.Name = oudiaStation.Name;
+                    if (prevStations.Exists(x => x.Name == station.Name))
+                    {
+                        station = prevStations.Find(x => x.Name == station.Name);
+                    }
+                    else
+                    {
+                        command = conn.CreateCommand();
+                        station.ReplaceStation(ref command);
+                    }
+                    //routeStationの追加
+                    Sujiro.Data.RouteStation routeStation = new Sujiro.Data.RouteStation();
+                    routeStation.RouteID = route.RouteID;
+                    routeStation.StationID = station.StationID;
+                    routeStation.Seq = ouDiaRoute.Stations.IndexOf(oudiaStation);
+                    switch (oudiaStation.type)
+                    {
+                        case "Jikokukeisiki_NoboriChaku":
+                            routeStation.Style = 0x0201;
+                            break;
+                        case "Jikokukeisiki_KudariChaku":
+                            routeStation.Style = 0x0102;
+                            break;
+                        case "Jikokukeisiki_Hatsuchaku":
+                            routeStation.Style = 0x0303;
+                            break;
+                        default:
+                            routeStation.Style = 0x0101;
+                            break;
+                    }
+                    if (oudiaStation.size == "Syuyou")
+                    {
+                        routeStation.Style |= 0x01000000;
+                    }
+                    command = conn.CreateCommand();
+                    routeStation.ReplaceSqlite(ref command);
+                    return routeStation;
+
+                }).ToList();
+                var prevTrainTypes = Sujiro.Data.TrainType.GetAllTrainType(command);
+                var trainTypes=ouDiaRoute.TrainTypes.Select(type =>
                 {
-                    StopTime stopTime = new StopTime();
-                    stopTime.tripID = trip.TripID;
-                    stopTime.routeStationID =i;
-                    stopTime.ariTime = train.times[i].AriTime;
-                    stopTime.depTime = train.times[i].DepTime;
-                    stopTime.stopType = train.times[i].StopType;
-                    routeContext.stop_times.Add(stopTime);
+                    Sujiro.Data.TrainType trainType = new Sujiro.Data.TrainType();
+                    trainType.TrainTypeID = ouDiaRoute.TrainTypes.IndexOf(type);
+                    trainType.Name = type.Name;
+                    trainType.ShortName = type.ShortName;
+                    trainType.color = "#" + type.TextColor.Substring(6, 2) + type.TextColor.Substring(4, 2) + type.TextColor.Substring(2, 2);
+                    if(prevTrainTypes.Exists(x => x.TrainTypeID == trainType.TrainTypeID))
+                    {
+                        trainType = prevTrainTypes.Find(x => x.TrainTypeID == trainType.TrainTypeID);
+                    }
+                    else
+                    {
+                        command = conn.CreateCommand();
+                        trainType.ReplaceSqlite(ref command);
+                    }   
 
-                }
-
-            }
-            foreach (var train in route.Diagrams[0].up.trains)
-            {
-                Sujiro.Data.Trip trip = new Sujiro.Data.Trip();
-                trip.TripID = route.Diagrams[0].down.trains.Count + route.Diagrams[0].up.trains.IndexOf(train);
-                trip.Seq = route.Diagrams[0].up.trains.IndexOf(train);
-                trip.direct = 1;
-                trip.Name = train.Name;
-                trip.Number = train.Number;
-                trip.TypeID = train.Type;
-                routeContext.trips.Add(trip);
-                for (int i = 0; i < train.times.Count; i++)
+                    return trainType;
+                }).ToList();
+                //tripの追加
+                foreach (var train in ouDiaRoute.Diagrams[0].down.trains)
                 {
-                    StopTime stopTime = new StopTime();
-                    stopTime.tripID = trip.TripID;
-                    stopTime.routeStationID = route.Stations.Count- i-1;
-                    stopTime.ariTime = train.times[i].AriTime;
-                    stopTime.depTime = train.times[i].DepTime;
-                    stopTime.stopType = train.times[i].StopType;
-                    routeContext.stop_times.Add(stopTime);
+                    Trip trip = new Trip();
+                    trip.RouteID = route.RouteID;
+                    trip.direct = 0;
+                    trip.Seq = ouDiaRoute.Diagrams[0].down.trains.IndexOf(train);
+                    trip.Name = train.Name;
+                    trip.Number = train.Number;
+                    trip.TypeID = trainTypes[train.Type].TrainTypeID;
+                    command = conn.CreateCommand();
+                    trip.Replace(ref command);
+                    for (int i = 0; i < train.times.Count; i++)
+                    {
+                        StopTime stopTime = new StopTime();
+                        stopTime.tripID = trip.TripID;
+                        stopTime.routeStationID = routeStations[i].RouteStationID;
+                        stopTime.ariTime = train.times[i].AriTime;
+                        stopTime.depTime = train.times[i].DepTime;
+                        stopTime.stopType = train.times[i].StopType;
+                        command = conn.CreateCommand();
+                        stopTime.Replace(ref command);
+                    }
 
                 }
+                foreach (var train in ouDiaRoute.Diagrams[0].up.trains)
+                {
+                    Sujiro.Data.Trip trip = new Sujiro.Data.Trip();
+                    trip.RouteID = route.RouteID;
+                    trip.Seq = ouDiaRoute.Diagrams[0].up.trains.IndexOf(train);
+                    trip.direct = 1;
+                    trip.Name = train.Name;
+                    trip.Number = train.Number;
+                    trip.TypeID = trainTypes[train.Type].TrainTypeID;
+                    command = conn.CreateCommand();
+                    trip.Replace(ref command);
 
+                    for (int i = 0; i < train.times.Count; i++)
+                    {
+                        StopTime stopTime = new StopTime();
+                        stopTime.tripID = trip.TripID;
+                        stopTime.routeStationID = routeStations[ouDiaRoute.Stations.Count - i - 1].RouteStationID;
+                        stopTime.ariTime = train.times[i].AriTime;
+                        stopTime.depTime = train.times[i].DepTime;
+                        stopTime.stopType = train.times[i].StopType;
+                        command = conn.CreateCommand();
+                        stopTime.Replace(ref command);
+
+                    }
+
+                }
+                tran.Commit();
             }
-            routeContext.SaveChanges();
-            Console.WriteLine((DateTime.Now - now).TotalMilliseconds);
             return 0;
         }
     }
-    internal class RouteContext : DbContext
-    {
-        public DbSet<Sujiro.Data.OldStation>? stations { get; set; }
-        public DbSet<Sujiro.Data.Trip>? trips { get; set; }
-        public DbSet<Sujiro.Data.StopTime>? stop_times { get; set; }
-        public DbSet<Sujiro.Data.OldTrainType>? trainTypes { get; set; }
-
-        public string DbPath { get; }
-
-        public RouteContext(string fileName)
-        {
-            // 特殊フォルダ（デスクトップ）の絶対パスを取得
-            var path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-
-            // DBファイルの保存先とDBファイル名
-            DbPath = fileName;
-        }
-
-        // デスクトップ上にSQLiteのDBファイルが作成される
-        protected override void OnConfiguring(DbContextOptionsBuilder options)
-            => options.UseSqlite($"Data Source={DbPath}");
-    }
-
-
 }
 
 

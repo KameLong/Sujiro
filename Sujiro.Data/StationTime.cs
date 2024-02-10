@@ -57,6 +57,7 @@ namespace Sujiro.Data
             command.Parameters.Add(new SqliteParameter(":depTime", depTime));
             command.Parameters.Add(new SqliteParameter(":stopType", stopType));
             command.Parameters.Add(new SqliteParameter(":stopID", stopID));
+            command.ExecuteNonQuery();
         }
        public static void PutStopTime(string dbPath, StopTime stopTime)
         {
@@ -65,7 +66,6 @@ namespace Sujiro.Data
                 conn.Open();
                 var command = conn.CreateCommand();
                 stopTime.Replace(ref command);
-                command.ExecuteNonQuery();
                 conn.Close();
             }
         }

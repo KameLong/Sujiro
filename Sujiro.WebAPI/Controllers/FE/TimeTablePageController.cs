@@ -128,19 +128,10 @@ namespace Sujiro.WebAPI.Controllers
                     var tran = conn.BeginTransaction();
                     var command = conn.CreateCommand();
                     trip.Replace(ref command);
-                    command.ExecuteNonQuery();
                     foreach(var stopTime in trip.stopTimes)
                     {
                         var command2 = conn.CreateCommand();
                         stopTime.Replace(ref command2);
-                        try
-                        {
-                            command2.ExecuteNonQuery();
-                        }
-                        catch (Exception ex)
-                        {
-                            Debug.WriteLine(ex);
-                        }
                     }
                     tran.Commit();
                 }

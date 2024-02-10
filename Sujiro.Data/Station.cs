@@ -30,24 +30,25 @@ namespace Sujiro.Data
         {
             return $"create table {TABLE_NAME} (stationID integer primary key not null,name text)";
         }
-        public void ReplaceSqlite(ref SqliteCommand command)
+        public void ReplaceStation(ref SqliteCommand command)
         {
             command.CommandText = $@"REPLACE INTO {TABLE_NAME} (stationID,name)values(:stationID,:name)";
             command.Parameters.Add(new SqliteParameter(":stationID", StationID));
             command.Parameters.Add(new SqliteParameter(":name", Name));
+            command.ExecuteNonQuery();
+
         }
 
 
 
 
-        public static void PutStation(string dbPath, Station station)
+        public static void ReplaceStation(string dbPath, Station station)
         {
             using (var conn = new SqliteConnection("Data Source=" + dbPath))
             {
                 conn.Open();
                 var command = conn.CreateCommand();
-                station.ReplaceSqlite(ref command);
-                command.ExecuteNonQuery();
+                station.ReplaceStation(ref command);
                 conn.Close();
             }
         }
@@ -66,24 +67,27 @@ namespace Sujiro.Data
         }
         public static List<Station>GetAllStation(string dbPath)
         {
-            List<Station> stations = new List<Station>();
             using (var conn = new SqliteConnection("Data Source=" + dbPath))
             {
                 conn.Open();
                 var command = conn.CreateCommand();
-                command.CommandText = @$"SELECT * FROM {TABLE_NAME}";
-                using (var reader = command.ExecuteReader())
+                return GetAllStation(command);
+            }
+        }
+        public static List<Station> GetAllStation(SqliteCommand command)
+        {
+            List<Station> stations = new List<Station>();
+            command.CommandText = @$"SELECT * FROM {TABLE_NAME}";
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
                 {
-
-                    while (reader.Read())
-                    {
-                        stations.Add(new Station(reader));
-                    }
+                    stations.Add(new Station(reader));
                 }
             }
             return stations;
-
         }
+
 
         public static Station? GetStation(string dbPath, long id)
         {

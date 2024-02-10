@@ -56,7 +56,7 @@ namespace Sujiro.WebAPI.Controllers
                 {
                     return NotFound();
                 }
-                Station.PutStation(filePath, station);
+                Station.ReplaceStation(filePath, station);
                 return Ok();
             }
             catch (Exception e)

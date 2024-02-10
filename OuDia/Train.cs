@@ -12,13 +12,13 @@ namespace OuDia
         public Dia dia { get; set; }
 
         public string Direct { get; set; }
-        public int Type { get; set; }
-        public string Number { get; set; }
-        public string Name { get; set; }
+        public int Type { get; set; } = 0;
+        public string Number { get; set; } = "";
+        public string Name { get; set; } = "";
         public List<StationTime>times { get; set; } = new List<StationTime>();
 
-        public string Comment { get; set; }
-        public string Gousuu { get; set; }
+        public string Comment { get; set; } = "";
+        public string Gousuu { get; set; } = "";
 
 
 

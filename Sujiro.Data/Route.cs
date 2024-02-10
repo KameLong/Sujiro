@@ -37,26 +37,27 @@ namespace Sujiro.Data
         {
             return $"create table {TABLE_NAME} (routeID integer primary key not null,name text,companyID integer,color text not null default '#000000')";
         }
-        public void ReplaceSqlite(ref SqliteCommand command)
+
+        public void Replace(ref SqliteCommand command)
         {
             command.CommandText = $@"REPLACE INTO {TABLE_NAME} (routeID,name,companyID,color)values(:routeID,:name,:companyID,:color)";
             command.Parameters.Add(new SqliteParameter(":routeID", RouteID));
             command.Parameters.Add(new SqliteParameter(":name", Name));
             command.Parameters.Add(new SqliteParameter(":companyID", CompanyID));
             command.Parameters.Add(new SqliteParameter(":color", Color));
+            command.ExecuteNonQuery();
         }
-        public static void PutRoute(string dbPath, Route route)
+        public static void Replace(string dbPath, Route route)
         {
             using (var conn = new SqliteConnection("Data Source=" + dbPath))
             {
                 conn.Open();
                 var command = conn.CreateCommand();
-                route.ReplaceSqlite(ref command);
-                command.ExecuteNonQuery();
+                route.Replace(ref command);
                 conn.Close();
             }
         }
-        public static void DeleteRoute(string dbPath, long routeID)
+        public static void Delete(string dbPath, long routeID)
         {
             using (var conn = new SqliteConnection("Data Source=" + dbPath))
             {

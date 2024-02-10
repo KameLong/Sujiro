@@ -68,6 +68,7 @@ namespace Sujiro.Data
             command.Parameters.Add(new SqliteParameter(":number", Number));
             command.Parameters.Add(new SqliteParameter(":typeID", TypeID));
             command.Parameters.Add(new SqliteParameter(":seq", Seq));
+            command.ExecuteNonQuery();
         }
         public static void ReplaceTrip(string dbPath,Trip trip)
         {
@@ -76,7 +77,6 @@ namespace Sujiro.Data
                 conn.Open();
                 var command = conn.CreateCommand();
                 trip.Replace(ref command);
-                command.ExecuteNonQuery();
                 conn.Close();
             }
         }

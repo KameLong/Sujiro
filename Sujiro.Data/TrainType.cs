@@ -41,6 +41,7 @@ namespace Sujiro.Data
             command.Parameters.Add(new SqliteParameter(":name", Name));
             command.Parameters.Add(new SqliteParameter(":shortname", ShortName));
             command.Parameters.Add(new SqliteParameter(":color", color));
+            command.ExecuteNonQuery();
         }
         public static void PutTrainType(string dbPath, TrainType trainType)
         {
@@ -49,8 +50,6 @@ namespace Sujiro.Data
                 conn.Open();
                 var command = conn.CreateCommand();
                 trainType.ReplaceSqlite(ref command);
-                command.ExecuteNonQuery();
-                conn.Close();
             }
         }
         public static void DeleteTrainType(string dbPath, long trainTypeID)
@@ -68,22 +67,26 @@ namespace Sujiro.Data
         }
         public static List<TrainType>GetAllTrainType(string dbPath)
         {
-            List<TrainType> trainTypes = new List<TrainType>();
             using (var conn = new SqliteConnection("Data Source=" + dbPath))
             {
                 conn.Open();
                 var command = conn.CreateCommand();
-                command.CommandText = $@"SELECT * FROM {TABLE_NAME}";
-                using (var reader = command.ExecuteReader())
+                return GetAllTrainType(command);
+            }
+        }
+        public static List<TrainType> GetAllTrainType(SqliteCommand command)
+        {
+            List<TrainType> trainTypes = new List<TrainType>();
+            command.CommandText = $@"SELECT * FROM {TABLE_NAME}";
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
                 {
-                    while (reader.Read())
-                    {
-                        trainTypes.Add(new TrainType(reader));
-                    }
+                    trainTypes.Add(new TrainType(reader));
                 }
-                conn.Close();
             }
             return trainTypes;
         }
+
     }
 }
