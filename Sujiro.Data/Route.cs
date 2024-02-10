@@ -16,6 +16,7 @@ namespace Sujiro.Data
         public long RouteID { get; set; }
         public string Name { get; set; } = "";
         public long CompanyID { get; set; }
+        public string Color { get; set; } = "#000000";
         public Route()
         {
             RouteID = MyRandom.NextSafeLong();
@@ -29,18 +30,20 @@ namespace Sujiro.Data
             RouteID = (long)reader["routeID"];
             Name = (string)reader["name"];
             CompanyID = (long)reader["companyID"];
+            Color = (string)reader["color"];
         }
 
         public static string CreateTableSqlite()
         {
-            return $"create table {TABLE_NAME} (routeID integer primary key not null,name text,companyID integer)";
+            return $"create table {TABLE_NAME} (routeID integer primary key not null,name text,companyID integer,color text not null default '#000000')";
         }
         public void ReplaceSqlite(ref SqliteCommand command)
         {
-            command.CommandText = $@"REPLACE INTO {TABLE_NAME} (routeID,name,companyID)values(:routeID,:name,:companyID)";
+            command.CommandText = $@"REPLACE INTO {TABLE_NAME} (routeID,name,companyID,color)values(:routeID,:name,:companyID,:color)";
             command.Parameters.Add(new SqliteParameter(":routeID", RouteID));
             command.Parameters.Add(new SqliteParameter(":name", Name));
             command.Parameters.Add(new SqliteParameter(":companyID", CompanyID));
+            command.Parameters.Add(new SqliteParameter(":color", Color));
         }
         public static void PutRoute(string dbPath, Route route)
         {
