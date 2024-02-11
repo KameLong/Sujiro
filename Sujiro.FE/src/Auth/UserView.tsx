@@ -15,7 +15,6 @@ export default function UserView(){
     const [user, setUser] = React.useState<User|null>(null);
     useEffect(() => {
         auth.onAuthStateChanged(async (user:User|null) => {
-            console.log("loginしました");
             setUser(user);
             //ユーザーが有効かチェックする
             let loginRes=await axios.get( `${process.env.REACT_APP_SERVER_URL}/api/user/registered?timestamp=${new Date().getTime()}`,
@@ -27,16 +26,15 @@ export default function UserView(){
             );
             switch(loginRes.status){
                 case 200:
-                    console.log("登録済み");
                     break;
                 case 204:
                     alert("現在ユーザーの新規登録を受け付けておりません。")
                     break;
                 case 401:
-                    console.log("未登録");
+                    alert("認証に失敗しました(401)")
                     break;
                 default:
-                    console.log("エラー");
+                    alert("認証に失敗しました()")
             }
         });
     },[]);

@@ -13,10 +13,6 @@ import {
 import Typography from "@mui/material/Typography";
 import {Company} from "../SujiroData/DiaData";
 import {getAuth} from "firebase/auth";
-
-
-
-
 function CompanyListPage() {
     const [myCompany,setMyCompany]=useState<Company[]>([]);
     const [editCompany,setEditCompany]=useState<Company|undefined>(undefined);
@@ -81,7 +77,7 @@ function CompanyListPage() {
                     >管理しているCompany一覧</Typography>
                     <Grid container>
                     {myCompany.map(company=>(
-                        <Grid item  xs={12} md={6} lg={4} sx={{padding:1}}>
+                        <Grid item key={company.companyID} xs={12} md={6} lg={4} sx={{padding:1}}>
                             <Card variant="outlined" style={{height:'100%',backgroundColor:'#EEF5FF',boxShadow:'0 5px 5px 0 rgba(0, 0, 0, .3)'}}>
                             <CardContent style={{height:'100%'}}>
                                 <Typography  color="textSecondary" gutterBottom>

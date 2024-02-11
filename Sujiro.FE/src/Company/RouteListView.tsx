@@ -53,12 +53,12 @@ export default function RouteListView({companyID}:RouteListViewProps) {
             <List style={{maxHeight: '100%', overflow: 'auto'}}>
                 <Divider  component="li" />
                 {routes.map((route) => {
-                    return (<><ListItem onClick={()=>{
+                    return (<div key={route.routeID}><ListItem onClick={()=>{
                         setEditRoute(route);
                         setOpenActionRouteDialog(true);
 
                     }}><GiRailway /><span>{route.name}</span>
-                    </ListItem><Divider  component="li" /></>)
+                    </ListItem><Divider  component="li" /></div>)
                 })}
             </List>
 

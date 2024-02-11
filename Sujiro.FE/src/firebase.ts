@@ -2,7 +2,6 @@ import { initializeApp, getApps } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
-console.log(process.env.REACT_APP_SERVER_URL)
 const firebaseConfig = {
     apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
     authDomain:process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
@@ -16,8 +15,6 @@ const firebaseConfig = {
 
 if (!getApps()?.length) {
     initializeApp(firebaseConfig);
-    console.log("initial");
-    console.log(getFirestore());
 }
 
 export const auth = getAuth();

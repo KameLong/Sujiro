@@ -48,16 +48,16 @@ export default function StationListView({companyID}:StationListViewProps) {
     },[]);
 
     return (
-        <>
+        <div>
             <List style={{maxHeight: '100%', overflow: 'auto'}}>
                 <Divider  component="li" />
                 {stations.map((station) => {
-                    return (<><ListItem onClick={()=>{
+                    return (<div key={station.stationID}><ListItem onClick={()=>{
                         setEditStation(station);
                         setOpenActionStation(true);
 
                     }}><Home/><span>{station.name}</span>
-                    </ListItem><Divider  component="li" /></>)
+                    </ListItem><Divider  component="li" /></div>)
                 })}
             </List>
 
@@ -139,7 +139,7 @@ export default function StationListView({companyID}:StationListViewProps) {
 
             </Dialog>
 
-        </>
+        </div>
     )
 }
 

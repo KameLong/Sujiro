@@ -58,7 +58,6 @@ export default function RoutePage({}:RoutePageProps) {
                 }
             }
         ).then(res => {
-            console.log(res.data)
             setStations(res.data);
         })
     }
@@ -97,12 +96,12 @@ export default function RoutePage({}:RoutePageProps) {
             <List style={{maxHeight: '100%', overflow: 'auto'}}>
                 <Divider  component="li" />
                 {route.routeStations.map((routeStation) => {
-                    return (<><ListItem onClick={()=>{
+                    return (<div key={routeStation.routeStationID}><ListItem onClick={()=>{
                         setInsertRouteStation(routeStation);
                         setOpenSelectStationDialog(true);
                     }}><Home /><span>{stations.find(station=>station.stationID===routeStation.stationID)?.name}</span>
                     </ListItem><Divider  component="li" />
-                    </>)
+                    </div>)
                 })}
                 <Button onClick={()=>appendStation(undefined)}>新規追加</Button>
 
@@ -189,7 +188,7 @@ function StationSelector({stations,onSelectStation}:StationSelectorProps){
             <DialogContent>
                 <List>
                     {stations.map((station)=>{
-                        return (<ListItem onClick={async()=>{
+                        return (<ListItem key={station.stationID} onClick={async()=>{
                             onSelectStation(station);
                         }}>{station.name}</ListItem>)
                     })}
