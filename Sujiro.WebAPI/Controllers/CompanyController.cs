@@ -2,9 +2,11 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Data.Sqlite;
 using OuDia;
 using Sujiro.Data;
 using Sujiro.Data.Common;
+using Sujiro.WebAPI.Service.AuthService;
 using Sujiro.WebAPI.SignalR;
 using System.ComponentModel.Design;
 using System.Diagnostics;
@@ -76,9 +78,25 @@ namespace Sujiro.WebAPI.Controllers
 
             string dbPath = Configuration["ConnectionStrings:DBdir"]+MasterData.MASTER_DATA_FILE;
             string? userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+                {
+                return Unauthorized();
+            }
+
+            using (var conn = new SqliteConnection("Data Source=" + dbPath))
+            {
+                conn.Open();
+
+                var command = conn.CreateCommand();
+                command.CommandText = $"SELECT count(*) FROM {Sujiro.Data.User.TABLE_NAME} where userID=:userID";
+                command.Parameters.Add(new SqliteParameter(":userID", AuthService.GetUserID(User)));
+                if ((long)command.ExecuteScalar() == 0)
+                {
+                    return Unauthorized();
+                }
+            }
 
             Company? oldCompany = Company.GetCompany(dbPath,company.CompanyID);
-
             if(oldCompany == null)
             {
                 //新規追加

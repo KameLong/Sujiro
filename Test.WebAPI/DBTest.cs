@@ -52,7 +52,7 @@ namespace Test.WebAPI
 
             Company company = new Company();
             company.Name = "TestCompany";
-            company.UserID = "TestUser";
+            company.UserID = "gVjRyIhAC6d3bRZj1ZKblHhRpCf1";
             company.CompanyID = MyRandom.NextSafeLong();
             Company.InsertCompany(DBdir + MasterData.MASTER_DATA_FILE, company);
 
@@ -149,7 +149,7 @@ namespace Test.WebAPI
         {
             Company company = new Company();
             company.Name = "Oudia";
-            company.UserID = "TestUser";
+            company.UserID = "gVjRyIhAC6d3bRZj1ZKblHhRpCf1";
             company.CompanyID = 1;
             Company.InsertCompany(DBdir + MasterData.MASTER_DATA_FILE, company);
 

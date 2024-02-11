@@ -25,6 +25,7 @@ import Signin from './Auth/Signin';
 import CompanyListPage from "./Company/CompanyListPage";
 import CompanyPage from "./Company/CompanyPage";
 import RoutePage from "./Route/RoutePage";
+import UserView from "./Auth/UserView";
 
 
 
@@ -104,19 +105,21 @@ function App() {
                   ml: { sm: `${drawerWidth}px` },
               }}
           >
-              <Toolbar variant="dense" >
+              <Toolbar variant="dense">
                   <IconButton
                       color="inherit"
                       aria-label="open drawer"
                       edge="start"
                       onClick={handleDrawerToggle}
-                      sx={{ mr: 2, display: { sm: 'none' } }}
+                      sx={{mr: 2, display: {sm: 'none'}}}
                   >
-                      <MenuIcon />
+                      <MenuIcon/>
                   </IconButton>
                   <Typography variant="h6" noWrap component="div">
-                      Sujiro Development
+                      Sujiraw Development
                   </Typography>
+                  <div style={{flexGrow: 1}}></div>
+                  <UserView/>
               </Toolbar>
           </AppBar>
           <Box

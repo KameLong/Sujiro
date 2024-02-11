@@ -19,6 +19,8 @@ namespace Sujiro.Data.Common
                 var command = conn.CreateCommand();
                 command.CommandText = Company.CreateTableSqlite();
                 command.ExecuteNonQuery();
+                command.CommandText=User.CreateTableSqlite();
+                command.ExecuteNonQuery();
                 tran.Commit();
             }
         }
