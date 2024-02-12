@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.Sqlite;
 using Sujiro.Data;
+using Sujiro.WebAPI.Service.AuthService;
 using Sujiro.WebAPI.SignalR;
 using System.Diagnostics;
 
@@ -13,8 +14,8 @@ namespace Sujiro.WebAPI.Controllers
     public class TripController : ControllerBase
     {
         private readonly IConfiguration Configuration;
-        private readonly IHubContext<ChatHub> _hubContext;
-        public TripController(IHubContext<ChatHub> hubContext, IConfiguration configuration)
+        private readonly IHubContext<SujirawHub> _hubContext;
+        public TripController(IHubContext<SujirawHub> hubContext, IConfiguration configuration)
         {
             _hubContext = hubContext;
             Configuration = configuration;
@@ -24,80 +25,44 @@ namespace Sujiro.WebAPI.Controllers
         [HttpGet]
         public IEnumerable<Trip> Get(int direct)
         {
-            try
-            {
-
-            DateTime now = DateTime.Now;
-            var trips = new List<Trip>();
-            using (var conn = new SqliteConnection("Data Source=" + Configuration["ConnectionStrings:DBpath"]))
-            {
-                conn.Open();
-                var tran = conn.BeginTransaction();
-                var command = conn.CreateCommand();
-
-                command.CommandText = $"SELECT * FROM {Trip.TABLE_NAME} where {nameof(Trip.direct)}=:direct";
-                command.Parameters.Add(new SqliteParameter(":direct", direct));
-
-                using (var reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        Trip trip = new Trip(reader);
-                            trips.Add(trip);
-                    }
-                }
-                    var command2 = conn.CreateCommand();
-                    command2.CommandText = $"SELECT * FROM {StopTime.TABLE_NAME}";
-                    using (var reader2 = command2.ExecuteReader())
-                    {
-                        while (reader2.Read())
-                        {
-                            StopTime stopTime = new StopTime(reader2);
-                            var t = trips.Find(t => t.TripID == stopTime.tripID);
-                            if (t != null)
-                            {
-//                                    t.stopTimes.Add(stopTime);
-
-                            }
-                        }
-                    }
-
-
-                }
-                Debug.WriteLine((DateTime.Now - now).TotalMilliseconds);
-
-            return trips;
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine(e.Message);
-                throw e;
-            }
+            throw new Exception("Not implemented");
         }
-        [HttpDelete("{tripID}")]
-        public async Task<ActionResult> DeleteTrip(long tripID)
+        [HttpDelete("{companyID}/{tripID}")]
+        public async Task<ActionResult> DeleteTrip(long companyID, long tripID)
         {
-            Debug.WriteLine($"DeleteTrip {tripID}");
-            using (var conn = new SqliteConnection("Data Source=" + Configuration["ConnectionStrings:DBpath"]))
+            if (!AuthService.HasAccessPrivileges(Configuration["ConnectionStrings:DBdir"], User, companyID))
+            {
+                return Forbid();
+            }
+            var dbpath = Configuration["ConnectionStrings:DBdir"] + "company_" + companyID + ".sqlite";
+            using (var conn = new SqliteConnection("Data Source=" + dbpath))
             {
                 conn.Open();
                 var tran = conn.BeginTransaction();
+                Trip? trip=Trip.GetTrip(conn, tripID);
+                if(trip==null)
+                {
+                    return NotFound();
+                }
+
                 var command = conn.CreateCommand();
                 command.CommandText = $"DELETE from {Trip.TABLE_NAME} where {nameof(Trip.TripID)}=:tripID";
-                command.Parameters.Add(new SqliteParameter(":tripID", tripID));
+                command.Parameters.Add(new SqliteParameter(":tripID", trip.TripID));
+                command.ExecuteNonQuery();
+
+                command=conn.CreateCommand();
+                command.CommandText = $"UPDATE {Trip.TABLE_NAME} set {nameof(Trip.TripSeq)}={nameof(Trip.TripSeq)}-1 where {nameof(Trip.TripSeq)}>{trip.TripSeq}";
                 command.ExecuteNonQuery();
 
                 command = conn.CreateCommand();
                 command.CommandText = $"DELETE from {StopTime.TABLE_NAME} where {nameof(StopTime.tripID)}=:tripID";
-                command.Parameters.Add(new SqliteParameter(":tripID", tripID));
+                command.Parameters.Add(new SqliteParameter(":tripID", trip.TripID));
                 command.ExecuteNonQuery();
-
-
                 tran.Commit();
-
-                await _hubContext.Clients.All.SendAsync("DeleteTrip", tripID);
-                return NoContent();
+                await _hubContext.Clients.Groups(companyID.ToString()).SendAsync("DeleteTrips", new List<Trip> { trip });
             }
+            return NoContent();
+
         }
     }
 }

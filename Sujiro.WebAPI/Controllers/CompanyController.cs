@@ -22,7 +22,7 @@ namespace Sujiro.WebAPI.Controllers
 
     public class CompanyController :SujiroAPIController
     {
-        public CompanyController(IHubContext<ChatHub> hubContext, IConfiguration configuration) : base(hubContext, configuration)
+        public CompanyController(IHubContext<SujirawHub> hubContext, IConfiguration configuration) : base(hubContext, configuration)
         {
 
         }

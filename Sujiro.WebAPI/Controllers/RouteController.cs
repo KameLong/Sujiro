@@ -12,7 +12,7 @@ namespace Sujiro.WebAPI.Controllers
 
     public class RouteController : SujiroAPIController
     {
-        public RouteController(IHubContext<ChatHub> hubContext, IConfiguration configuration) : base(hubContext, configuration)
+        public RouteController(IHubContext<SujirawHub> hubContext, IConfiguration configuration) : base(hubContext, configuration)
         {
         }
         [HttpGet("{companyID}")]

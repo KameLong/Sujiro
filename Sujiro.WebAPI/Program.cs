@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.IdentityModel.Tokens;
 using Sujiro.WebAPI.SignalR;
 using System.Security.Claims;
@@ -49,7 +50,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = "sujiro-e4a58",
             ValidateLifetime = true
         };
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                if (!string.IsNullOrEmpty(accessToken))
+                {
+                    context.Token = accessToken;
+                }
+
+                return Task.CompletedTask;
+            }
+        };
+
     });
+
+
+
+
 
 
 
@@ -69,7 +88,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHub<ChatHub>("/ws/chatHub");
+app.MapHub<SujirawHub>("/ws/chatHub");
+
+
 
 //https://learn.microsoft.com/en-gb/aspnet/core/tutorials/web-api-javascript?view=aspnetcore-8.0&viewFallbackFrom=aspnetcore-3.0
 //react‚ðwwwroot‚Ö

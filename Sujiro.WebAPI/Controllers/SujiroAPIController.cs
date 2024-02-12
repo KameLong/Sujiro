@@ -14,8 +14,8 @@ namespace Sujiro.WebAPI.Controllers
     public class SujiroAPIController:ControllerBase
     {
             protected readonly IConfiguration Configuration;
-            protected readonly IHubContext<ChatHub> _hubContext;
-            public SujiroAPIController(IHubContext<ChatHub> hubContext, IConfiguration configuration)
+            protected readonly IHubContext<SujirawHub> _hubContext;
+            public SujiroAPIController(IHubContext<SujirawHub> hubContext, IConfiguration configuration)
             {
                 _hubContext = hubContext;
                 Configuration = configuration;

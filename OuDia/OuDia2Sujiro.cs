@@ -88,7 +88,7 @@ namespace OuDia
                     Trip trip = new Trip();
                     trip.RouteID = route.RouteID;
                     trip.direct = 0;
-                    trip.Seq = ouDiaRoute.Diagrams[0].down.trains.IndexOf(train);
+                    trip.TripSeq = ouDiaRoute.Diagrams[0].down.trains.IndexOf(train);
                     trip.Name = train.Name;
                     trip.Number = train.Number;
                     trip.TypeID = trainTypes[train.Type].TrainTypeID;
@@ -109,7 +109,7 @@ namespace OuDia
                 {
                     Sujiro.Data.Trip trip = new Sujiro.Data.Trip();
                     trip.RouteID = route.RouteID;
-                    trip.Seq = ouDiaRoute.Diagrams[0].up.trains.IndexOf(train);
+                    trip.TripSeq = ouDiaRoute.Diagrams[0].up.trains.IndexOf(train);
                     trip.direct = 1;
                     trip.Name = train.Name;
                     trip.Number = train.Number;

@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import * as signalR from "@microsoft/signalr";
-import {StopTime} from "../SujiroData/DiaData";
+import {StopTime, Trip} from "../SujiroData/DiaData";
 import * as PIXI from 'pixi.js'
 import {DisplayObject} from "pixi.js";
 import {DiagramData, DiagramStation, DiagramTrip} from "./DiagramData";
@@ -9,6 +9,7 @@ import {TimetableSelected} from "../TimeTable/TimeTablePage";
 import {useRequiredParams} from "../Hooks/useRequiredParams";
 import {auth} from "../firebase";
 import axios from "axios";
+import {getAuth} from "firebase/auth";
 
 function DiagramPage() {
     const {companyID} = useRequiredParams<{ companyID: string }>();
@@ -85,120 +86,130 @@ function DiagramPage() {
         moveing2:{x:0,y:0}
     });
 
+    const loadDiagramData=async()=>{
+        const token = await getAuth().currentUser?.getIdToken()
+        const res=await axios.get(`${process.env.REACT_APP_SERVER_URL}/api/DiagramPage/${companyID}/${routeID}?timestamp=${new Date().getTime()}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+        switch(res.status){
+            case 200:
+                console.log(res.data);
+                setDownTrips(res.data.downTrips);
+                setUpTrips(res.data.upTrips);
+                setStations(res.data.stations);
+                break;
+            case 403:
+                console.log("403");
+                break;
+            default:
+                break;
+        }
+        setDiaRect(prevState => {
+            return {
+                xStart: prevState.xStart,
+                xEnd: prevState.xEnd,
+                yStart: res.data.stations[0].stationTime,
+                yEnd: res.data.stations[res.data.stations.length - 1].stationTime
+            }
+        })
+
+    }
+
     useEffect(() => {
         auth.onAuthStateChanged(async (user) => {
-            const res=await axios.get(`${process.env.REACT_APP_SERVER_URL}/api/DiagramPage/${companyID}/${routeID}?timestamp=${new Date().getTime()}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${await user?.getIdToken()}`
-                    }
-                });
-            switch(res.status){
-                case 200:
-                    console.log(res.data);
-                    setDownTrips(res.data.downTrips);
-                    setUpTrips(res.data.upTrips);
-                    setStations(res.data.stations);
-                    break;
-                case 403:
-                    console.log("403");
-                    break;
-                default:
-                    break;
-            }
-            // setDiaRect(prevState => {
-            //     return {
-            //         xStart: prevState.xStart,
-            //         xEnd: prevState.xEnd,
-            //         yStart: res.data.stations[0].stationTime,
-            //         yEnd: res.data.stations[res.data.stations.length - 1].stationTime
-            //     }
-            // })
+            await loadDiagramData();
+            const token = await getAuth().currentUser?.getIdToken()
 
             const connection = new signalR.HubConnectionBuilder()
-                .withUrl(`${process.env.REACT_APP_SERVER_URL}/ws/chatHub`)
+                .withUrl(`${process.env.REACT_APP_SERVER_URL}/ws/chatHub`, {accessTokenFactory: () => token ?? ''})
                 .build();
-            connection.start().catch((err) => console.error(err));
-
-            connection.on("UpdateStoptime", (stoptime: StopTime) => {
-                console.log("UpdateStoptime",stoptime);
-                setUpTrips(prev=> {
-                    const tripIndex=prev.findIndex(item=>item.tripID===stoptime.tripID);
-                    if(tripIndex<0){
-                        console.error("tripIndex<0");
-                        return prev;
-                    }
-                    const stopTimeIndex=prev[tripIndex].stopTimes.findIndex(item=>item.stopTimeID===stoptime.stopTimeID);
-                    if(stopTimeIndex<0){
-                        console.error("stopTimeIndex<0");
-                        return prev;
-                    }
+            await connection.start();
+            connection.invoke("Init",companyID);
+            connection.off("UpdateStopTimes");
+            connection.on("UpdateStopTimes", (stopTimes: StopTime[]) => {
+                setDownTrips(prev => {
                     const next=[...prev];
-                    next[tripIndex]={...next[tripIndex]};
-                    next[tripIndex].stopTimes=[...next[tripIndex].stopTimes];
-                    next[tripIndex].stopTimes[stopTimeIndex]=stoptime;
+                    stopTimes.forEach(stopTime => {
+                        const tripIndex = next.findIndex(item => item.tripID === stopTime.tripID);
+                        if (tripIndex < 0) {
+                            return;
+                        }
+                        const stopTimeIndex = next[tripIndex].stopTimes.findIndex(item => item.stopTimeID === stopTime.stopTimeID);
+                        if (stopTimeIndex < 0) {
+                            return;
+                        }
+                        next[tripIndex] = {...next[tripIndex]};
+                        next[tripIndex].stopTimes = [...next[tripIndex].stopTimes];
+                        next[tripIndex].stopTimes[stopTimeIndex] = stopTime;
+
+                    });
                     return next;
                 });
-                setDownTrips(prev=> {
-                    const tripIndex=prev.findIndex(item=>item.tripID===stoptime.tripID);
-                    if(tripIndex<0){
-                        console.error("tripIndex<0");
-                        return prev;
-                    }
-                    const stopTimeIndex=prev[tripIndex].stopTimes.findIndex(item=>item.stopTimeID===stoptime.stopTimeID);
-                    if(stopTimeIndex<0){
-                        console.error("stopTimeIndex<0");
-                        return prev;
-                    }
+                setUpTrips(prev => {
                     const next=[...prev];
-                    next[tripIndex]={...next[tripIndex]};
-                    next[tripIndex].stopTimes=[...next[tripIndex].stopTimes];
-                    next[tripIndex].stopTimes[stopTimeIndex]=stoptime;
+                    stopTimes.forEach(stopTime => {
+                        const tripIndex = next.findIndex(item => item.tripID === stopTime.tripID);
+                        if (tripIndex < 0) {
+                            return;
+                        }
+                        const stopTimeIndex = next[tripIndex].stopTimes.findIndex(item => item.stopTimeID === stopTime.stopTimeID);
+                        if (stopTimeIndex < 0) {
+                            return;
+                        }
+                        next[tripIndex] = {...next[tripIndex]};
+                        next[tripIndex].stopTimes = [...next[tripIndex].stopTimes];
+                        next[tripIndex].stopTimes[stopTimeIndex] = stopTime;
+
+                    });
                     return next;
                 });
             });
-            connection.on("UpdateTripStopTime", (trip: TimeTableTrip) => {
-                console.log("UpdateTripStopTime",trip.stopTimes[0].depTime);
-                setUpTrips(prev=> {
-                    const tripIndex=prev.findIndex(item=>item.tripID===trip.tripID);
-                    if(tripIndex>=0){
-                        const next=[...prev];
-                        next[tripIndex]=Object.assign({...next[tripIndex]}, trip);
-                        console.log(next[tripIndex].stopTimes[0].depTime);
-                        return next;
-                    }
-                    return prev;
-                });
-                setDownTrips(prev=> {
-                    const tripIndex=prev.findIndex(item=>item.tripID===trip.tripID);
-                    if(tripIndex>=0){
-                        const next=[...prev];
-                        next[tripIndex]=Object.assign({...next[tripIndex]}, trip);
-                        console.log(next[tripIndex].stopTimes[0].depTime);
-                        return next;
-                    }
-                    return prev;
-                });
 
-            });
-            connection.on("UpdateTrips", () => {
-                console.log("UpdateTrips");
-                fetch(`${process.env.REACT_APP_SERVER_URL}/api/DiagramPage/0`).then(res=>res.json())
-                    .then((res:DiagramData)=>{
-                        setDownTrips(res.downTrips);
-                        setUpTrips(res.upTrips);
-                        setStations(res.stations);
-                    })
+            connection.off("UpdateTrips");
+            connection.on("UpdateTrips", async(trips:Trip[]) => {
+                setUpTrips(prev => {
+                    const next=[...prev];
+                    trips.forEach(trip => {
+                        const tripIndex = next.findIndex(item => item.tripID === trip.tripID);
+                        if (tripIndex < 0) {
+                            return;
+                        }
+                        next[tripIndex] = {...next[tripIndex],...trip};
 
+                    });
+                    return next;
+                });
+                setDownTrips(prev => {
+                    const next=[...prev];
+                    trips.forEach(trip => {
+                        const tripIndex = next.findIndex(item => item.tripID === trip.tripID);
+                        if (tripIndex < 0) {
+                            return;
+                        }
+                        next[tripIndex] = {...next[tripIndex],...trip};
+
+                    });
+                    return next;
+                });
             });
-            connection.on("DeleteTrip", (tripID: number) => {
-                fetch(`${process.env.REACT_APP_SERVER_URL}/api/DiagramPage/0`).then(res=>res.json())
-                    .then((res:DiagramData)=>{
-                        setDownTrips(res.downTrips);
-                        setUpTrips(res.upTrips);
-                        setStations(res.stations);
-                    })
+            connection.off("DeleteTrips");
+            connection.on("DeleteTrips", async() => {
+                await loadDiagramData();
             });
+            connection.off("InsertTrips");
+            connection.on("InsertTrips", async() => {
+                await loadDiagramData();
+            });
+
+
+
+
+
+
+
 
 
         });

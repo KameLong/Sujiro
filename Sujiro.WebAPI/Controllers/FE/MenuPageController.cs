@@ -26,7 +26,7 @@ namespace Sujiro.WebAPI.Controllers
 
 
 
-        public MenuPageController(IHubContext<ChatHub> hubContext, IConfiguration configuration) : base(hubContext, configuration)
+        public MenuPageController(IHubContext<SujirawHub> hubContext, IConfiguration configuration) : base(hubContext, configuration)
         {
         }
 

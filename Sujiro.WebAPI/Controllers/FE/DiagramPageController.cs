@@ -39,7 +39,7 @@ namespace Sujiro.WebAPI.Controllers
         }
 
 
-        public DiagramPageController(IHubContext<ChatHub> hubContext, IConfiguration configuration) : base(hubContext, configuration)
+        public DiagramPageController(IHubContext<SujirawHub> hubContext, IConfiguration configuration) : base(hubContext, configuration)
         {
         }
 
@@ -70,10 +70,6 @@ namespace Sujiro.WebAPI.Controllers
                             inner join {RouteStation.TABLE_NAME} on {StopTime.TABLE_NAME}.{nameof(StopTime.routeStationID)}={RouteStation.TABLE_NAME}.{nameof(RouteStation.RouteStationID)}
                             order by {StopTime.TABLE_NAME}.{nameof(StopTime.tripID)},
                             {RouteStation.TABLE_NAME}.{nameof(RouteStation.Seq)}";
-                    //$@"SELECT * FROM {StopTime.TABLE_NAME} 
-                    //        inner join {Trip.TABLE_NAME} on {StopTime.TABLE_NAME}.{nameof(StopTime.tripID)}={Trip.TABLE_NAME}.tripID
-                    //        order by {StopTime.TABLE_NAME}.{nameof(StopTime.tripID)},
-                    //        {StopTime.TABLE_NAME}.{nameof(StopTime.routeStationID)}";
                     using (var reader = command.ExecuteReader())
                     {
                         DiagramTrip? trip = null;

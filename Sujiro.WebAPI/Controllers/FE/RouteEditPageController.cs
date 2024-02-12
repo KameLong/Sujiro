@@ -34,7 +34,7 @@ namespace Sujiro.WebAPI.Controllers.FE
     [Authorize]
     public class RouteEditPageController : SujiroAPIController
     {
-        public RouteEditPageController(IHubContext<ChatHub> hubContext, IConfiguration configuration) : base(hubContext, configuration)
+        public RouteEditPageController(IHubContext<SujirawHub> hubContext, IConfiguration configuration) : base(hubContext, configuration)
         {
         }
         [HttpGet("{companyID}/{routeID}")]

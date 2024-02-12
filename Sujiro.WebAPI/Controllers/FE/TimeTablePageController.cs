@@ -4,15 +4,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.Sqlite;
 using Sujiro.Data;
+using Sujiro.Data.Common;
 using Sujiro.WebAPI.Service.AuthService;
 using Sujiro.WebAPI.SignalR;
+using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Security.Claims;
 using static System.Formats.Asn1.AsnWriter;
 
 namespace Sujiro.WebAPI.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class TimeTablePageController : SujiroAPIController
@@ -58,7 +59,7 @@ namespace Sujiro.WebAPI.Controllers
         }
 
 
-        public TimeTablePageController(IHubContext<ChatHub> hubContext, IConfiguration configuration) : base(hubContext, configuration)
+        public TimeTablePageController(IHubContext<SujirawHub> hubContext, IConfiguration configuration) : base(hubContext, configuration)
         {
         }
 
@@ -83,7 +84,14 @@ namespace Sujiro.WebAPI.Controllers
                     result.stations.ForEach(x => x.station = Station.GetStation(conn, x.StationID));
                     trainTypes=TrainType.GetAllTrainType(conn).ToList();
                     var command=conn.CreateCommand();
-                    command.CommandText = $"SELECT * FROM {StopTime.TABLE_NAME} inner join {Trip.TABLE_NAME} on {StopTime.TABLE_NAME}.{nameof(StopTime.tripID)}={Trip.TABLE_NAME}.{nameof(Trip.TripID)} where {Trip.TABLE_NAME}.{nameof(Trip.direct)}=:direct order by {Trip.TABLE_NAME}.{nameof(Trip.Seq)}";
+                    command.CommandText = $@"SELECT * FROM {StopTime.TABLE_NAME} 
+                            inner join {Trip.TABLE_NAME} on ({StopTime.TABLE_NAME}.{nameof(StopTime.tripID)}={Trip.TABLE_NAME}.tripID 
+                                and {Trip.TABLE_NAME}.{nameof(Trip.RouteID)}={routeID}
+                                and {Trip.TABLE_NAME}.{nameof(Trip.direct)}=:direct)
+                            inner join {RouteStation.TABLE_NAME} on {StopTime.TABLE_NAME}.{nameof(StopTime.routeStationID)}={RouteStation.TABLE_NAME}.{nameof(RouteStation.RouteStationID)}
+                            order by {Trip.TABLE_NAME}.{nameof(Trip.TripSeq)},
+                            {RouteStation.TABLE_NAME}.{nameof(RouteStation.Seq)}";
+
                     command.Parameters.Add(new SqliteParameter(":direct", direct));
                     using (var reader = command.ExecuteReader())
                     {
@@ -112,47 +120,66 @@ namespace Sujiro.WebAPI.Controllers
             }
         }
 
-        [HttpPut("trip")]
-        public async Task<ActionResult> PutTrip(TimetableTrip trip)
-        {
 
+        /**
+         * 既存のTripを置き換えます
+         */
+        [HttpPut("UpdateTrip/{companyID}")]
+        public async Task<ActionResult> UpdateTrip(long companyID,TimetableTrip trip)
+        {
+            if (!AuthService.HasAccessPrivileges(Configuration["ConnectionStrings:DBdir"], User, companyID))
+            {
+                return Forbid();
+            }
+            string dbPath = Configuration["ConnectionStrings:DBdir"] + $"company_{companyID}.sqlite";
             try
             {
-               Debug.WriteLine($"PostTrip");
-                using (var conn = new SqliteConnection("Data Source=" + Configuration["ConnectionStrings:DBpath"]))
+                using (var conn = new SqliteConnection("Data Source=" + dbPath))
                 {
                     conn.Open();
                     var tran = conn.BeginTransaction();
                     trip.Replace(conn);
-                    foreach(var stopTime in trip.stopTimes)
+                    foreach (var stopTime in trip.stopTimes)
                     {
                         stopTime.Replace(conn);
                     }
                     tran.Commit();
                 }
-                await _hubContext.Clients.All.SendAsync("UpdateTripStopTime", trip);
+                var trips= new List<Trip>
+                {
+                    (Trip)trip
+                };
+                await _hubContext.Clients.Groups(companyID.ToString()).SendAsync("UpdateStopTimes", trip.stopTimes);
+                await _hubContext.Clients.Groups(companyID.ToString()).SendAsync("UpdateTrips",trips);
                 return Ok("");
             }
             catch (Exception ex)
             {
                 return BadRequest(ex);
             }
+
+
         }
-        [HttpPost("insertTrip")]
-        public async Task<ActionResult> InsertTrip(InsertTimetableTrip insert)
+        [HttpPost("InsertTrip/{companyID}")]
+        public async Task<ActionResult> InsertTrip(long companyID,InsertTimetableTrip insert)
         {
+
             TimetableTrip trip = insert.trip;
+            if (!AuthService.HasAccessPrivileges(Configuration["ConnectionStrings:DBdir"], User, companyID))
+            {
+                return Forbid();
+            }
+            string dbPath = Configuration["ConnectionStrings:DBdir"] + $"company_{companyID}.sqlite";
 
             try
             {
-                Debug.WriteLine($"insertTrip");
-                using (var conn = new SqliteConnection("Data Source=" + Configuration["ConnectionStrings:DBpath"]))
+                using (var conn = new SqliteConnection("Data Source=" + dbPath))
                 {
                     conn.Open();
                     var tran = conn.BeginTransaction();
                     var command = conn.CreateCommand();
 
-                    command.CommandText = $"select seq from {Trip.TABLE_NAME} WHERE direct=:direct and tripID=:tripID";
+                    command.CommandText = $"select TripSeq from {Trip.TABLE_NAME} WHERE direct=:direct and tripID=:tripID";
                     command.Parameters.Add(new SqliteParameter(":direct", trip.direct));
                     command.Parameters.Add(new SqliteParameter(":tripID", insert.insertTripID));
                     int seq=(int)(long)command.ExecuteScalar();
@@ -160,39 +187,19 @@ namespace Sujiro.WebAPI.Controllers
 
 
                     command = conn.CreateCommand();
-                    command.CommandText = $"UPDATE {Trip.TABLE_NAME} SET seq=seq+1 WHERE direct=:direct and seq>=:seq";
+                    command.CommandText = $"UPDATE {Trip.TABLE_NAME} SET TripSeq=TripSeq+1 WHERE direct=:direct and TripSeq>=:TripSeq";
                     command.Parameters.Add(new SqliteParameter(":direct", trip.direct));
-                    command.Parameters.Add(new SqliteParameter(":seq", seq));
+                    command.Parameters.Add(new SqliteParameter(":TripSeq", seq));
                     command.ExecuteNonQuery();
-
-                    command = conn.CreateCommand();
-                    command.CommandText = $"INSERT INTO {Trip.TABLE_NAME} (tripID,direct,name,number,type,seq) VALUES (:tripID,:direct,:name,:number,:type,:seq)";
-                    command.Parameters.Add(new SqliteParameter(":tripID", trip.TripID));
-                    command.Parameters.Add(new SqliteParameter(":direct", trip.direct));
-                    command.Parameters.Add(new SqliteParameter(":name", trip.Name));
-                    command.Parameters.Add(new SqliteParameter(":number", trip.Number));
-                    command.Parameters.Add(new SqliteParameter(":type", trip.TypeID));
-                    command.Parameters.Add(new SqliteParameter(":seq", seq));
-                    command.ExecuteNonQuery();
+                    trip.TripSeq = seq;
+                    trip.Replace(conn);
                     foreach (var stop in trip.stopTimes)
                     {
-                        command=    conn.CreateCommand();
-                        command.CommandText = $"INSERT INTO {StopTime.TABLE_NAME} (tripID,stationID,ariTime,depTime,stopType) VALUES (:tripID,:stationID,:ariTime,:depTime,:stopType)";
-                        command.Parameters.Add(new SqliteParameter(":tripID", trip.TripID));
-                            command.Parameters.Add(new SqliteParameter(":stationID", stop.routeStationID));
-                        command.Parameters.Add(new SqliteParameter(":ariTime", stop.ariTime));
-                        command.Parameters.Add(new SqliteParameter(":depTime", stop.depTime));
-                        command.Parameters.Add(new SqliteParameter(":stopType", stop.stopType));
-                        command.ExecuteNonQuery();
-
-
+                        stop.Replace(conn);
                     }
-
-
                     tran.Commit();
                 }
-                await _hubContext.Clients.All.SendAsync("UpdateTrips");
-
+                await _hubContext.Clients.Groups(companyID.ToString()).SendAsync("InsertTrips", new List<Trip> { trip });
                 return Ok("");
             }
             catch (Exception ex)

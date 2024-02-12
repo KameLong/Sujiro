@@ -15,7 +15,7 @@ namespace Sujiro.WebAPI.Controllers
     [Authorize]
     public class UserController : SujiroAPIController
     {
-        public UserController(IHubContext<ChatHub> hubContext, IConfiguration configuration) : base(hubContext, configuration)
+        public UserController(IHubContext<SujirawHub> hubContext, IConfiguration configuration) : base(hubContext, configuration)
         {
         }
 

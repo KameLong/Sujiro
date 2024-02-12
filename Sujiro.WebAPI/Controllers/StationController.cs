@@ -15,7 +15,7 @@ namespace Sujiro.WebAPI.Controllers
     [ApiController]
     public class StationController : SujiroAPIController
     {
-        public StationController(IHubContext<ChatHub> hubContext, IConfiguration configuration):base(hubContext, configuration)
+        public StationController(IHubContext<SujirawHub> hubContext, IConfiguration configuration):base(hubContext, configuration)
         {
         }
 

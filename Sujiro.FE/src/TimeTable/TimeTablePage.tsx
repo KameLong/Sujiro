@@ -3,7 +3,7 @@ import style from './TimeTablePage.module.css';
 import * as signalR from "@microsoft/signalr";
 import StationView from "./StationView";
 import TrainView from "./TrainView";
-import {Station, StopTime} from "../SujiroData/DiaData";
+import {Station, StopTime, Trip} from "../SujiroData/DiaData";
 import {TimeTableStation, TimeTableTrip} from "./TimeTableData";
 import {useParams} from "react-router-dom";
 import {
@@ -34,13 +34,6 @@ function TimeTablePage() {
     const [user] = useIdToken(auth);
     const [stations, setStations] = useState<TimeTableStation[]>([]);
     const [trips, setTrips] = useState<TimeTableTrip[]>([]);
-    const [connection,setConnection]=useState<signalR.HubConnection>(()=>{
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl(`${process.env.REACT_APP_SERVER_URL}/ws/chatHub`)
-            .build();
-        connection.start().catch((err) => console.error(err));
-        return connection;
-    });
     const [selected, setSelected] = useState<TimetableSelected | null>(null);
     const onRightKeyDown = (e: React.KeyboardEvent<HTMLDivElement> | undefined) => {
         if (open) {
@@ -172,87 +165,68 @@ function TimeTablePage() {
     useEffect(() => {
         auth.onAuthStateChanged(async(user) => {
             await loadTimeTableData();
+            const token = await getAuth().currentUser?.getIdToken()
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl(`${process.env.REACT_APP_SERVER_URL}/ws/chatHub`, {accessTokenFactory: () => token ?? ''})
+                .build();
+            await connection.start();
+            connection.invoke("Init",companyID);
+            connection.off("UpdateStopTimes");
+            connection.on("UpdateStopTimes", (stopTimes: StopTime[]) => {
+                setTrips(prev => {
+                    const next=[...prev];
+                    stopTimes.forEach(stopTime => {
+                        const tripIndex = next.findIndex(item => item.tripID === stopTime.tripID);
+                        if (tripIndex < 0) {
+                            return;
+                        }
+                        const stopTimeIndex = next[tripIndex].stopTimes.findIndex(item => item.stopTimeID === stopTime.stopTimeID);
+                        if (stopTimeIndex < 0) {
+                            return;
+                        }
+                        next[tripIndex] = {...next[tripIndex]};
+                        next[tripIndex].stopTimes = [...next[tripIndex].stopTimes];
+                        next[tripIndex].stopTimes[stopTimeIndex] = stopTime;
+
+                    });
+                    return next;
+                });
+            });
+
+            connection.off("UpdateTrips");
+            connection.on("UpdateTrips", async(trips:Trip[]) => {
+                setTrips(prev => {
+                    const next=[...prev];
+                    trips.forEach(trip => {
+                        const tripIndex = next.findIndex(item => item.tripID === trip.tripID);
+                        if (tripIndex < 0) {
+                            return;
+                        }
+                        next[tripIndex] = {...next[tripIndex],...trip};
+
+                    });
+                    return next;
+                });
+            });
+            connection.off("DeleteTrips");
+
+            connection.on("DeleteTrips", async() => {
+                await loadTimeTableData();
+            });
+            connection.off("InsertTrips");
+
+            connection.on("InsertTrips", async() => {
+                await loadTimeTableData();
+            });
         });
     }, []);
 
 
 
-    connection.off("UpdateStoptime");
-    connection.on("UpdateStoptime", (stoptime: StopTime) => {
-        setTrips(prev => {
-            const tripIndex = prev.findIndex(item => item.tripID === stoptime.tripID);
-            if (tripIndex < 0) {
-                console.error("tripIndex<0");
-                return prev;
-            }
-            const stopTimeIndex = prev[tripIndex].stopTimes.findIndex(item => item.stopTimeID === stoptime.stopTimeID);
-            if (stopTimeIndex < 0) {
-                console.error("stopTimeIndex<0");
-                return prev;
-            }
-            const next = [...prev];
-            next[tripIndex] = {...next[tripIndex]};
-            next[tripIndex].stopTimes = [...next[tripIndex].stopTimes];
-            next[tripIndex].stopTimes[stopTimeIndex] = stoptime;
-
-            return next;
-        });
-    });
-    connection.off("UpdateTripStopTime");
-
-    connection.on("UpdateTripStopTime", (trip: TimeTableTrip) => {
-        console.log("UpdateTripStopTime", trip.stopTimes[0].depTime);
-        setTrips(prev => {
-            const tripIndex = prev.findIndex(item => item.tripID === trip.tripID);
-            if (tripIndex < 0) {
-                console.error("tripIndex<0");
-                return prev;
-            }
-            const next = [...prev];
-            next[tripIndex] = Object.assign({...next[tripIndex]}, trip);
-            console.log(next[tripIndex].stopTimes[0].depTime);
-            return next;
-        });
-
-    });
-    connection.off("UpdateTrips");
-    connection.on("UpdateTrips", () => {
-        const token=user?.getIdToken();
-        fetch(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/0/${direct}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                }
-            }).then(res => res.json())
-            .then((res) => {
-                setTrips(res.trips);
-                setStations(res.stations);
-            })
-
-    });
-    connection.off("DeleteTrip");
-
-    connection.on("DeleteTrip", (tripID: number) => {
-
-        if (selected?.tripID === tripID) {
-            setSelected((prev) => {
-                if (prev === null) {
-                    return null;
-                }
-                const tripIndex = trips.findIndex(item => item.tripID === prev.tripID);
-                const newTrip = trips[tripIndex + 1];
-                if (newTrip) {
-                    return {tripID: newTrip.tripID, stationID: prev.stationID, viewID: prev.viewID};
-                }
-                return prev;
-            });
-        }
 
 
-        setTrips(prev => {
-            return prev.filter(item => item.tripID !== tripID);
-        });
-    });
+
+
 
 
 
@@ -286,7 +260,7 @@ function TimeTablePage() {
     const copyTrip=(trip:TimeTableTrip)=>{
         localStorage.setItem('copyTrip', JSON.stringify([trip]));
     }
-    const pasteTrip=(tripList:TimeTableTrip[],selectedTripID:number|undefined)=>{
+    const pasteTrip=async (tripList:TimeTableTrip[],selectedTripID:number|undefined)=>{
 
         console.log(selectedTripID);
             let text = localStorage.getItem('copyTrip');
@@ -295,24 +269,25 @@ function TimeTablePage() {
                 return;
             }
             const trips: TimeTableTrip[] = JSON.parse(text);
-            trips.forEach(trip => {
+            const promise=trips.map(async trip => {
                 if (trip.tripID === undefined) {
                     console.log("tripID is undefined");
                     return;
                 }
                 trip.tripID = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+                trip.trainID=Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+                trip.stopTimes.forEach(item => {
+                    item.stopTimeID = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+                    item.tripID = trip.tripID;
+                });
                 const selectedTrip = tripList.find(item => item.tripID === selectedTripID);
                 if (!selectedTrip) return;
                 console.log({trip: trip, insertTripID: selectedTripID});
-
-                axios.post("" + process.env.REACT_APP_SERVER_URL + "/api/timetablePage/insertTrip",
-                    {trip: trip, insertTripID: selectedTripID}).then(res => {
-                    console.log(res);
-                });
+                const token=await getAuth().currentUser?.getIdToken();
+                await axios.post(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/InsertTrip/${companyID}`,
+                    {trip: trip, insertTripID: selectedTripID},{headers: {Authorization: `Bearer ${token}`}});
             });
-
-
-
+            await Promise.all(promise);
     }
 
     return (
@@ -322,7 +297,7 @@ function TimeTablePage() {
             >
                 <StationView stations={stations} direct={Number(direct)}/>
                 <div className={style.trainListLayout} tabIndex={-1}
-                     onKeyDown={e => {
+                     onKeyDown={async e => {
                          switch (e.key) {
                              case "Enter":
                                  onEnterKeyDown(e);
@@ -345,6 +320,7 @@ function TimeTablePage() {
                                      const addSec = 60;
                                      const trip = trips.find(item => item.tripID === selected?.tripID);
                                      if (!trip) return;
+                                     console.log(trip);
                                      let flag = false;
                                      for (let i = 0; i < trip.stopTimes.length; i++) {
                                          if (trip.stopTimes[i].routeStationID === selected?.stationID && selected?.viewID === 0) {
@@ -360,7 +336,8 @@ function TimeTablePage() {
                                              trip.stopTimes[i].depTime += addSec;
                                          }
                                      }
-                                     axios.put(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/trip`, trip);
+                                     const token=await getAuth().currentUser?.getIdToken();
+                                     axios.put(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/UpdateTrip/${companyID}`, trip,{headers: {Authorization: `Bearer ${token}`}});
                                      e.preventDefault();
 
                                  }
@@ -385,7 +362,8 @@ function TimeTablePage() {
                                              trip.stopTimes[i].depTime += addSec;
                                          }
                                      }
-                                     axios.put(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/trip`, trip);
+                                     const token=await getAuth().currentUser?.getIdToken();
+                                     axios.put(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/UpdateTrip/${companyID}`, trip,{headers: {Authorization: `Bearer ${token}`}});
                                      e.preventDefault();
                                  }
                                  break;
@@ -409,7 +387,13 @@ function TimeTablePage() {
                                  if (selected?.tripID === undefined) {
                                      return;
                                  }
-                                 axios.delete(`${process.env.REACT_APP_SERVER_URL}/api/trip/${selected?.tripID}`);
+                                 const token=await getAuth().currentUser?.getIdToken();
+                                 await axios.delete(`${process.env.REACT_APP_SERVER_URL}/api/trip/${companyID}/${selected?.tripID}`,
+                                     {
+                                            headers: {
+                                                Authorization: `Bearer ${token}`
+                                            }
+                                     });
                                  e.preventDefault();
                                  break;
 

@@ -26,6 +26,7 @@ export interface Trip{
     number:string;
     name:string;
     seq:number;
+
 }
 
 export interface StopTime{

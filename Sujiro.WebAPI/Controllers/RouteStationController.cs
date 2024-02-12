@@ -14,7 +14,7 @@ namespace Sujiro.WebAPI.Controllers
 
     public class RouteStationController : SujiroAPIController
     {
-        public RouteStationController(IHubContext<ChatHub> hubContext, IConfiguration configuration) : base(hubContext, configuration)
+        public RouteStationController(IHubContext<SujirawHub> hubContext, IConfiguration configuration) : base(hubContext, configuration)
         {
         }
         [HttpGet("{companyID}/{routeID}")]

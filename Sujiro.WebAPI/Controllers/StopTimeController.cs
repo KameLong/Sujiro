@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.Sqlite;
@@ -9,37 +10,28 @@ namespace Sujiro.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class StopTimeController : SujiroAPIController
     {
-        public StopTimeController(IHubContext<ChatHub> hubContext, IConfiguration configuration) : base(hubContext, configuration)
+        public StopTimeController(IHubContext<SujirawHub> hubContext, IConfiguration configuration) : base(hubContext, configuration)
         {
         }
 
-        [HttpPut]
-        public async Task<ActionResult> Put(StopTime stopTime)
+        [HttpPut("{companyID}")]
+        public async Task<ActionResult> Put(long companyID,StopTime stopTime)
         {
             try
             {
                 DateTime now = DateTime.Now;
-                using (var conn = new SqliteConnection("Data Source=" + Configuration["ConnectionStrings:DBpath"]))
+                var dbpath = Configuration["ConnectionStrings:DBdir"] +"company_" +companyID + ".sqlite";
+                using (var conn = new SqliteConnection("Data Source=" +dbpath))
                 {
                     conn.Open();
                     var tran = conn.BeginTransaction();
-                    var command = conn.CreateCommand();
-                    command.CommandText = $@"UPDATE {StopTime.TABLE_NAME} set 
-                            {nameof(StopTime.ariTime)}=:ariTime ,
-                            {nameof(StopTime.depTime)}=:depTime, 
-                            {nameof(StopTime.stopType)}=:stopType 
-                               where {nameof(StopTime.StopTimeID)}=:id";
-                    command.Parameters.AddWithValue(":id", stopTime.StopTimeID);
-                    command.Parameters.AddWithValue(":ariTime", stopTime.ariTime);
-                    command.Parameters.AddWithValue(":depTime", stopTime.depTime);
-                    command.Parameters.AddWithValue(":stopType", stopTime.stopType);
-                    command.ExecuteNonQuery();
+                    stopTime.Replace(conn);
                     tran.Commit();
                 }
-                await _hubContext.Clients.All.SendAsync("UpdateStoptime", stopTime);
-
+                await _hubContext.Clients.Group(companyID.ToString()).SendAsync("UpdateStoptimes", new List<StopTime> { stopTime });
                 return Ok();
             }
             catch(Exception ex)

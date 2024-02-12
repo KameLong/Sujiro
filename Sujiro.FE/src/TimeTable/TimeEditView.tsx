@@ -3,6 +3,8 @@ import React, {useEffect, useRef, useState} from "react";
 import {StopTime} from "../SujiroData/DiaData";
 import axios from "axios";
 import {time2Str, timeS2int} from "./TimeTableData";
+import {useRequiredParams} from "../Hooks/useRequiredParams";
+import {getAuth} from "firebase/auth";
 
 
 interface TimeEditViewProps {
@@ -24,6 +26,7 @@ export function useSSS(stopTime:StopTime|null) {
 
 
 export function TimeEditView({stopTime,focusIndex,close}:TimeEditViewProps){
+    const {companyID} = useRequiredParams<{ companyID: string }>();
     const [depTime,setDepTime]=useState(time2Str(stopTime?.depTime));
     const [ariTime,setAriTime]=useState(time2Str(stopTime?.ariTime));
     const ariInput=useRef<HTMLInputElement>(null);
@@ -37,15 +40,20 @@ export function TimeEditView({stopTime,focusIndex,close}:TimeEditViewProps){
         setDepTime(time2Str(stopTime.depTime));
         setAriTime(time2Str(stopTime.ariTime));
     },[stopTime]);
-    const updateStopTime=()=>{
+    const updateStopTime=async()=>{
         const newStopTime={...stopTime};
         newStopTime.ariTime=timeS2int(ariTime);
         newStopTime.depTime=timeS2int(depTime);
         console.log(newStopTime);
         if(JSON.stringify(newStopTime)!==JSON.stringify(stopTime)){
             console.log(JSON.stringify(newStopTime),JSON.stringify(stopTime));
-            axios.put(`${process.env.REACT_APP_SERVER_URL}/api/stopTime`,newStopTime);
-
+            const token=await getAuth().currentUser?.getIdToken();
+            axios.put(`${process.env.REACT_APP_SERVER_URL}/api/stopTime/${companyID}`,newStopTime,                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
         }
     }
 
@@ -62,10 +70,18 @@ export function TimeEditView({stopTime,focusIndex,close}:TimeEditViewProps){
                 <br/>
                 <div style={{display: "flex", height: '100%'}}>
                     <div style={{width: "150px", backgroundColor: '#FFF', height: '100%'}}>
-                        <RadioGroup aria-label="gender" name="gender1" value={stopTime?.stopType} onChange={e=>{
+                        <RadioGroup aria-label="gender" name="gender1" value={stopTime?.stopType}
+                                    onChange={async e=>{
                             const newStopTime={...stopTime};
                             newStopTime.stopType=parseInt(e.target.value);
-                            axios.put(`${process.env.REACT_APP_SERVER_URL}/api/stopTime`,newStopTime);
+                            const token=await getAuth().currentUser?.getIdToken();
+                            axios.put(`${process.env.REACT_APP_SERVER_URL}/api/stopTime/${companyID}`,newStopTime,                {
+                                    headers: {
+                                        Authorization: `Bearer ${token}`
+                                    }
+                                }
+                            );
+
                         }}>
                             <FormControlLabel value="0" control={<Radio/>} label="運行なし"/>
                             <FormControlLabel value="1" control={<Radio/>} label="停車"/>
