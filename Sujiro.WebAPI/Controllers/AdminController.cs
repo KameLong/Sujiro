@@ -35,9 +35,6 @@ namespace Sujiro.WebAPI.Controllers
             Company.InsertCompany(DBdir + MasterData.MASTER_DATA_FILE, company);
             CompanySqlite.CreateCompanySqlite(DBdir, company.CompanyID);
             await OuDia.OuDia2Sujiro.OuDia2Sujiraw(@"C:\Users\kamelong\Downloads\阪急宝塚線.oud", DBdir + $"company_1.sqlite", 1);
-
-
-            //            await OuDia2Sujiro.Reset(Configuration["ConnectionStrings:oudPath"], Configuration["ConnectionStrings:DBpath"]);
             return 0;
         }
     }

@@ -3,11 +3,13 @@
 /Sujiro.WebAPI/bin
 /Sujiro.WebAPI/obj
 /Sujiro.WebAPI/wwwroot/
+/Sujiro.WebAPI/appsettings.json
 
 /Sujiro.FE/.vscode
 /Sujiro.FE/.idea
 /Sujiro.FE/build
 /Sujiro.FE/node_modules
+/Sujiro.FE/.env
 
 /Test.WebAPI/bin
 /Test.WebAPI/obj
