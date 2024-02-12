@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.IdentityModel.Tokens;
 using Sujiro.WebAPI.SignalR;
 using System.Security.Claims;
@@ -7,9 +6,6 @@ using System.Security.Claims;
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
 builder.Services.AddCors(options =>
@@ -38,18 +34,20 @@ builder.Services.AddAuthorization(options =>
         policy.RequireClaim(ClaimTypes.Name);
     });
 });
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.Authority = "https://securetoken.google.com/sujiro-e4a58";
+        options.Authority = $"https://securetoken.google.com/{builder.Configuration["Firebase:id"]}";
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = "https://securetoken.google.com/sujiro-e4a58",
+            ValidIssuer = $"https://securetoken.google.com/{builder.Configuration["Firebase:id"]}",
             ValidateAudience = true,
-            ValidAudience = "sujiro-e4a58",
+            ValidAudience = builder.Configuration["Firebase:id"],
             ValidateLifetime = true
         };
+        //signalR用に必要な処理です。
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
@@ -59,18 +57,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 {
                     context.Token = accessToken;
                 }
-
                 return Task.CompletedTask;
             }
         };
 
     });
-
-
-
-
-
-
 
 var app = builder.Build();
 
@@ -91,12 +82,10 @@ app.MapControllers();
 app.MapHub<SujirawHub>("/ws/chatHub");
 
 
-
 //https://learn.microsoft.com/en-gb/aspnet/core/tutorials/web-api-javascript?view=aspnetcore-8.0&viewFallbackFrom=aspnetcore-3.0
 //reactをwwwrootへ
 app.UseDefaultFiles();
 app.UseStaticFiles();
-//
 app.MapFallbackToFile("index.html");
 
 app.Run();

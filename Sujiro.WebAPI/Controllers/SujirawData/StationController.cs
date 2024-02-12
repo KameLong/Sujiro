@@ -8,14 +8,14 @@ using Sujiro.WebAPI.SignalR;
 using System.Diagnostics;
 using System.Security.Claims;
 
-namespace Sujiro.WebAPI.Controllers
+namespace Sujiro.WebAPI.Controllers.SujirawData
 {
 
     [Route("api/[controller]")]
     [ApiController]
     public class StationController : SujiroAPIController
     {
-        public StationController(IHubContext<SujirawHub> hubContext, IConfiguration configuration):base(hubContext, configuration)
+        public StationController(IHubContext<SujirawHub> hubContext, IConfiguration configuration) : base(hubContext, configuration)
         {
         }
 
@@ -28,8 +28,8 @@ namespace Sujiro.WebAPI.Controllers
             }
             try
             {
-                string filePath = Configuration["ConnectionStrings:DBdir"]+$"company_{companyID}.sqlite";
-                if(!System.IO.File.Exists(filePath))
+                string filePath = Configuration["ConnectionStrings:DBdir"] + $"company_{companyID}.sqlite";
+                if (!System.IO.File.Exists(filePath))
                 {
                     return NotFound();
                 }
@@ -51,8 +51,8 @@ namespace Sujiro.WebAPI.Controllers
             }
             try
             {
-                string filePath = Configuration["ConnectionStrings:DBdir"]+$"company_{companyID}.sqlite";
-                if(!System.IO.File.Exists(filePath))
+                string filePath = Configuration["ConnectionStrings:DBdir"] + $"company_{companyID}.sqlite";
+                if (!System.IO.File.Exists(filePath))
                 {
                     return NotFound();
                 }

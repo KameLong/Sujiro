@@ -4,7 +4,7 @@ using Microsoft.Data.Sqlite;
 using Sujiro.Data;
 using System.Diagnostics;
 
-namespace Sujiro.WebAPI.Controllers
+namespace Sujiro.WebAPI.Controllers.SujirawData
 {
 
 
@@ -20,10 +20,10 @@ namespace Sujiro.WebAPI.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<OldTrainType> Get()
+        public IEnumerable<TrainType> Get()
         {
             DateTime now = DateTime.Now;
-            var trainTypes = new List<OldTrainType>();
+            var trainTypes = new List<TrainType>();
             using (var conn = new SqliteConnection("Data Source=" + Configuration["ConnectionStrings:DBpath"]))
             {
                 conn.Open();
@@ -31,13 +31,13 @@ namespace Sujiro.WebAPI.Controllers
                 var command = conn.CreateCommand();
 
                 command = conn.CreateCommand();
-                command.CommandText = $"SELECT * FROM {OldTrainType.TABLE_NAME}";
+                command.CommandText = $"SELECT * FROM {TrainType.TABLE_NAME}";
 
                 using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        trainTypes.Add(new OldTrainType(reader));
+                        trainTypes.Add(new TrainType(reader));
                     }
                 }
             }

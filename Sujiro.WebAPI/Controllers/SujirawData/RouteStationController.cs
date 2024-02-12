@@ -6,7 +6,7 @@ using Sujiro.Data;
 using Sujiro.WebAPI.Service.AuthService;
 using Sujiro.WebAPI.SignalR;
 
-namespace Sujiro.WebAPI.Controllers
+namespace Sujiro.WebAPI.Controllers.SujirawData
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -40,7 +40,7 @@ namespace Sujiro.WebAPI.Controllers
             }
         }
         [HttpPut("{companyID}")]
-        public async Task<ActionResult> Put(long companyID, [FromBody]RouteStation routeStation)
+        public async Task<ActionResult> Put(long companyID, [FromBody] RouteStation routeStation)
         {
             if (!AuthService.HasAccessPrivileges(Configuration["ConnectionStrings:DBdir"], User, companyID))
             {

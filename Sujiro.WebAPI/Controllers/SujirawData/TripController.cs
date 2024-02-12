@@ -7,7 +7,7 @@ using Sujiro.WebAPI.Service.AuthService;
 using Sujiro.WebAPI.SignalR;
 using System.Diagnostics;
 
-namespace Sujiro.WebAPI.Controllers
+namespace Sujiro.WebAPI.Controllers.SujirawData
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -39,8 +39,8 @@ namespace Sujiro.WebAPI.Controllers
             {
                 conn.Open();
                 var tran = conn.BeginTransaction();
-                Trip? trip=Trip.GetTrip(conn, tripID);
-                if(trip==null)
+                Trip? trip = Trip.GetTrip(conn, tripID);
+                if (trip == null)
                 {
                     return NotFound();
                 }
@@ -50,7 +50,7 @@ namespace Sujiro.WebAPI.Controllers
                 command.Parameters.Add(new SqliteParameter(":tripID", trip.TripID));
                 command.ExecuteNonQuery();
 
-                command=conn.CreateCommand();
+                command = conn.CreateCommand();
                 command.CommandText = $"UPDATE {Trip.TABLE_NAME} set {nameof(Trip.TripSeq)}={nameof(Trip.TripSeq)}-1 where {nameof(Trip.TripSeq)}>{trip.TripSeq}";
                 command.ExecuteNonQuery();
 

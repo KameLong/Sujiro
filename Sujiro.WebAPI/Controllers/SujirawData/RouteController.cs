@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 using Sujiro.WebAPI.Service.AuthService;
 using Sujiro.WebAPI.SignalR;
 using Route = Sujiro.Data.Route;
-namespace Sujiro.WebAPI.Controllers
+namespace Sujiro.WebAPI.Controllers.SujirawData
 {
     [Route("api/[controller]")]
     [ApiController]

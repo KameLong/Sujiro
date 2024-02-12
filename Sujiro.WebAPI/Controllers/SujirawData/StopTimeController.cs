@@ -6,7 +6,7 @@ using Microsoft.Data.Sqlite;
 using Sujiro.Data;
 using Sujiro.WebAPI.SignalR;
 
-namespace Sujiro.WebAPI.Controllers
+namespace Sujiro.WebAPI.Controllers.SujirawData
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -18,13 +18,13 @@ namespace Sujiro.WebAPI.Controllers
         }
 
         [HttpPut("{companyID}")]
-        public async Task<ActionResult> Put(long companyID,StopTime stopTime)
+        public async Task<ActionResult> Put(long companyID, StopTime stopTime)
         {
             try
             {
                 DateTime now = DateTime.Now;
-                var dbpath = Configuration["ConnectionStrings:DBdir"] +"company_" +companyID + ".sqlite";
-                using (var conn = new SqliteConnection("Data Source=" +dbpath))
+                var dbpath = Configuration["ConnectionStrings:DBdir"] + "company_" + companyID + ".sqlite";
+                using (var conn = new SqliteConnection("Data Source=" + dbpath))
                 {
                     conn.Open();
                     var tran = conn.BeginTransaction();
@@ -34,7 +34,7 @@ namespace Sujiro.WebAPI.Controllers
                 await _hubContext.Clients.Group(companyID.ToString()).SendAsync("UpdateStoptimes", new List<StopTime> { stopTime });
                 return Ok();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 throw ex;

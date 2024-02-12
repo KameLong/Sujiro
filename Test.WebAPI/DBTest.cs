@@ -52,7 +52,7 @@ namespace Test.WebAPI
 
             Company company = new Company();
             company.Name = "TestCompany";
-            company.UserID = "gVjRyIhAC6d3bRZj1ZKblHhRpCf1";
+            company.UserID = "oARWXx5ZaKS43967iQb2pUjnnq62";
             company.CompanyID = MyRandom.NextSafeLong();
             Company.InsertCompany(DBdir + MasterData.MASTER_DATA_FILE, company);
 
@@ -149,14 +149,14 @@ namespace Test.WebAPI
         {
             Company company = new Company();
             company.Name = "ïÛíÀ";
-            company.UserID = "gVjRyIhAC6d3bRZj1ZKblHhRpCf1";
+            company.UserID = "oARWXx5ZaKS43967iQb2pUjnnq62";
             company.CompanyID = 1;
             Company.InsertCompany(DBdir + MasterData.MASTER_DATA_FILE, company);
             CompanySqlite.CreateCompanySqlite(DBdir, company.CompanyID);
             await OuDia.OuDia2Sujiro.OuDia2Sujiraw( @"C:\Users\kamelong\Downloads\ç„ã}ïÛíÀê¸.oud", DBdir + $"company_1.sqlite", 1);
 
             company.Name = "ãûê¨";
-            company.UserID = "gVjRyIhAC6d3bRZj1ZKblHhRpCf1";
+            company.UserID = "oARWXx5ZaKS43967iQb2pUjnnq62";
             company.CompanyID = 2;
             Company.InsertCompany(DBdir + MasterData.MASTER_DATA_FILE, company);
             CompanySqlite.CreateCompanySqlite(DBdir, company.CompanyID);
