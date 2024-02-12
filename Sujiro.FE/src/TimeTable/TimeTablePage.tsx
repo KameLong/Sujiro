@@ -4,7 +4,7 @@ import * as signalR from "@microsoft/signalr";
 import StationView from "./StationView";
 import TrainView from "./TrainView";
 import {Station, StopTime} from "../SujiroData/DiaData";
-import {TimeTableTrip} from "./TimeTableData";
+import {TimeTableStation, TimeTableTrip} from "./TimeTableData";
 import {useParams} from "react-router-dom";
 import {
     Button,
@@ -21,13 +21,18 @@ import {
     auth
 } from '../firebase';
 import {useIdToken} from "react-firebase-hooks/auth";
+import {useRequiredParams} from "../Hooks/useRequiredParams";
+import {getAuth} from "firebase/auth";
 
 const MemoTrainView = memo(TrainView);
 
 function TimeTablePage() {
-    const {direct} = useParams<{ direct: string }>();
+    const {companyID} = useRequiredParams<{ companyID: string }>();
+    const {routeID} = useRequiredParams<{ routeID: string }>();
+    const {direct} = useRequiredParams<{ direct: string }>();
+
     const [user] = useIdToken(auth);
-    const [stations, setStations] = useState<Station[]>([]);
+    const [stations, setStations] = useState<TimeTableStation[]>([]);
     const [trips, setTrips] = useState<TimeTableTrip[]>([]);
     const [connection,setConnection]=useState<signalR.HubConnection>(()=>{
         const connection = new signalR.HubConnectionBuilder()
@@ -83,7 +88,7 @@ function TimeTablePage() {
             if (prev === null) {
                 return null;
             }
-            let stationIndex = stations.findIndex(item => item.stationID === prev.stationID);
+            let stationIndex = stations.findIndex(item => item.routeStationID === prev.stationID);
             let viewID = prev.viewID;
             while (true) {
                 if (viewID === 0) {
@@ -97,12 +102,12 @@ function TimeTablePage() {
                 switch (viewID) {
                     case 2:
                         if ((stations[stationIndex].style & 0x01) > 0) {
-                            return {tripID: prev.tripID, stationID: stations[stationIndex].stationID, viewID};
+                            return {tripID: prev.tripID, stationID: stations[stationIndex].routeStationID, viewID};
                         }
                         break;
                     case 0:
                         if ((stations[stationIndex].style & 0x02) > 0) {
-                            return {tripID: prev.tripID, stationID: stations[stationIndex].stationID, viewID};
+                            return {tripID: prev.tripID, stationID: stations[stationIndex].routeStationID, viewID};
                         }
                         break;
                 }
@@ -118,7 +123,7 @@ function TimeTablePage() {
             if (prev === null) {
                 return null;
             }
-            let stationIndex = stations.findIndex(item => item.stationID === prev.stationID);
+            let stationIndex = stations.findIndex(item => item.routeStationID === prev.stationID);
             let viewID = prev.viewID;
             while (true) {
                 viewID++;
@@ -132,12 +137,12 @@ function TimeTablePage() {
                 switch (viewID) {
                     case 2:
                         if ((stations[stationIndex].style & 0x01) > 0) {
-                            return {tripID: prev.tripID, stationID: stations[stationIndex].stationID, viewID};
+                            return {tripID: prev.tripID, stationID: stations[stationIndex].routeStationID, viewID};
                         }
                         break;
                     case 0:
                         if ((stations[stationIndex].style & 0x02) > 0) {
-                            return {tripID: prev.tripID, stationID: stations[stationIndex].stationID, viewID};
+                            return {tripID: prev.tripID, stationID: stations[stationIndex].routeStationID, viewID};
                         }
                         break;
                 }
@@ -145,26 +150,28 @@ function TimeTablePage() {
         });
         e?.preventDefault();
     };
+    const loadTimeTableData=async()=>{
+        const token=await getAuth().currentUser?.getIdToken();
+        const res=await axios.get(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/${companyID}/${routeID}/${direct}?timestamp=${new Date().getTime()}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        )
+        switch(res.status){
+            case 200:
+                setTrips(res.data.trips);
+                setStations(res.data.stations);
+                break;
+            default:
+                console.log(res.status,res.data);
+        }
+    }
 
     useEffect(() => {
         auth.onAuthStateChanged(async(user) => {
-            if (user) {
-                const token=await user.getIdToken();
-                console.log(user);
-                fetch(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/0/${direct}`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        }
-                    }
-                ).then(res => res.json())
-                    .then((res) => {
-                        setTrips(res.trips);
-                        setStations(res.stations);
-                    })
-            }else{
-                console.error("ログインされていない");
-            }
+            await loadTimeTableData();
         });
     }, []);
 
@@ -340,13 +347,13 @@ function TimeTablePage() {
                                      if (!trip) return;
                                      let flag = false;
                                      for (let i = 0; i < trip.stopTimes.length; i++) {
-                                         if (trip.stopTimes[i].stationID === selected?.stationID && selected?.viewID === 0) {
+                                         if (trip.stopTimes[i].routeStationID === selected?.stationID && selected?.viewID === 0) {
                                              flag = true;
                                          }
                                          if (flag && trip.stopTimes[i].ariTime >= 0) {
                                              trip.stopTimes[i].ariTime += addSec;
                                          }
-                                         if (trip.stopTimes[i].stationID === selected?.stationID && selected?.viewID === 2) {
+                                         if (trip.stopTimes[i].routeStationID === selected?.stationID && selected?.viewID === 2) {
                                              flag = true;
                                          }
                                          if (flag && trip.stopTimes[i].depTime >= 0) {
@@ -365,13 +372,13 @@ function TimeTablePage() {
                                      if (!trip) return;
                                      let flag = false;
                                      for (let i = 0; i < trip.stopTimes.length; i++) {
-                                         if (trip.stopTimes[i].stationID === selected?.stationID && selected?.viewID === 0) {
+                                         if (trip.stopTimes[i].routeStationID === selected?.stationID && selected?.viewID === 0) {
                                              flag = true;
                                          }
                                          if (flag && trip.stopTimes[i].ariTime >= 0) {
                                              trip.stopTimes[i].ariTime += addSec;
                                          }
-                                         if (trip.stopTimes[i].stationID === selected?.stationID && selected?.viewID === 2) {
+                                         if (trip.stopTimes[i].routeStationID === selected?.stationID && selected?.viewID === 2) {
                                              flag = true;
                                          }
                                          if (flag && trip.stopTimes[i].depTime >= 0) {
@@ -430,12 +437,12 @@ function TimeTablePage() {
                         padding: 5,
                     },
                 }}>
-                    <TimeEditView close={()=>handleClose("")} focusIndex={selected?.viewID} stopTime={selected ? trips.find(item => item.tripID === selected.tripID)?.stopTimes.find(item => item.stationID === selected.stationID)! : null}/>
+                    <TimeEditView close={()=>handleClose("")} focusIndex={selected?.viewID} stopTime={selected ? trips.find(item => item.tripID === selected.tripID)?.stopTimes.find(item => item.routeStationID === selected.stationID)! : null}/>
                 </Dialog>
             </div>
             {
                 ((selected!==null) ?
-                    <TimeEditView close={undefined} focusIndex={undefined} stopTime={selected ? trips.find(item => item.tripID === selected.tripID)?.stopTimes.find(item => item.stationID === selected.stationID)! : null}
+                    <TimeEditView close={undefined} focusIndex={undefined} stopTime={selected ? trips.find(item => item.tripID === selected.tripID)?.stopTimes.find(item => item.routeStationID === selected.stationID)! : null}
                     /> : null)
             }
             <Dialog  onClose={handleClose2} open={openEditTrain}>

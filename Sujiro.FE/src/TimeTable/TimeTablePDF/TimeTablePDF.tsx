@@ -1,6 +1,6 @@
 import React, { useEffect, useState} from 'react';
 import {Station} from "../../SujiroData/DiaData";
-import {TimeTableTrip} from "../TimeTableData";
+import {TimeTableStation, TimeTableTrip} from "../TimeTableData";
 import {useParams} from "react-router-dom";
 import PDFStationView from "./PDFStationView";
 import PDFTrainView from './PDFTrainView';
@@ -14,7 +14,7 @@ export function TimeTablePDF() {
     const {direct} = useParams<{ direct: string }>();
     const [settingOpen, setSettingOpen] = useState(false);
 
-    const [stations, setStations] = useState<Station[]>([]);
+    const [stations, setStations] = useState<TimeTableStation[]>([]);
     const [upTrips, setUpTrips] = useState<TimeTableTrip[]>([]);
     const [downTrips, setDownTrips] = useState<TimeTableTrip[]>([]);
     const [layout,setLayout]=useState<PDFTimeTableLayout>({

@@ -130,7 +130,7 @@ namespace Test.WebAPI
         {
             CreateTrips();
             var trips = Trip.GetAllTrip(DBdir + $"company_{companyID}.sqlite", routeID).ToList();
-            var routeStations = RouteStation.GetAllRouteStations(DBdir + $"company_{companyID}.sqlite",routeID).ToList();
+            var routeStations = RouteStation.GetAllRouteStations<RouteStation>(DBdir + $"company_{companyID}.sqlite",routeID).ToList();
             foreach(var trip in trips)
             {
                 foreach(var routeStation in routeStations)
@@ -148,13 +148,19 @@ namespace Test.WebAPI
         public async void ConvertOudia()
         {
             Company company = new Company();
-            company.Name = "Oudia";
+            company.Name = "ïÛíÀ";
             company.UserID = "gVjRyIhAC6d3bRZj1ZKblHhRpCf1";
             company.CompanyID = 1;
             Company.InsertCompany(DBdir + MasterData.MASTER_DATA_FILE, company);
-
             CompanySqlite.CreateCompanySqlite(DBdir, company.CompanyID);
             await OuDia.OuDia2Sujiro.OuDia2Sujiraw( @"C:\Users\kamelong\Downloads\ç„ã}ïÛíÀê¸.oud", DBdir + $"company_1.sqlite", 1);
+
+            company.Name = "ãûê¨";
+            company.UserID = "gVjRyIhAC6d3bRZj1ZKblHhRpCf1";
+            company.CompanyID = 2;
+            Company.InsertCompany(DBdir + MasterData.MASTER_DATA_FILE, company);
+            CompanySqlite.CreateCompanySqlite(DBdir, company.CompanyID);
+            await OuDia.OuDia2Sujiro.OuDia2Sujiraw(@"C:\Users\kamelong\Downloads\ãûê¨ìdìS.oud", DBdir + $"company_2.sqlite", 1);
         }
 
     }

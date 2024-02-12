@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.Sqlite;
 using Sujiro.Data;
+using Sujiro.WebAPI.Service.AuthService;
 using Sujiro.WebAPI.SignalR;
 using System.Diagnostics;
 
@@ -12,10 +13,11 @@ namespace Sujiro.WebAPI.Controllers
     [ApiController]
     public class DiagramPageController : SujiroAPIController
     {
-        class DiagramStation : OldStation
+        class DiagramStation : RouteStation
         {
             public int stationTime { get; set; } = 0;
-            public DiagramStation(SqliteDataReader reader) : base(reader)
+            public Station Station { get; set; } = new Station();
+            public DiagramStation() : base()
             {
             }
         }
@@ -25,7 +27,7 @@ namespace Sujiro.WebAPI.Controllers
             {
             }
             public List<StopTime> stopTimes { get; set; } = new List<StopTime>();
-            public OldTrainType trainType { get; set; } = new OldTrainType();
+            public TrainType trainType { get; set; } = new TrainType();
         }
 
 
@@ -41,47 +43,37 @@ namespace Sujiro.WebAPI.Controllers
         {
         }
 
-        [HttpGet("{routeID}")]
-        public async Task<ActionResult> GetDiagramData(long routeID)
+        [HttpGet("{companyID}/{routeID}")]
+        public async Task<ActionResult> GetDiagramData(long companyID,long routeID)
         {
-            try
+            if (!AuthService.HasAccessPrivileges(Configuration["ConnectionStrings:DBdir"], User, companyID))
             {
+                return Forbid();
+            }
+                try
+                {
                 var result = new DiagramData();
+                var trainTypes = new List<TrainType>();
+                string filePath = Configuration["ConnectionStrings:DBdir"] + $"company_{companyID}.sqlite";
 
-                var trainTypes = new List<OldTrainType>();
 
-
-                using (var conn = new SqliteConnection("Data Source=" + Configuration["ConnectionStrings:DBpath"]))
+                using (var conn = new SqliteConnection("Data Source=" + filePath))
                 {
                     conn.Open();
-
+                    result.stations=RouteStation.GetAllRouteStations<DiagramStation>(conn, routeID).ToList();
+                    result.stations.ForEach(x => x.Station = Station.GetStation(conn, x.StationID));
+                    trainTypes = TrainType.GetAllTrainType(conn).ToList();
                     var command = conn.CreateCommand();
-                    command.CommandText = $"SELECT * FROM {OldStation.TABLE_NAME}";
-                    using (var reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            DiagramStation station = new DiagramStation(reader);
-                            result.stations.Add(station);
-                        }
-                    
-                    }
-
-                    command.CommandText = $"SELECT * FROM {OldTrainType.TABLE_NAME}";
-                    using (var reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            OldTrainType trainType = new OldTrainType(reader);
-                            trainTypes.Add(trainType);
-                        }
-                    }
-
-                    command.CommandText = 
+                    command.CommandText =
                         $@"SELECT * FROM {StopTime.TABLE_NAME} 
-                            inner join {Trip.TABLE_NAME} on {StopTime.TABLE_NAME}.{nameof(StopTime.tripID)}={Trip.TABLE_NAME}.tripID
+                            inner join {Trip.TABLE_NAME} on ({StopTime.TABLE_NAME}.{nameof(StopTime.tripID)}={Trip.TABLE_NAME}.tripID and {Trip.TABLE_NAME}.{nameof(Trip.RouteID)}={routeID})
+                            inner join {RouteStation.TABLE_NAME} on {StopTime.TABLE_NAME}.{nameof(StopTime.routeStationID)}={RouteStation.TABLE_NAME}.{nameof(RouteStation.RouteStationID)}
                             order by {StopTime.TABLE_NAME}.{nameof(StopTime.tripID)},
-                            {StopTime.TABLE_NAME}.{nameof(StopTime.routeStationID)}";
+                            {RouteStation.TABLE_NAME}.{nameof(RouteStation.Seq)}";
+                    //$@"SELECT * FROM {StopTime.TABLE_NAME} 
+                    //        inner join {Trip.TABLE_NAME} on {StopTime.TABLE_NAME}.{nameof(StopTime.tripID)}={Trip.TABLE_NAME}.tripID
+                    //        order by {StopTime.TABLE_NAME}.{nameof(StopTime.tripID)},
+                    //        {StopTime.TABLE_NAME}.{nameof(StopTime.routeStationID)}";
                     using (var reader = command.ExecuteReader())
                     {
                         DiagramTrip? trip = null;

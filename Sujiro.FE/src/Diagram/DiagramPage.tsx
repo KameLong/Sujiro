@@ -6,12 +6,14 @@ import {DisplayObject} from "pixi.js";
 import {DiagramData, DiagramStation, DiagramTrip} from "./DiagramData";
 import {TimeTableTrip} from "../TimeTable/TimeTableData";
 import {TimetableSelected} from "../TimeTable/TimeTablePage";
-const connection = new signalR.HubConnectionBuilder()
-    .withUrl(`${process.env.REACT_APP_SERVER_URL}/ws/chatHub`)
-    .build();
-connection.start().catch((err) => console.error(err));
+import {useRequiredParams} from "../Hooks/useRequiredParams";
+import {auth} from "../firebase";
+import axios from "axios";
 
 function DiagramPage() {
+    const {companyID} = useRequiredParams<{ companyID: string }>();
+    const {routeID} = useRequiredParams<{ routeID: string }>();
+
     const SCALE:number=3;
     const [stations, setStations] = useState<DiagramStation[]>([]);
 
@@ -40,13 +42,13 @@ function DiagramPage() {
                 if(st.ariTime>=0){
                     diagramLine.points.push({
                         x:st.ariTime,
-                        y:stations.filter(item=>item.stationID===st.stationID)[0].stationTime
+                        y:stations.filter(item=>item.routeStationID===st.routeStationID)[0].stationTime
                     });
                 }
                 if(st.depTime>=0) {
                     diagramLine.points.push({
                         x: st.depTime,
-                        y:stations.filter(item=>item.stationID===st.stationID)[0].stationTime
+                        y:stations.filter(item=>item.routeStationID===st.routeStationID)[0].stationTime
                     });
                 }
             }
@@ -83,105 +85,127 @@ function DiagramPage() {
         moveing2:{x:0,y:0}
     });
 
-    useEffect(()=>{
-        console.log("load");
-        fetch(`${process.env.REACT_APP_SERVER_URL}/api/DiagramPage/0`).then(res=>res.json())
-            .then((res:DiagramData)=>{
-                setDownTrips(res.downTrips);
-                setUpTrips(res.upTrips);
-                setStations(res.stations);
-                setDiaRect(prevState => {
-                    return {
-                        xStart: prevState.xStart,
-                        xEnd: prevState.xEnd,
-                        yStart: res.stations[0].stationTime,
-                        yEnd: res.stations[res.stations.length - 1].stationTime
+    useEffect(() => {
+        auth.onAuthStateChanged(async (user) => {
+            const res=await axios.get(`${process.env.REACT_APP_SERVER_URL}/api/DiagramPage/${companyID}/${routeID}?timestamp=${new Date().getTime()}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${await user?.getIdToken()}`
                     }
-                })
-            })
-        connection.on("UpdateStoptime", (stoptime: StopTime) => {
-            console.log("UpdateStoptime",stoptime);
-            setUpTrips(prev=> {
-                const tripIndex=prev.findIndex(item=>item.tripID===stoptime.tripID);
-                if(tripIndex<0){
-                    console.error("tripIndex<0");
-                    return prev;
-                }
-                const stopTimeIndex=prev[tripIndex].stopTimes.findIndex(item=>item.stopTimeID===stoptime.stopTimeID);
-                if(stopTimeIndex<0){
-                    console.error("stopTimeIndex<0");
-                    return prev;
-                }
-                const next=[...prev];
-                next[tripIndex]={...next[tripIndex]};
-                next[tripIndex].stopTimes=[...next[tripIndex].stopTimes];
-                next[tripIndex].stopTimes[stopTimeIndex]=stoptime;
-                return next;
-            });
-            setDownTrips(prev=> {
-                const tripIndex=prev.findIndex(item=>item.tripID===stoptime.tripID);
-                if(tripIndex<0){
-                    console.error("tripIndex<0");
-                    return prev;
-                }
-                const stopTimeIndex=prev[tripIndex].stopTimes.findIndex(item=>item.stopTimeID===stoptime.stopTimeID);
-                if(stopTimeIndex<0){
-                    console.error("stopTimeIndex<0");
-                    return prev;
-                }
-                const next=[...prev];
-                next[tripIndex]={...next[tripIndex]};
-                next[tripIndex].stopTimes=[...next[tripIndex].stopTimes];
-                next[tripIndex].stopTimes[stopTimeIndex]=stoptime;
-                return next;
-            });
-        });
-        connection.on("UpdateTripStopTime", (trip: TimeTableTrip) => {
-            console.log("UpdateTripStopTime",trip.stopTimes[0].depTime);
-            setUpTrips(prev=> {
-                const tripIndex=prev.findIndex(item=>item.tripID===trip.tripID);
-                if(tripIndex>=0){
+                });
+            switch(res.status){
+                case 200:
+                    console.log(res.data);
+                    setDownTrips(res.data.downTrips);
+                    setUpTrips(res.data.upTrips);
+                    setStations(res.data.stations);
+                    break;
+                case 403:
+                    console.log("403");
+                    break;
+                default:
+                    break;
+            }
+            // setDiaRect(prevState => {
+            //     return {
+            //         xStart: prevState.xStart,
+            //         xEnd: prevState.xEnd,
+            //         yStart: res.data.stations[0].stationTime,
+            //         yEnd: res.data.stations[res.data.stations.length - 1].stationTime
+            //     }
+            // })
+
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl(`${process.env.REACT_APP_SERVER_URL}/ws/chatHub`)
+                .build();
+            connection.start().catch((err) => console.error(err));
+
+            connection.on("UpdateStoptime", (stoptime: StopTime) => {
+                console.log("UpdateStoptime",stoptime);
+                setUpTrips(prev=> {
+                    const tripIndex=prev.findIndex(item=>item.tripID===stoptime.tripID);
+                    if(tripIndex<0){
+                        console.error("tripIndex<0");
+                        return prev;
+                    }
+                    const stopTimeIndex=prev[tripIndex].stopTimes.findIndex(item=>item.stopTimeID===stoptime.stopTimeID);
+                    if(stopTimeIndex<0){
+                        console.error("stopTimeIndex<0");
+                        return prev;
+                    }
                     const next=[...prev];
-                    next[tripIndex]=Object.assign({...next[tripIndex]}, trip);
-                    console.log(next[tripIndex].stopTimes[0].depTime);
+                    next[tripIndex]={...next[tripIndex]};
+                    next[tripIndex].stopTimes=[...next[tripIndex].stopTimes];
+                    next[tripIndex].stopTimes[stopTimeIndex]=stoptime;
                     return next;
-                }
-                return prev;
-            });
-            setDownTrips(prev=> {
-                const tripIndex=prev.findIndex(item=>item.tripID===trip.tripID);
-                if(tripIndex>=0){
+                });
+                setDownTrips(prev=> {
+                    const tripIndex=prev.findIndex(item=>item.tripID===stoptime.tripID);
+                    if(tripIndex<0){
+                        console.error("tripIndex<0");
+                        return prev;
+                    }
+                    const stopTimeIndex=prev[tripIndex].stopTimes.findIndex(item=>item.stopTimeID===stoptime.stopTimeID);
+                    if(stopTimeIndex<0){
+                        console.error("stopTimeIndex<0");
+                        return prev;
+                    }
                     const next=[...prev];
-                    next[tripIndex]=Object.assign({...next[tripIndex]}, trip);
-                    console.log(next[tripIndex].stopTimes[0].depTime);
+                    next[tripIndex]={...next[tripIndex]};
+                    next[tripIndex].stopTimes=[...next[tripIndex].stopTimes];
+                    next[tripIndex].stopTimes[stopTimeIndex]=stoptime;
                     return next;
-                }
-                return prev;
+                });
+            });
+            connection.on("UpdateTripStopTime", (trip: TimeTableTrip) => {
+                console.log("UpdateTripStopTime",trip.stopTimes[0].depTime);
+                setUpTrips(prev=> {
+                    const tripIndex=prev.findIndex(item=>item.tripID===trip.tripID);
+                    if(tripIndex>=0){
+                        const next=[...prev];
+                        next[tripIndex]=Object.assign({...next[tripIndex]}, trip);
+                        console.log(next[tripIndex].stopTimes[0].depTime);
+                        return next;
+                    }
+                    return prev;
+                });
+                setDownTrips(prev=> {
+                    const tripIndex=prev.findIndex(item=>item.tripID===trip.tripID);
+                    if(tripIndex>=0){
+                        const next=[...prev];
+                        next[tripIndex]=Object.assign({...next[tripIndex]}, trip);
+                        console.log(next[tripIndex].stopTimes[0].depTime);
+                        return next;
+                    }
+                    return prev;
+                });
+
+            });
+            connection.on("UpdateTrips", () => {
+                console.log("UpdateTrips");
+                fetch(`${process.env.REACT_APP_SERVER_URL}/api/DiagramPage/0`).then(res=>res.json())
+                    .then((res:DiagramData)=>{
+                        setDownTrips(res.downTrips);
+                        setUpTrips(res.upTrips);
+                        setStations(res.stations);
+                    })
+
+            });
+            connection.on("DeleteTrip", (tripID: number) => {
+                fetch(`${process.env.REACT_APP_SERVER_URL}/api/DiagramPage/0`).then(res=>res.json())
+                    .then((res:DiagramData)=>{
+                        setDownTrips(res.downTrips);
+                        setUpTrips(res.upTrips);
+                        setStations(res.stations);
+                    })
             });
 
-        });
-        connection.on("UpdateTrips", () => {
-            console.log("UpdateTrips");
-            fetch(`${process.env.REACT_APP_SERVER_URL}/api/DiagramPage/0`).then(res=>res.json())
-                .then((res:DiagramData)=>{
-                    setDownTrips(res.downTrips);
-                    setUpTrips(res.upTrips);
-                    setStations(res.stations);
-                })
 
         });
-        connection.on("DeleteTrip", (tripID: number) => {
-            fetch(`${process.env.REACT_APP_SERVER_URL}/api/DiagramPage/0`).then(res=>res.json())
-                .then((res:DiagramData)=>{
-                    setDownTrips(res.downTrips);
-                    setUpTrips(res.upTrips);
-                    setStations(res.stations);
-                })
-        });
+    },[]);
 
 
 
-    },[])
 
     useEffect(()=>{
         setDownLines(makeDiagramLine(downTrips));
@@ -298,7 +322,7 @@ function DiagramPage() {
             line.lineTo(stationViewWidth, (station.stationTime-transform.y)*transform.yScale*SCALE);
             app.stage.addChild(line as DisplayObject);
 
-            const text=new PIXI.Text(station.name , { fontSize:40,fill: 0x000000 });
+            const text=new PIXI.Text(station.station.name , { fontSize:40,fill: 0x000000 });
             text.anchor.set(0,1);
             text.x=20;
             text.y=(station.stationTime-transform.y)*transform.yScale*SCALE;

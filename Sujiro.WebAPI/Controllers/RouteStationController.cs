@@ -31,7 +31,7 @@ namespace Sujiro.WebAPI.Controllers
                 {
                     return NotFound();
                 }
-                var routeStations = RouteStation.GetAllRouteStations(filePath, routeID);
+                var routeStations = RouteStation.GetAllRouteStations<RouteStation>(filePath, routeID);
                 return Ok(routeStations);
             }
             catch (Exception e)

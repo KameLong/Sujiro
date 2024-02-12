@@ -7,7 +7,7 @@ namespace Sujiro.WebAPI.Service.AuthService
     {
         public static string GetUserID(ClaimsPrincipal user)
         {
-            return user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+            return user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value??"";
         }
         public static bool HasAccessPrivileges(string DBdir,ClaimsPrincipal user,long companyID)
         {

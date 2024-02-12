@@ -65,8 +65,7 @@ export default function StationListView({companyID}:StationListViewProps) {
                 <Fab color="primary" aria-label="add" onClick={()=>{
                     setEditStation({
                         stationID:Math.floor(Math.random()*Number.MAX_SAFE_INTEGER),
-                        name:"",
-                        style:0
+                        name:""
                     });
                     setOpenEditStationDialog(true);
                 }}>

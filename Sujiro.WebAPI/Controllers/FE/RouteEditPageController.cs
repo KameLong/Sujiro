@@ -56,7 +56,7 @@ namespace Sujiro.WebAPI.Controllers.FE
                 {
                        return NotFound();
                 }
-                var routeStations = RouteStation.GetAllRouteStations(filePath, routeID);
+                var routeStations = RouteStation.GetAllRouteStations<RouteStation>(filePath, routeID);
                 editRoute.RouteStations = routeStations;
                 return Ok(editRoute);
             }

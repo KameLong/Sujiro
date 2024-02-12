@@ -1,6 +1,7 @@
-import {Station, StopTime, TrainType, Trip} from "../SujiroData/DiaData";
-export interface DiagramStation extends Station{
+import {RouteStation, Station, StopTime, TrainType, Trip} from "../SujiroData/DiaData";
+export interface DiagramStation extends RouteStation{
     stationTime:number
+    station:Station;
 }
 export interface DiagramTrip extends Trip{
     stopTimes:StopTime[];

@@ -90,12 +90,9 @@ namespace Sujiro.Data
         }
 
 
-        public static Station? GetStation(string dbPath, long id)
+        public static Station? GetStation(SqliteConnection conn, long id)
         {
-            using (var conn = new SqliteConnection("Data Source=" + dbPath))
-            {
-                conn.Open();
-                var command = conn.CreateCommand();
+               var command = conn.CreateCommand();
                 command.CommandText = @$"SELECT * FROM {TABLE_NAME} where stationID=:stationID";
                 command.Parameters.Add(new SqliteParameter(":stationID", id));
                 using (var reader = command.ExecuteReader())
@@ -105,7 +102,6 @@ namespace Sujiro.Data
                     {
                         return new Station(reader);
                     }
-                }
             }
             return null;
         }

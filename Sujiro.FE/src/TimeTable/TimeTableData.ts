@@ -1,10 +1,12 @@
-import {StopTime, TrainType, Trip} from "../SujiroData/DiaData";
+import {RouteStation, Station, StopTime, TrainType, Trip} from "../SujiroData/DiaData";
 
 export interface TimeTableTrip extends Trip{
     stopTimes:StopTime[];
     trainType:TrainType;
 }
-
+export interface TimeTableStation extends RouteStation{
+    station:Station;
+}
 
 export const time2Str=(time:number|undefined)=>{
     if(time===undefined){

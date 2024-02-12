@@ -38,13 +38,18 @@ namespace Sujiro.Data
         {
             RouteStationID = MyRandom.NextSafeLong();
         }
-        public RouteStation(SqliteDataReader reader)
+        public void LoadFromSqlite(SqliteDataReader reader)
         {
             RouteStationID = (long)reader["routeStationID"];
             RouteID = (long)reader["routeID"];
             StationID = (long)reader["stationID"];
             Seq = (int)(long)reader["seq"];
             Style = (int)(long)reader["style"];
+        }
+
+        public RouteStation(SqliteDataReader reader)
+        {
+            LoadFromSqlite(reader);
         }
         public static string CreateTableSqlite()
         {
@@ -89,23 +94,28 @@ namespace Sujiro.Data
                 conn.Close();
             }
         }
-        public static List<RouteStation> GetAllRouteStations(string dbPath,long routeID)
+        public static List<T> GetAllRouteStations<T>(string dbPath,long routeID) where T : RouteStation, new()
         {
             List<RouteStation> routeStations = new List<RouteStation>();
             using (var conn = new SqliteConnection("Data Source=" + dbPath))
             {
                 conn.Open();
-                var command = conn.CreateCommand();
-                command.CommandText = $"SELECT * FROM {TABLE_NAME} WHERE routeID = {routeID} order by seq";
-                var reader = command.ExecuteReader();
-                while (reader.Read())
-                {
-                    routeStations.Add(new RouteStation(reader));
-                }
-                conn.Close();
+                return GetAllRouteStations<T>(conn, routeID).ToList();
             }
-            return routeStations;
+        }
 
+
+        public static IEnumerable<T> GetAllRouteStations<T>(SqliteConnection conn, long routeID) where T : RouteStation, new()
+        {
+            var command = conn.CreateCommand();
+            command.CommandText = $"SELECT * FROM {TABLE_NAME} WHERE routeID = {routeID} order by seq";
+            var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                T res = new T();
+                res.LoadFromSqlite(reader);
+                yield return res;
+            }
         }
 
 

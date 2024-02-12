@@ -67,7 +67,8 @@ export default function RouteListView({companyID}:RouteListViewProps) {
                     setEditRoute({
                         routeID:Math.floor(Math.random()*Number.MAX_SAFE_INTEGER),
                         name:"",
-                        color:"#000000"
+                        color:"#000000",
+                        companyID:Number(companyID)
                     });
                     setOpenEditRouteDialog(true);
                 }}>

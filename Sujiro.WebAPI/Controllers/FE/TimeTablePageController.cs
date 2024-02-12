@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.Sqlite;
 using Sujiro.Data;
+using Sujiro.WebAPI.Service.AuthService;
 using Sujiro.WebAPI.SignalR;
 using System.Diagnostics;
 using System.Security.Claims;
@@ -27,21 +28,33 @@ namespace Sujiro.WebAPI.Controllers
         {
             public TimetableTrip()
             {
-
             }
-
             public List<StopTime> stopTimes { get; set; } = new List<StopTime>();
-            public OldTrainType trainType { get; set; } = new OldTrainType();
-            
+            public TrainType trainType { get; set; } = new TrainType();
             public TimetableTrip(SqliteDataReader reader) : base(reader)
             {
             }
+        }
 
+        /*
+         * 時刻表表示用のRouteStation
+         * RouteStationとStationを結合
+         */
+        public class TimeTableStation : RouteStation
+        {
+            public Station station { get; set; } = new Station();
+            public TimeTableStation():base()
+            {
+            }
+
+            public TimeTableStation(SqliteDataReader reader) : base(reader)
+            {
+            }
         }
         public class TimeTableData
         {
             public List<TimetableTrip> trips { get; set; }=new List<TimetableTrip>();
-            public List<OldStation> stations { get; set; } = new List<OldStation>();
+            public List<TimeTableStation> stations { get; set; } = new List<TimeTableStation>();
         }
 
 
@@ -49,43 +62,27 @@ namespace Sujiro.WebAPI.Controllers
         {
         }
 
-        [HttpGet("{routeID}/{direct}")]
-        public async Task<ActionResult> GetTimeTaleData(long routeID,int direct)
+        [HttpGet("{companyID}/{routeID}/{direct}")]
+        public async Task<ActionResult> GetTimeTaleData(long companyID,long routeID,int direct)
         {
-            string userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+            if (!AuthService.HasAccessPrivileges(Configuration["ConnectionStrings:DBdir"], User, companyID))
+            {
+                return Forbid();
+            }
             try
             {
-                Debug.WriteLine($"GetTimeTaleData {routeID} {direct}");
                 var result = new TimeTableData();
-                var trainTypes= new List<OldTrainType>();
+                var trainTypes= new List<TrainType>();
 
+                string filePath = Configuration["ConnectionStrings:DBdir"] + $"company_{companyID}.sqlite";
 
-                using (var conn = new SqliteConnection("Data Source=" + Configuration["ConnectionStrings:DBpath"]))
+                using (var conn = new SqliteConnection("Data Source=" + filePath))
                 {
                     conn.Open();
-
-                    var command = conn.CreateCommand();
-
-                    command.CommandText = $"SELECT * FROM {OldStation.TABLE_NAME}";
-
-                    using (var reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            OldStation trip = new OldStation(reader);
-                            result.stations.Add(trip);
-                        }
-                    }
-                    command.CommandText = $"SELECT * FROM {OldTrainType.TABLE_NAME}";
-                    using (var reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            OldTrainType trainType = new OldTrainType(reader);
-                            trainTypes.Add(trainType);
-                        }
-                    }
-
+                    result.stations=RouteStation.GetAllRouteStations<TimeTableStation>(conn, routeID).ToList();
+                    result.stations.ForEach(x => x.station = Station.GetStation(conn, x.StationID));
+                    trainTypes=TrainType.GetAllTrainType(conn).ToList();
+                    var command=conn.CreateCommand();
                     command.CommandText = $"SELECT * FROM {StopTime.TABLE_NAME} inner join {Trip.TABLE_NAME} on {StopTime.TABLE_NAME}.{nameof(StopTime.tripID)}={Trip.TABLE_NAME}.{nameof(Trip.TripID)} where {Trip.TABLE_NAME}.{nameof(Trip.direct)}=:direct order by {Trip.TABLE_NAME}.{nameof(Trip.Seq)}";
                     command.Parameters.Add(new SqliteParameter(":direct", direct));
                     using (var reader = command.ExecuteReader())

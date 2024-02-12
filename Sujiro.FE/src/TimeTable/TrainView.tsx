@@ -1,13 +1,13 @@
 import React, {Dispatch, SetStateAction} from "react";
 import style from "./TimeTablePage.module.css";
-import {Station, StopTime} from "../SujiroData/DiaData";
+import {Route, RouteStation, Station, StopTime} from "../SujiroData/DiaData";
 import {Button, Dialog, DialogTitle, List, ListItem} from "@mui/material";
 import axios from "axios";
-import {time2Str, TimeTableTrip} from "./TimeTableData";
+import {time2Str, TimeTableStation, TimeTableTrip} from "./TimeTableData";
 import {TimetableSelected} from "./TimeTablePage";
 interface TrainViewProps {
     trip:TimeTableTrip;
-    stations:Station[]
+    stations:TimeTableStation[]
     direct:number;
     selected:TimetableSelected|null;
     setSelected:Dispatch<SetStateAction<TimetableSelected | null>>|null;
@@ -36,19 +36,23 @@ function TrainView({trip,stations,direct,selected,setSelected,onDoubleClick}:Tra
     // const getStopTime = (stationID:number)=>{
     //     return trip.stopTimes.filter(item=>item.stationID===stationID)[0];
     // }
-    const getDepTimeStr=(station:Station,stopTimes:StopTime[])=>{
-        const stopTimeIndex=stopTimes.findIndex(item=>item.stationID===station.stationID);
-        const stopTime=stopTimes[stopTimeIndex];
-
+    const getDepTimeStr=(station:TimeTableStation,stopTimes:StopTime[],stations:TimeTableStation[])=>{
+        const index=stations.findIndex(item=>item.routeStationID===station.routeStationID);
+        const stopTime=stopTimes.find(item=>item.routeStationID===station.routeStationID);
+        if(stopTime===undefined){
+            return "e";
+        }
         if((station.style& 0x03)===3){
             //発着の時
-            if(stopTimeIndex+1<stopTimes.length){
-                const nextStopTime=stopTimes[stopTimeIndex+1];
-                if(nextStopTime.stopType===0){
-                    return "‥";
-                }
-                if(nextStopTime.stopType===3){
-                    return "║";
+            if(index+1<stopTimes.length){
+                const nextStopTime=stopTimes.find(item=>item.routeStationID===stations[index+1].routeStationID);
+                if(nextStopTime!==undefined){
+                    if(nextStopTime.stopType===0){
+                        return "‥";
+                    }
+                    if(nextStopTime.stopType===3){
+                        return "║";
+                    }
                 }
             }
         }
@@ -72,17 +76,22 @@ function TrainView({trip,stations,direct,selected,setSelected,onDoubleClick}:Tra
         return time2Str(time);
 
     }
-    const getAriTimeStr=(station:Station,stopTimes:StopTime[])=>{
-        const stopTimeIndex=stopTimes.findIndex(item=>item.stationID===station.stationID);
-        const stopTime=stopTimes[stopTimeIndex];
+    const getAriTimeStr=(station:TimeTableStation,stopTimes:StopTime[],stations:TimeTableStation[])=>{
+        const index=stations.findIndex(item=>item.routeStationID===station.routeStationID);
+        const stopTime=stopTimes.find(item=>item.routeStationID===station.routeStationID);
+        if(stopTime===undefined){
+            return "e";
+        }
         if((station.style& 0x03)===3) {
-            if (stopTimeIndex - 1 >= 0) {
-                const befStopTime = stopTimes[stopTimeIndex - 1];
-                if (befStopTime.stopType === 0) {
-                    return "‥";
-                }
-                if (befStopTime.stopType === 3) {
-                    return "║";
+            if (index- 1 >= 0) {
+                const befStopTime = stopTimes.find(item=>item.routeStationID===stations[index-1].routeStationID);
+                if(befStopTime!==undefined){
+                    if (befStopTime.stopType === 0) {
+                        return "‥";
+                    }
+                    if (befStopTime.stopType === 3) {
+                        return "║";
+                    }
                 }
             }
         }
@@ -142,15 +151,15 @@ function TrainView({trip,stations,direct,selected,setSelected,onDoubleClick}:Tra
             {
                 showStations.map(station =>
 
-                    <div key={station.stationID}>
+                    <div key={station.routeStationID}>
                         {
                             (station.style&0x02)>0?
-                            <div className={`${style.timeView}  ${(selected?.tripID===trip.tripID&&selected.stationID===station.stationID&&selected.viewID===0)?style.selected:""}`}
+                            <div className={`${style.timeView}  ${(selected?.tripID===trip.tripID&&selected.stationID===station.routeStationID&&selected.viewID===0)?style.selected:""}`}
                                 onClick={(e)=>{
                                     if(setSelected){
                                         setSelected({
                                             tripID:trip.tripID,
-                                            stationID:station.stationID,
+                                            stationID:station.routeStationID,
                                             viewID:0
                                         });
                                     }
@@ -161,7 +170,7 @@ function TrainView({trip,stations,direct,selected,setSelected,onDoubleClick}:Tra
 
                                      e.preventDefault();
                                  }}>
-                                {getAriTimeStr(station, trip.stopTimes)}
+                                {getAriTimeStr(station, trip.stopTimes,showStations)}
                             </div>:null
                         }
                         {
@@ -172,12 +181,12 @@ function TrainView({trip,stations,direct,selected,setSelected,onDoubleClick}:Tra
 
                         {
                             (station.style&0x01)>0?
-                                <div className={`${style.timeView}  ${(selected?.tripID===trip.tripID&&selected.stationID===station.stationID&&selected.viewID===2)?style.selected:""}`}
+                                <div className={`${style.timeView}  ${(selected?.tripID===trip.tripID&&selected.stationID===station.routeStationID&&selected.viewID===2)?style.selected:""}`}
                                      onClick={(e)=>{
                                          if(setSelected) {
                                              setSelected({
                                                  tripID: trip.tripID,
-                                                 stationID: station.stationID,
+                                                 stationID: station.routeStationID,
                                                  viewID: 2
                                              });
                                          }
@@ -188,7 +197,7 @@ function TrainView({trip,stations,direct,selected,setSelected,onDoubleClick}:Tra
                                          e.preventDefault();
                                      }}>
 
-                                    {getDepTimeStr(station,trip.stopTimes)}
+                                    {getDepTimeStr(station,trip.stopTimes,showStations)}
                                 </div>:null
                         }
                     </div>

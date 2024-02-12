@@ -3,8 +3,9 @@ import style from "../TimeTablePage.module.css";
 import {Station} from "../../SujiroData/DiaData";
 
 import {Text, View} from "@react-pdf/renderer";
+import {TimeTableStation} from "../TimeTableData";
 interface StationViewProps {
-    stations:Station[];
+    stations:TimeTableStation[];
     direct:number;
     lineHeight:number;
     fontSize:number;
@@ -22,18 +23,18 @@ function PDFStationView({stations,direct,lineHeight,fontSize}:StationViewProps){
             </div>
             <div style={{borderBottom: "1px solid #000"}}></div>
 
-            {showStations.map((station: Station) => {
+            {showStations.map((station: TimeTableStation) => {
                 switch(station.style&0x03){
                     case 3:
                         return (
-                            <div key={station.stationID} className={style.bigStationView}>
-                                <Text style={{paddingLeft:'2px',verticalAlign:'sub', height:((lineHeight*0.1)*2+0.5)+'px',fontSize:(fontSize*0.13)+'pt'}}>{station.name}</Text>
+                            <div key={station.routeStationID} className={style.bigStationView}>
+                                <Text style={{paddingLeft:'2px',verticalAlign:'sub', height:((lineHeight*0.1)*2+0.5)+'px',fontSize:(fontSize*0.13)+'pt'}}>{station.station.name}</Text>
                             </div>
                         )
                     default:
                         return (
-                            <div className={style.stationView} key={station.stationID}>
-                                <Text style={{paddingLeft:'2px',height:(lineHeight*0.1)+'px',overflow:'hidden'}}>{station.name}</Text> </div>
+                            <div className={style.stationView} key={station.routeStationID}>
+                                <Text style={{paddingLeft:'2px',height:(lineHeight*0.1)+'px',overflow:'hidden'}}>{station.station.name}</Text> </div>
                         )
 
                 }

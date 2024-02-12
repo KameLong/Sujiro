@@ -24,6 +24,10 @@ namespace Sujiro.WebAPI.Controllers
         {
             try
             {
+                if (AuthService.GetUserID(User) == "")
+                {
+                    return Unauthorized();
+                }
                 string dbPath = Configuration["ConnectionStrings:DBdir"] + MasterData.MASTER_DATA_FILE;
 
                 using (var conn = new SqliteConnection("Data Source=" + dbPath))
