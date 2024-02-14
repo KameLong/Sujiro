@@ -1,4 +1,4 @@
-import React, { useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
     Button, Card, CardActions, CardContent, Container,
     Dialog,  DialogContent, DialogTitle,
@@ -13,11 +13,13 @@ import {
 import Typography from "@mui/material/Typography";
 import {Company} from "../SujiroData/DiaData";
 import {getAuth} from "firebase/auth";
+import {statusContext} from "../Common/UseStatusContext";
 function CompanyListPage() {
     const [myCompany,setMyCompany]=useState<Company[]>([]);
     const [editCompany,setEditCompany]=useState<Company|undefined>(undefined);
 
     const [openEditor,setOpenEditor]=useState(false);
+    const ctx = useContext(statusContext);
 
     const close=async()=>{
         setOpenEditor(false);
@@ -38,6 +40,7 @@ function CompanyListPage() {
 
 
         }else{
+
             console.error("ログインされていない");
         }
 
@@ -61,6 +64,7 @@ function CompanyListPage() {
 
             }else{
                 console.error("ログインされていない");
+                // ctx.setLogined(false);
             }
         });
     }, []);

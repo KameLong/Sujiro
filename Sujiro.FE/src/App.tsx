@@ -12,6 +12,7 @@ import CompanyPage from "./Company/CompanyPage";
 import RoutePage from "./Route/RoutePage";
 import SujirawLayout from "./Common/SujirawLayout";
 import DiagramPage from "./Diagram/DiagramPage";
+import SignIn from "./Auth/Signin";
 
 
 
@@ -27,9 +28,6 @@ function App() {
             <Route path="/TimeTable/:companyID/:routeID/:direct" element={
                 <SujirawLayout><TimeTablePage/></SujirawLayout>
             }></Route>
-            <Route path="/License" element={
-                <SujirawLayout><HelpPage/></SujirawLayout>
-            }></Route>
             <Route path="/TimeTablePDF/:companyID/:routeID/:direct" element={
                 <SujirawLayout><TimeTablePDF/></SujirawLayout>
             }></Route>
@@ -42,6 +40,14 @@ function App() {
             <Route path="/Route/:companyID/:routeID" element={
                 <SujirawLayout><RoutePage/></SujirawLayout>
             }> </Route>
+            <Route path="/License" element={
+                <SujirawLayout><HelpPage/></SujirawLayout>
+            }></Route>
+            <Route path="/Login" element={
+                <SignIn/>
+            }></Route>
+
+
         </Routes>
     );
 

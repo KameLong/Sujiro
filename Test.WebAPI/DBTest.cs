@@ -161,6 +161,20 @@ namespace Test.WebAPI
             Company.InsertCompany(DBdir + MasterData.MASTER_DATA_FILE, company);
             CompanySqlite.CreateCompanySqlite(DBdir, company.CompanyID);
             await OuDia.OuDia2Sujiro.OuDia2Sujiraw(@"C:\Users\kamelong\Downloads\‹¬“d“S.oud", DBdir + $"company_2.sqlite", 1);
+            company = new Company();
+            company.Name = "•ó’Ë";
+            company.UserID = "gVjRyIhAC6d3bRZj1ZKblHhRpCf1";
+            company.CompanyID = 3;
+            Company.InsertCompany(DBdir + MasterData.MASTER_DATA_FILE, company);
+            CompanySqlite.CreateCompanySqlite(DBdir, company.CompanyID);
+            await OuDia.OuDia2Sujiro.OuDia2Sujiraw(@"C:\Users\kamelong\Downloads\ã‹}•ó’Ëü.oud", DBdir + $"company_3.sqlite", 1);
+
+            company.Name = "‹¬";
+            company.UserID = "gVjRyIhAC6d3bRZj1ZKblHhRpCf1";
+            company.CompanyID = 4;
+            Company.InsertCompany(DBdir + MasterData.MASTER_DATA_FILE, company);
+            CompanySqlite.CreateCompanySqlite(DBdir, company.CompanyID);
+            await OuDia.OuDia2Sujiro.OuDia2Sujiraw(@"C:\Users\kamelong\Downloads\‹¬“d“S.oud", DBdir + $"company_4.sqlite", 1);
         }
 
     }

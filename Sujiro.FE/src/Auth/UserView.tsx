@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useContext, useEffect} from 'react';
 import {Button, ListItemIcon, Menu, MenuItem} from "@mui/material";
 import {
     GoogleAuthProvider,
@@ -11,31 +11,37 @@ import { auth } from "../firebase";
 import firebase from "firebase/compat";
 import {Login, Logout, Person, Settings} from "@mui/icons-material";
 import axios from "axios";
+import {statusContext} from "../Common/UseStatusContext";
 export default function UserView(){
     const [user, setUser] = React.useState<User|null>(null);
+    const ctx=useContext(statusContext);
     useEffect(() => {
         auth.onAuthStateChanged(async (user:User|null) => {
             setUser(user);
             //ユーザーが有効かチェックする
-            let loginRes=await axios.get( `${process.env.REACT_APP_SERVER_URL}/api/user/registered?timestamp=${new Date().getTime()}`,
+            axios.get(`${process.env.REACT_APP_SERVER_URL}/api/user/registered?timestamp=${new Date().getTime()}`,
                 {
                     headers: {
                         Authorization: `Bearer ${await user?.getIdToken()}`
                     }
                 }
-            );
-            switch(loginRes.status){
-                case 200:
-                    break;
-                case 204:
-                    alert("現在ユーザーの新規登録を受け付けておりません。")
-                    break;
-                case 401:
-                    alert("認証に失敗しました(401)")
-                    break;
-                default:
-                    alert("認証に失敗しました()")
-            }
+            )
+            .then((response)=> {
+                switch (response.status) {
+                    case 200:
+                        console.info('成功です',response.data);
+                        break;
+                    case 204:
+                        alert("現在ユーザーの新規登録を受け付けておりません。")
+                        break;
+                }
+            })
+            .catch((error) => {
+                ctx.setLogined(false);
+            })
+            .finally(() => {
+                console.info('ローディング表示終了');
+            });
         });
     },[]);
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);

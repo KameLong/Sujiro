@@ -51,7 +51,7 @@ namespace Sujiro.WebAPI.Controllers.SujirawData
                 command.ExecuteNonQuery();
 
                 command = conn.CreateCommand();
-                command.CommandText = $"UPDATE {Trip.TABLE_NAME} set {nameof(Trip.TripSeq)}={nameof(Trip.TripSeq)}-1 where {nameof(Trip.TripSeq)}>{trip.TripSeq}";
+                command.CommandText = $"UPDATE {Trip.TABLE_NAME} set {nameof(Trip.TripSeq)}={nameof(Trip.TripSeq)}-1 where {nameof(Trip.RouteID)}={trip.RouteID} and {nameof(Trip.direct)}={trip.direct} and {nameof(Trip.TripSeq)}>{trip.TripSeq}";
                 command.ExecuteNonQuery();
 
                 command = conn.CreateCommand();

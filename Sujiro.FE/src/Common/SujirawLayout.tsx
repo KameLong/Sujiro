@@ -1,8 +1,8 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import style from '../App.module.css';
 
 import Box from '@mui/material/Box/Box';
-import {AppBar, CssBaseline, IconButton, Toolbar } from '@mui/material';
+import {Alert, AppBar, Backdrop, Button, CssBaseline, Divider, IconButton, List, Toolbar} from '@mui/material';
 import MenuIcon from "@mui/icons-material/Menu";
 import Typography from "@mui/material/Typography";
 import UserView from "../Auth/UserView";
@@ -10,6 +10,7 @@ import Drawer from "@mui/material/Drawer";
 
 
 import MenuPage from "../Menu/MenuPage";
+import {statusContext, useStatusContext} from "./UseStatusContext";
 export default function SujirawLayout(props:any) {
     const drawerWidth=250;
     const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -26,76 +27,119 @@ export default function SujirawLayout(props:any) {
             setMobileOpen(!mobileOpen);
         }
     };
+    const ctx = useStatusContext() ;
+
+
     const container = window !== undefined ? () => window.document.body : undefined;
     return (
-        <Box className={style.app} >
-            <CssBaseline />
-            <AppBar
-                position="fixed"
-                sx={{
-                    width: { sm: `calc(100% - ${drawerWidth}px)` },
-                    ml: { sm: `${drawerWidth}px` },
-                }}
-            >
-                <Toolbar variant="dense">
-                    <IconButton
-                        color="inherit"
-                        aria-label="open drawer"
-                        edge="start"
-                        onClick={handleDrawerToggle}
-                        sx={{mr: 2, display: {sm: 'none'}}}
+        <statusContext.Provider value={ctx}>
+            <Box className={style.app}>
+                <CssBaseline/>
+                <AppBar
+                    position="fixed"
+                    sx={{
+                        width: { sm: `calc(100% - ${drawerWidth}px)` },
+                        ml: { sm: `${drawerWidth}px` },
+                    }}
+                >
+                    <Toolbar variant="dense">
+                        <IconButton
+                            color="inherit"
+                            aria-label="open drawer"
+                            edge="start"
+                            onClick={handleDrawerToggle}
+                            sx={{mr: 2, display: {sm: 'none'}}}
+                        >
+                            <MenuIcon/>
+                        </IconButton>
+                        <Typography variant="h6" noWrap component="div">
+                            Sujiraw Development
+                        </Typography>
+                        <div style={{flexGrow: 1}}></div>
+                        <UserView/>
+                    </Toolbar>
+                </AppBar>
+                <Box
+                    component="nav"
+                    sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+                    aria-label="mailbox folders"
+                >
+                    {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
+                    <Drawer
+                        container={container}
+                        variant="temporary"
+                        open={mobileOpen}
+                        onTransitionEnd={handleDrawerTransitionEnd}
+                        onClose={handleDrawerClose}
+                        ModalProps={{
+                            keepMounted: true, // Better open performance on mobile.
+                        }}
+                        sx={{
+                            display: { xs: 'block', sm: 'none' },
+                            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+                        }}
                     >
-                        <MenuIcon/>
-                    </IconButton>
-                    <Typography variant="h6" noWrap component="div">
-                        Sujiraw Development
-                    </Typography>
-                    <div style={{flexGrow: 1}}></div>
-                    <UserView/>
-                </Toolbar>
-            </AppBar>
-            <Box
-                component="nav"
-                sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-                aria-label="mailbox folders"
-            >
-                {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
-                <Drawer
-                    container={container}
-                    variant="temporary"
-                    open={mobileOpen}
-                    onTransitionEnd={handleDrawerTransitionEnd}
-                    onClose={handleDrawerClose}
-                    ModalProps={{
-                        keepMounted: true, // Better open performance on mobile.
-                    }}
-                    sx={{
-                        display: { xs: 'block', sm: 'none' },
-                        '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-                    }}
+                        <MenuPage/>
+                    </Drawer>
+                    <Drawer
+                        variant="permanent"
+                        sx={{
+                            display: { xs: 'none', sm: 'block' },
+                            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+                        }}
+                        open
+                    >
+                        <MenuPage/>
+                    </Drawer>
+                </Box>
+                <Box
+                    component="main"
+                    sx={{display:'flex',flexDirection:'column', flexGrow: 1,  width: { sm: `calc(100% - ${drawerWidth}px)` } ,height:'100%'}}
                 >
-                    <MenuPage/>
-                </Drawer>
-                <Drawer
-                    variant="permanent"
-                    sx={{
-                        display: { xs: 'none', sm: 'block' },
-                        '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-                    }}
-                    open
-                >
-                    <MenuPage/>
-                </Drawer>
+                    <Toolbar variant="dense" />
+                    {props.children}
+                </Box>
+                <ErrorAlert/>/
             </Box>
-            <Box
-                component="main"
-                sx={{display:'flex',flexDirection:'column', flexGrow: 1,  width: { sm: `calc(100% - ${drawerWidth}px)` } ,height:'100%'}}
-            >
-                <Toolbar variant="dense" />
-                {props.children}
-            </Box>
-        </Box>
+        </statusContext.Provider>
 
+    );
+}
+
+function ErrorAlert() {
+    const [open, setOpen] = React.useState(true);
+
+    const ctx = useContext(statusContext);
+    const handleClose = () => {
+        setOpen(false);
+    };
+    return (
+        <>
+        {
+            ctx.isLogined?null:
+        <Backdrop
+            sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+            open={open}
+            // onClick={handleClose}
+        >
+            <List>
+                {/*<Alert  severity="error">*/}
+                {/*    通信エラーが発生しました。ページをリロードしてください。*/}
+                {/*</Alert>*/}
+                <Divider/>
+                {
+                    ctx.isLogined?null:
+                        <Alert  severity="warning" >
+                            ログインしてください。
+                            <Button onClick={(e)=>{
+                                window.location.href = `/login`
+                                e.preventDefault()}}>ログインページへ</Button>
+                        </Alert>
+                }
+            </List>
+        </Backdrop>
+        }
+        </>
     );
 }
 
