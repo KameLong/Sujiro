@@ -4,7 +4,6 @@ import {
     Dialog,  DialogContent, DialogTitle,
     Grid, Paper,  DialogActions, TextField,
 } from '@mui/material';
-import axios from "axios";
 import {Add} from "@mui/icons-material";
 
 import {
@@ -13,59 +12,29 @@ import {
 import Typography from "@mui/material/Typography";
 import {Company} from "../SujiroData/DiaData";
 import {getAuth} from "firebase/auth";
-import {statusContext} from "../Common/UseStatusContext";
+import {axiosClient} from "../Common/AxiosHook";
 function CompanyListPage() {
     const [myCompany,setMyCompany]=useState<Company[]>([]);
     const [editCompany,setEditCompany]=useState<Company|undefined>(undefined);
 
     const [openEditor,setOpenEditor]=useState(false);
-    const ctx = useContext(statusContext);
 
     const close=async()=>{
         setOpenEditor(false);
-        const auth = getAuth();
-        const user = auth.currentUser;
-        if (user) {
-            const token=await user.getIdToken();
-            axios.get(`${process.env.REACT_APP_SERVER_URL}/api/company/getAll?timestamp=${new Date().getTime()}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-            ).then(res => {
-                console.log(res.data);
-                setMyCompany(res.data);
-            })
-
-
-        }else{
-
-            console.error("ログインされていない");
-        }
-
+        axiosClient.get(`/api/company/getAll?timestamp=${new Date().getTime()}`)
+        .then(res => {
+            setMyCompany(res.data);
+        })
     }
 
     useEffect(() => {
         auth.onAuthStateChanged(async(user) => {
-            if (user) {
-                const token=await user.getIdToken();
-                axios.get(`${process.env.REACT_APP_SERVER_URL}/api/company/getAll?timestamp=${new Date().getTime()}`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        }
-                    }
-                ).then(res => {
-                    console.log(res.data);
+            axiosClient.get<Company[]>(`/api/company/getAll?timestamp=${new Date().getTime()}`)
+                .then(res => {
                     setMyCompany(res.data);
                 })
-
-
-            }else{
-                console.error("ログインされていない");
-                // ctx.setLogined(false);
-            }
+                .catch((err)=>{
+                });
         });
     }, []);
     // const [open, setOpen] = React.useState(false);
@@ -167,9 +136,7 @@ function CompanyEdit({close,company}:CompanyEditProps){
                             if(company2.userID.length===0){
                                 company2.userID=user?.uid??"";
                             }
-
-                            const token=await user?.getIdToken()
-                            await axios.put(`${process.env.REACT_APP_SERVER_URL}/api/company`, company2,{headers: {Authorization: `Bearer ${token}`}});
+                            await axiosClient.put(`/api/company`, company2);
                             close();
                         }
                     }}>決定</Button>

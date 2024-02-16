@@ -11,6 +11,7 @@ import Drawer from "@mui/material/Drawer";
 
 import MenuPage from "../Menu/MenuPage";
 import {statusContext, useStatusContext} from "./UseStatusContext";
+import {AxiosClientProvider} from "./AxiosHook";
 export default function SujirawLayout(props:any) {
     const drawerWidth=250;
     const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -33,6 +34,8 @@ export default function SujirawLayout(props:any) {
     const container = window !== undefined ? () => window.document.body : undefined;
     return (
         <statusContext.Provider value={ctx}>
+            <AxiosClientProvider>
+
             <Box className={style.app}>
                 <CssBaseline/>
                 <AppBar
@@ -101,45 +104,65 @@ export default function SujirawLayout(props:any) {
                 </Box>
                 <ErrorAlert/>/
             </Box>
+            </AxiosClientProvider>
         </statusContext.Provider>
 
     );
 }
 
 function ErrorAlert() {
-    const [open, setOpen] = React.useState(true);
-
     const ctx = useContext(statusContext);
-    const handleClose = () => {
-        setOpen(false);
-    };
     return (
         <>
         {
-            ctx.isLogined?null:
+
         <Backdrop
             sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-            open={open}
-            // onClick={handleClose}
+            open={ctx.hasError}
         >
             <List>
-                {/*<Alert  severity="error">*/}
-                {/*    通信エラーが発生しました。ページをリロードしてください。*/}
-                {/*</Alert>*/}
-                <Divider/>
                 {
-                    ctx.isLogined?null:
+                    ctx.forbiddenError?
+                        <Alert  severity="warning">
+                            権限がありません。
+                        </Alert>:null
+                }
+                {
+                    ctx.notFoundError?
+                        <Alert  severity="warning">
+                            ページが見つかりません。
+                        </Alert>:null
+                }
+                {
+                    ctx.networkError?
+                        <Alert  severity="error">
+                            ネットワークエラーが発生しました。
+                        </Alert>:null
+
+                }
+                {
+                    ctx.clientError!==undefined?
+                        <Alert  severity="error">
+                            通信エラーが発生しました（{ctx.clientError})
+                        </Alert>:null
+
+                }
+                {
+                    ctx.isNotLogined?
                         <Alert  severity="warning" >
-                            ログインしてください。
+                            ログインが必要なページを開こうとしています。
                             <Button onClick={(e)=>{
                                 window.location.href = `/login`
                                 e.preventDefault()}}>ログインページへ</Button>
-                        </Alert>
+                            <Button onClick={(e)=>{
+                                window.location.href = `/`
+                                e.preventDefault()}}>トップに戻る</Button>
+                        </Alert>:null
                 }
             </List>
         </Backdrop>
         }
-        </>
+            </>
     );
 }
 

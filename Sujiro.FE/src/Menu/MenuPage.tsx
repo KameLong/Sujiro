@@ -15,12 +15,10 @@ import {Add, Home} from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import React, {useContext, useEffect, useState} from "react";
 import {getAuth} from "firebase/auth";
-import axios from "axios";
 import {Route, RouteStation, Station} from "../SujiroData/DiaData";
 import {auth} from "../firebase";
 import { GiRailway } from "react-icons/gi";
 import {useRequiredParams} from "../Hooks/useRequiredParams";
-import AlertView from "../Common/AlertView";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import {TreeItem, TreeView} from "@mui/x-tree-view";
@@ -28,6 +26,7 @@ import style from "../App.module.css";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import {useParams} from "react-router-dom";
+import {axiosClient} from "../Common/AxiosHook";
 export interface MenuPageProps {
     // companyID:string|undefined
 }
@@ -42,16 +41,10 @@ export default function MenuPage({}:MenuPageProps) {
             return;
         }
         console.log(companyID);
-        const token=await getAuth().currentUser?.getIdToken();
-        axios.get(`${process.env.REACT_APP_SERVER_URL}/api/MenuPage/company/${companyID}?timestamp=${new Date().getTime()}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            }
+        axiosClient.get(`/api/MenuPage/company/${companyID}?timestamp=${new Date().getTime()}`
         ).then(res => {
             setRoutes(res.data);
-        })
+        }).catch(err=>{});
     }
 
     useEffect(() => {
@@ -154,8 +147,7 @@ function RouteEdit({close, route, companyID}: RouteEditProps) {
 
                         const route2 = {...route};
                         route2.name = routeName;
-                        const token = await getAuth().currentUser?.getIdToken();
-                        await axios.put(`${process.env.REACT_APP_SERVER_URL}/api/route/${companyID}`, route2, {headers: {Authorization: `Bearer ${token}`}});
+                        await axiosClient.put(`/api/route/${companyID}`, route2);
                         close();
                     }
                 }}>決定</Button>

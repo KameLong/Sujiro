@@ -12,11 +12,12 @@ import {
 } from "@mui/material";
 import {Add, Home} from "@mui/icons-material";
 import Box from "@mui/material/Box";
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {getAuth} from "firebase/auth";
-import axios from "axios";
 import {Station} from "../SujiroData/DiaData";
 import {auth} from "../firebase";
+import {statusContext} from "../Common/UseStatusContext";
+import {axiosClient} from "../Common/AxiosHook";
 
 export interface StationListViewProps {
     companyID:string
@@ -26,23 +27,19 @@ export default function StationListView({companyID}:StationListViewProps) {
     const [editStation,setEditStation]=useState<Station|undefined>(undefined);
     const [openEditStationDialog,setOpenEditStationDialog]=useState(false);
     const [openActionStationDialog,setOpenActionStation]=useState(false);
+    const ctx=useContext(statusContext);
     useEffect(() => {
         auth.onAuthStateChanged(async(user) => {
             if (user) {
                 const token=await user.getIdToken();
-                axios.get(`${process.env.REACT_APP_SERVER_URL}/api/station/${companyID}?timestamp=${new Date().getTime()}`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        }
-                    }
+                axiosClient.get(`/api/station/${companyID}?timestamp=${new Date().getTime()}`
                 ).then(res => {
                     setStations(res.data);
-                })
+                }).catch((err)=>{
 
-
+                });
             }else{
-                console.error("ログインされていない");
+                 ctx.setNotLogined(false);
             }
         });
     },[]);
@@ -84,13 +81,7 @@ export default function StationListView({companyID}:StationListViewProps) {
                         </ListItem>
                         <ListItem>
                             <Button  onClick={async()=>{
-                                const token=await getAuth().currentUser?.getIdToken();
-                                const deleteAction=await axios.delete(`${process.env.REACT_APP_SERVER_URL}/api/station/${companyID}/${editStation?.stationID}`,
-                                    {
-                                        headers: {
-                                            Authorization: `Bearer ${token}`
-                                        }
-                                    }
+                                const deleteAction=await axiosClient.delete(`${process.env.REACT_APP_SERVER_URL}/api/station/${companyID}/${editStation?.stationID}`
                                 );
                                 switch (deleteAction.status) {
                                     case 200:
@@ -103,12 +94,7 @@ export default function StationListView({companyID}:StationListViewProps) {
                                         console.log("削除失敗");
                                         break;
                                 }
-                                axios.get(`${process.env.REACT_APP_SERVER_URL}/api/station/${companyID}?timestamp=${new Date().getTime()}`,
-                                    {
-                                        headers: {
-                                            Authorization: `Bearer ${token}`
-                                        }
-                                    }
+                                axiosClient.get(`/api/station/${companyID}?timestamp=${new Date().getTime()}`
                                 ).then(res => {
                                     setStations(res.data);
                                 })
@@ -122,13 +108,7 @@ export default function StationListView({companyID}:StationListViewProps) {
             <Dialog open={openEditStationDialog} onClose={()=>{setOpenEditStationDialog(false);}}>
                 <StationEdit close={async()=>{
                     setOpenEditStationDialog(false);
-                    const token=await getAuth().currentUser?.getIdToken();
-                    axios.get(`${process.env.REACT_APP_SERVER_URL}/api/station/${companyID}?timestamp=${new Date().getTime()}`,
-                        {
-                            headers: {
-                                Authorization: `Bearer ${token}`
-                            }
-                        }
+                    axiosClient.get(`/api/station/${companyID}?timestamp=${new Date().getTime()}`
                     ).then(res => {
                         setStations(res.data);
                     })
@@ -167,10 +147,7 @@ function StationEdit({close,station,companyID}:StationEditProps){
                     if(stationName.length>0) {
                         const station2={...station};
                         station2.name=stationName;
-                        const auth = getAuth();
-                        const user = auth.currentUser;
-                        const token=await user?.getIdToken()
-                        await axios.put(`${process.env.REACT_APP_SERVER_URL}/api/station/${companyID}`, station2,{headers: {Authorization: `Bearer ${token}`}});
+                        await axiosClient.put(`/api/station/${companyID}`, station2);
                         close();
                     }
                 }}>決定</Button>

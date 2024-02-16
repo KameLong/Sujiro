@@ -1,30 +1,85 @@
-import { createContext, useCallback, useState } from 'react';
+import {createContext, useCallback, useEffect, useState} from 'react';
 
 interface StatusContext{
-    isLogined: boolean;
-    setLogined: (current: boolean) => void;
+    hasError: boolean;
+    isNotLogined: boolean;
+    setNotLogined: (current: boolean) => void;
+    unAuthorized: boolean;
+    setUnAuthorized: (current: boolean) => void;
+    forbiddenError: boolean;
+    setForbiddenError: (current: boolean) => void;
+    clientError?: string;
+    setClientError: (current: string) => void;
+    networkError?: boolean;
+    setNetworkError: (current: boolean) => void;
+    notFoundError?: boolean;
+    setNotFoundError: (current: boolean) => void;
+
 };
 
 
-// context object
 export const statusContext = createContext<StatusContext>({
-    isLogined: true,
-    setLogined: () => {
-        console.log("test");
+    isNotLogined: false,
+    setNotLogined: () => {
     },
+    unAuthorized: false,
+    setUnAuthorized: () => {
+    },
+    forbiddenError: false,
+    setForbiddenError: () => {
+    },
+    clientError: undefined,
+    setClientError: () => {
+    },
+    hasError: false,
+    networkError: false,
+    setNetworkError: () => {
+    },
+    notFoundError: false,
+    setNotFoundError: () => {
+    }
+
+
 });
 
-// custom Hook
 export const useStatusContext = (): StatusContext => {
-    // state名はThemeContext typeのプロパティに合わせる。
-    const [logined, setLogined] = useState(true);
-    // 関数名はThemeContext typeのプロパティに合わせる。
-    const setIsDark = useCallback((current: boolean): void => {
-        console.log("test3");
-        setLogined(current);
-    }, []);
+    const [hasError, setHasError] = useState(false);
+
+    const [notLogined, setNotLogined] = useState(false);
+    const [unAuthorized, setUnAuthorized] = useState(false);
+    const [forbiddenError, setForbiddenError] = useState(false);
+    const [clientError, setClientError] = useState<undefined|string>(undefined);
+    const [networkError, setNetworkError] = useState(false);
+    const [notFoundError, setNotFoundError] = useState(false);
+
+
+    useEffect(()=>{
+        if(notLogined || unAuthorized || forbiddenError || clientError || networkError || notFoundError){
+            setHasError(true);
+        }else{
+            setHasError(false);
+        }
+    },[notLogined, unAuthorized, forbiddenError, clientError, networkError, notFoundError]);
+
+    const setLogined2 = useCallback((current: boolean) => {
+        console.log(current);
+        console.trace();
+        setNotLogined(current);
+    },[]);
+
     return {
-        isLogined: logined,
-        setLogined: setIsDark,
+        isNotLogined: notLogined,
+        setNotLogined: setLogined2,
+        unAuthorized: unAuthorized,
+        setUnAuthorized: setUnAuthorized,
+        forbiddenError: forbiddenError,
+        setForbiddenError: setForbiddenError,
+        clientError: clientError,
+        setClientError: setClientError,
+        hasError: hasError,
+        networkError: networkError,
+        setNetworkError: setNetworkError,
+        notFoundError: notFoundError,
+        setNotFoundError: setNotFoundError
     };
 };

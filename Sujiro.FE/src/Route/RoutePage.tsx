@@ -20,7 +20,6 @@ import {Route, RouteStation, Station} from "../SujiroData/DiaData";
 import {auth} from "../firebase";
 import { GiRailway } from "react-icons/gi";
 import {useRequiredParams} from "../Hooks/useRequiredParams";
-import AlertView from "../Common/AlertView";
 export interface RoutePageProps {
 }
 export default function RoutePage({}:RoutePageProps) {
@@ -80,8 +79,7 @@ export default function RoutePage({}:RoutePageProps) {
     }
 
     if(route===undefined){
-        return (
-            <AlertView loading={loading} isLogout={isLogout}/>
+        return (<></>
         );
     }
     const appendStation=(routeStation:RouteStation|undefined)=>{
@@ -173,8 +171,6 @@ export default function RoutePage({}:RoutePageProps) {
                 </List>
 
             </Dialog>
-            <AlertView loading={loading} isLogout={isLogout}/>
-
         </>
     )
 }

@@ -14,10 +14,11 @@ import {Add} from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import React, {useEffect, useState} from "react";
 import {getAuth} from "firebase/auth";
-import axios from "axios";
 import {Route} from "../SujiroData/DiaData";
 import {auth} from "../firebase";
 import { GiRailway } from "react-icons/gi";
+import {axiosClient} from "../Common/AxiosHook";
+
 export interface RouteListViewProps {
     companyID:string
 }
@@ -28,23 +29,14 @@ export default function RouteListView({companyID}:RouteListViewProps) {
     const [openActionRouteDialog,setOpenActionRouteDialog]=useState(false);
     const loadRouteFromServer=async()=>{
         const token=await getAuth().currentUser?.getIdToken();
-        axios.get(`${process.env.REACT_APP_SERVER_URL}/api/route/${companyID}?timestamp=${new Date().getTime()}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            }
+        axiosClient.get(`/api/route/${companyID}?timestamp=${new Date().getTime()}`
         ).then(res => {
             setRoutes(res.data);
-        })
+        }).catch(err=>{});
     }
     useEffect(() => {
         auth.onAuthStateChanged((user) => {
-            if (user) {
-                loadRouteFromServer();
-            }else{
-                console.error("ログインされていない");
-            }
+            loadRouteFromServer();
         });
     },[]);
 
@@ -88,14 +80,7 @@ export default function RouteListView({companyID}:RouteListViewProps) {
                         </ListItem>
                         <ListItem>
                             <Button  onClick={async()=>{
-                                const token=await getAuth().currentUser?.getIdToken();
-                                const deleteAction=await axios.delete(`${process.env.REACT_APP_SERVER_URL}/api/route/${companyID}/${editRoute?.routeID}`,
-                                    {
-                                        headers: {
-                                            Authorization: `Bearer ${token}`
-                                        }
-                                    }
-                                );
+                                const deleteAction=await axiosClient.delete(`/api/route/${companyID}/${editRoute?.routeID}`);
                                 switch (deleteAction.status) {
                                     case 200:
                                         console.log("削除成功");
@@ -154,8 +139,7 @@ function RouteEdit({close,route,companyID}:RouteEditProps){
                     if(routeName.length>0) {
                         const route2={...route};
                         route2.name=routeName;
-                        const token=await getAuth().currentUser?.getIdToken();
-                        await axios.put(`${process.env.REACT_APP_SERVER_URL}/api/route/${companyID}`, route2,{headers: {Authorization: `Bearer ${token}`}});
+                        await axiosClient.put(`/api/route/${companyID}`, route2);
                         close();
                     }
                 }}>決定</Button>

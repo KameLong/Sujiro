@@ -45,8 +45,8 @@ namespace Sujiro.Data
         public static string CreateTableSqlite()
         {
             return $@"create table {TABLE_NAME} (
-                {nameof(TripID)} integer primary key not null,
-                {nameof(TrainID)} integer not null,
+                tripID integer primary key not null,
+                trainID integer not null,
                 routeID integer not null default 0,
                 direct integer not null default 0,
                 name text not null default '',

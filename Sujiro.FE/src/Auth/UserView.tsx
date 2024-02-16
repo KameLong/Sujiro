@@ -12,20 +12,25 @@ import firebase from "firebase/compat";
 import {Login, Logout, Person, Settings} from "@mui/icons-material";
 import axios from "axios";
 import {statusContext} from "../Common/UseStatusContext";
+import {axiosClient} from "../Common/AxiosHook";
+
 export default function UserView(){
     const [user, setUser] = React.useState<User|null>(null);
     const ctx=useContext(statusContext);
+    axios.interceptors.response.use(response => {
+        console.log(response.status)
+        return response
+    })
+
     useEffect(() => {
         auth.onAuthStateChanged(async (user:User|null) => {
             setUser(user);
+            if(user===null){
+                ctx.setNotLogined(false);
+                return;
+            }
             //ユーザーが有効かチェックする
-            axios.get(`${process.env.REACT_APP_SERVER_URL}/api/user/registered?timestamp=${new Date().getTime()}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${await user?.getIdToken()}`
-                    }
-                }
-            )
+            axiosClient.get(`/api/user/registered?timestamp=${new Date().getTime()}`)
             .then((response)=> {
                 switch (response.status) {
                     case 200:
@@ -37,11 +42,7 @@ export default function UserView(){
                 }
             })
             .catch((error) => {
-                ctx.setLogined(false);
             })
-            .finally(() => {
-                console.info('ローディング表示終了');
-            });
         });
     },[]);
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
