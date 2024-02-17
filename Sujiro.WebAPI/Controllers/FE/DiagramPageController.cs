@@ -20,6 +20,7 @@ namespace Sujiro.WebAPI.Controllers
             public DiagramStation() : base()
             {
             }
+
         }
         class DiagramTrip : Trip
         {

@@ -6,14 +6,14 @@ import {DisplayObject} from "pixi.js";
 import {DiagramData, DiagramStation, DiagramTrip} from "./DiagramData";
 import {TimeTableTrip} from "../TimeTable/TimeTableData";
 import {TimetableSelected} from "../TimeTable/TimeTablePage";
-import {useRequiredParams} from "../Hooks/useRequiredParams";
+import {requiredParamsHook} from "../Hooks/RequiredParamsHook";
 import {auth} from "../firebase";
 import {getAuth} from "firebase/auth";
-import {axiosClient} from "../Common/AxiosHook";
+import {axiosClient} from "../Hooks/AxiosHook";
 
 function DiagramPage() {
-    const {companyID} = useRequiredParams<{ companyID: string }>();
-    const {routeID} = useRequiredParams<{ routeID: string }>();
+    const {companyID} = requiredParamsHook<{ companyID: string }>();
+    const {routeID} = requiredParamsHook<{ routeID: string }>();
 
     const SCALE:number=3;
     const [stations, setStations] = useState<DiagramStation[]>([]);

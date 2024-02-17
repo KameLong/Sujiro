@@ -13,12 +13,8 @@ export const axiosClient = axios.create({
         'Content-Type': 'application/json'
     }
 })
-
-
 export function AxiosClientProvider({children}: {children: React.ReactElement}) {
-    // 関数コンポーネントなのでフックが使える
     const ctx=useContext(statusContext);
-
     React.useEffect(() => {
 
         // リクエスト インターセプター

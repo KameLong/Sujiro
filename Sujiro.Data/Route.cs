@@ -92,19 +92,23 @@ namespace Sujiro.Data
             using (var conn = new SqliteConnection("Data Source=" + dbPath))
             {
                 conn.Open();
-                var command = conn.CreateCommand();
-                command.CommandText = @$"SELECT * FROM {TABLE_NAME} where routeID=:routeID";
-                command.Parameters.Add(new SqliteParameter(":routeID", routeID));
-                using (var reader = command.ExecuteReader())
+                return GetRoute<T>(conn, routeID);
+            }
+        }
+
+        public static T? GetRoute<T>(SqliteConnection conn, long routeID) where T : Route, new()
+        {
+            var command = conn.CreateCommand();
+            command.CommandText = @$"SELECT * FROM {TABLE_NAME} where routeID=:routeID";
+            command.Parameters.Add(new SqliteParameter(":routeID", routeID));
+            using (var reader = command.ExecuteReader())
+            {
+                if (reader.Read())
                 {
-                    if (reader.Read())
-                    {
-                        T route = new T();
-                        route.loadSqlite(reader);
-                        return route;
-                    }
+                    T route = new T();
+                    route.loadSqlite(reader);
+                    return route;
                 }
-                conn.Close();
             }
             return null;
         }

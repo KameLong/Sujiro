@@ -10,8 +10,8 @@ import { auth } from "../firebase";
 
 import firebase from "firebase/compat";
 import {Login, Logout, Person, Settings} from "@mui/icons-material";
-import {statusContext} from "../Common/UseStatusContext";
-import {axiosClient} from "../Common/AxiosHook";
+import {statusContext} from "../Hooks/UseStatusContext";
+import {axiosClient} from "../Hooks/AxiosHook";
 
 export default function UserView(){
     const [user, setUser] = React.useState<User|null>(null);

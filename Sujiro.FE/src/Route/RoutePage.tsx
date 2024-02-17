@@ -14,13 +14,13 @@ import React, {useEffect, useState} from "react";
 import {getAuth} from "firebase/auth";
 import {Route, RouteStation, Station} from "../SujiroData/DiaData";
 import {auth} from "../firebase";
-import {useRequiredParams} from "../Hooks/useRequiredParams";
-import {axiosClient} from "../Common/AxiosHook";
+import {requiredParamsHook} from "../Hooks/RequiredParamsHook";
+import {axiosClient} from "../Hooks/AxiosHook";
 export interface RoutePageProps {
 }
 export default function RoutePage({}:RoutePageProps) {
-    const {companyID} = useRequiredParams<{ companyID: string }>();
-    const {routeID} = useRequiredParams<{ routeID: string }>();
+    const {companyID} = requiredParamsHook<{ companyID: string }>();
+    const {routeID} = requiredParamsHook<{ routeID: string }>();
 
     const [route,setRoute]=useState<EditRoute|undefined>(undefined);
     const [stations,setStations]=useState<Station[]>([]);

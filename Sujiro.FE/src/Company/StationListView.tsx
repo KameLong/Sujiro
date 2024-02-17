@@ -16,8 +16,7 @@ import React, {useContext, useEffect, useState} from "react";
 import {getAuth} from "firebase/auth";
 import {Station} from "../SujiroData/DiaData";
 import {auth} from "../firebase";
-import {statusContext} from "../Common/UseStatusContext";
-import {axiosClient} from "../Common/AxiosHook";
+import {axiosClient} from "../Hooks/AxiosHook";
 
 export interface StationListViewProps {
     companyID:string
@@ -27,7 +26,6 @@ export default function StationListView({companyID}:StationListViewProps) {
     const [editStation,setEditStation]=useState<Station|undefined>(undefined);
     const [openEditStationDialog,setOpenEditStationDialog]=useState(false);
     const [openActionStationDialog,setOpenActionStation]=useState(false);
-    const ctx=useContext(statusContext);
     useEffect(() => {
         auth.onAuthStateChanged(async(user) => {
             axiosClient.get(`/api/station/${companyID}?timestamp=${new Date().getTime()}`

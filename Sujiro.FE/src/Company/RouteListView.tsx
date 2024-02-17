@@ -17,7 +17,7 @@ import {getAuth} from "firebase/auth";
 import {Route} from "../SujiroData/DiaData";
 import {auth} from "../firebase";
 import { GiRailway } from "react-icons/gi";
-import {axiosClient} from "../Common/AxiosHook";
+import {axiosClient} from "../Hooks/AxiosHook";
 
 export interface RouteListViewProps {
     companyID:string

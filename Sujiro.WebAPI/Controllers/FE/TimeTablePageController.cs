@@ -11,6 +11,7 @@ using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Security.Claims;
 using static System.Formats.Asn1.AsnWriter;
+using Route = Sujiro.Data.Route;
 
 namespace Sujiro.WebAPI.Controllers
 {
@@ -80,8 +81,21 @@ namespace Sujiro.WebAPI.Controllers
                 using (var conn = new SqliteConnection("Data Source=" + filePath))
                 {
                     conn.Open();
+                    Route? route = Route.GetRoute<Route>(conn, routeID);
+                    if (route==null)
+                    {
+                        return NotFound();
+                    }
                     result.stations=RouteStation.GetAllRouteStations<TimeTableStation>(conn, routeID).ToList();
-                    result.stations.ForEach(x => x.station = Station.GetStation(conn, x.StationID));
+                    result.stations.ForEach(x => {
+                        var station = Station.GetStation(conn, x.StationID);
+                        if(station==null)
+                        {
+                            station = new Station();
+                            station.Name= "Error";
+                        }
+                        x.station = station;
+                     });
                     trainTypes=TrainType.GetAllTrainType(conn).ToList();
                     var command=conn.CreateCommand();
                     command.CommandText = $@"SELECT * FROM {StopTime.TABLE_NAME} 

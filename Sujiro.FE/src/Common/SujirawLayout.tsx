@@ -10,8 +10,8 @@ import Drawer from "@mui/material/Drawer";
 
 
 import MenuPage from "../Menu/MenuPage";
-import {statusContext, useStatusContext} from "./UseStatusContext";
-import {AxiosClientProvider} from "./AxiosHook";
+import {statusContext, useStatusContext} from "../Hooks/UseStatusContext";
+import {AxiosClientProvider} from "../Hooks/AxiosHook";
 export default function SujirawLayout(props:any) {
     const drawerWidth=250;
     const [mobileOpen, setMobileOpen] = React.useState(false);

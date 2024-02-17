@@ -12,7 +12,7 @@ import {
 import Typography from "@mui/material/Typography";
 import {Company} from "../SujiroData/DiaData";
 import {getAuth} from "firebase/auth";
-import {axiosClient} from "../Common/AxiosHook";
+import {axiosClient} from "../Hooks/AxiosHook";
 function CompanyListPage() {
     const [myCompany,setMyCompany]=useState<Company[]>([]);
     const [editCompany,setEditCompany]=useState<Company|undefined>(undefined);

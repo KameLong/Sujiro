@@ -20,16 +20,16 @@ import {
     auth
 } from '../firebase';
 import {useIdToken} from "react-firebase-hooks/auth";
-import {useRequiredParams} from "../Hooks/useRequiredParams";
+import {requiredParamsHook} from "../Hooks/RequiredParamsHook";
 import {getAuth} from "firebase/auth";
-import {axiosClient} from "../Common/AxiosHook";
+import {axiosClient} from "../Hooks/AxiosHook";
 
 const MemoTrainView = memo(TrainView);
 
 function TimeTablePage() {
-    const {companyID} = useRequiredParams<{ companyID: string }>();
-    const {routeID} = useRequiredParams<{ routeID: string }>();
-    const {direct} = useRequiredParams<{ direct: string }>();
+    const {companyID} = requiredParamsHook<{ companyID: string }>();
+    const {routeID} = requiredParamsHook<{ routeID: string }>();
+    const {direct} = requiredParamsHook<{ direct: string }>();
 
     const [user] = useIdToken(auth);
     const [stations, setStations] = useState<TimeTableStation[]>([]);

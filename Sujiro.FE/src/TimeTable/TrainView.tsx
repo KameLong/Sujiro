@@ -4,7 +4,7 @@ import {Route, RouteStation, Station, StopTime} from "../SujiroData/DiaData";
 import {Button, Dialog, DialogTitle, List, ListItem} from "@mui/material";
 import {time2Str, TimeTableStation, TimeTableTrip} from "./TimeTableData";
 import {TimetableSelected} from "./TimeTablePage";
-import {axiosClient} from "../Common/AxiosHook";
+import {axiosClient} from "../Hooks/AxiosHook";
 interface TrainViewProps {
     trip:TimeTableTrip;
     stations:TimeTableStation[]

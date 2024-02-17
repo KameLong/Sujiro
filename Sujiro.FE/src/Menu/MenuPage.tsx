@@ -11,7 +11,7 @@ import style from "../App.module.css";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import {useParams} from "react-router-dom";
-import {axiosClient} from "../Common/AxiosHook";
+import {axiosClient} from "../Hooks/AxiosHook";
 export interface MenuPageProps {
 }
 export default function MenuPage({}:MenuPageProps) {

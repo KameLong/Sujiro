@@ -2,9 +2,9 @@ import {Button, FormControlLabel, Radio, RadioGroup, TextField} from "@mui/mater
 import React, {useEffect, useRef, useState} from "react";
 import {StopTime} from "../SujiroData/DiaData";
 import {time2Str, timeS2int} from "./TimeTableData";
-import {useRequiredParams} from "../Hooks/useRequiredParams";
+import {requiredParamsHook} from "../Hooks/RequiredParamsHook";
 import {getAuth} from "firebase/auth";
-import {axiosClient} from "../Common/AxiosHook";
+import {axiosClient} from "../Hooks/AxiosHook";
 
 
 interface TimeEditViewProps {
@@ -20,7 +20,7 @@ interface TimeEditViewProps {
 
 
 export function TimeEditView({stopTime,focusIndex,close}:TimeEditViewProps){
-    const {companyID} = useRequiredParams<{ companyID: string }>();
+    const {companyID} = requiredParamsHook<{ companyID: string }>();
     const [depTime,setDepTime]=useState(time2Str(stopTime?.depTime));
     const [ariTime,setAriTime]=useState(time2Str(stopTime?.ariTime));
     const ariInput=useRef<HTMLInputElement>(null);

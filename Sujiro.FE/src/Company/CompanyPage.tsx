@@ -3,7 +3,7 @@ import {Container, Paper, Tabs, useTheme, Tab} from '@mui/material';
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import StationListView from "./StationListView";
-import {useRequiredParams} from "../Hooks/useRequiredParams";
+import {requiredParamsHook} from "../Hooks/RequiredParamsHook";
 import RouteListView from "./RouteListView";
 function a11yProps(index: number) {
     return {
@@ -12,7 +12,7 @@ function a11yProps(index: number) {
     };
 }
 function CompanyPage() {
-    const {companyID} = useRequiredParams<{ companyID: string }>();
+    const {companyID} = requiredParamsHook<{ companyID: string }>();
 
     const theme = useTheme();
     const [value, setValue] = React.useState(0);
