@@ -10,17 +10,12 @@ import { auth } from "../firebase";
 
 import firebase from "firebase/compat";
 import {Login, Logout, Person, Settings} from "@mui/icons-material";
-import axios from "axios";
 import {statusContext} from "../Common/UseStatusContext";
 import {axiosClient} from "../Common/AxiosHook";
 
 export default function UserView(){
     const [user, setUser] = React.useState<User|null>(null);
     const ctx=useContext(statusContext);
-    axios.interceptors.response.use(response => {
-        console.log(response.status)
-        return response
-    })
 
     useEffect(() => {
         auth.onAuthStateChanged(async (user:User|null) => {
@@ -125,12 +120,6 @@ export default function UserView(){
                 transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
             >
-                {/*<MenuItem onClick={handleClose}>*/}
-                {/*    <ListItemIcon>*/}
-                {/*        <Settings fontSize="small" />*/}
-                {/*    </ListItemIcon>*/}
-                {/*    Settings*/}
-                {/*</MenuItem>*/}
                 <MenuItem onClick={async()=>{
                     let res=await signOut(auth);
                     console.log(res);

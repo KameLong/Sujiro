@@ -1,10 +1,10 @@
 import {Button, FormControlLabel, Radio, RadioGroup, TextField} from "@mui/material";
 import React, {useEffect, useRef, useState} from "react";
 import {StopTime} from "../SujiroData/DiaData";
-import axios from "axios";
 import {time2Str, timeS2int} from "./TimeTableData";
 import {useRequiredParams} from "../Hooks/useRequiredParams";
 import {getAuth} from "firebase/auth";
+import {axiosClient} from "../Common/AxiosHook";
 
 
 interface TimeEditViewProps {
@@ -14,13 +14,7 @@ interface TimeEditViewProps {
 
 }
 
-export function useSSS(stopTime:StopTime|null) {
-    const [depTime,setDepTime]=useState(time2Str(stopTime?.depTime));
-    const [ariTime,setAriTime]=useState(time2Str(stopTime?.ariTime));
-    useEffect(() => {
 
-    }, []);
-}
 
 
 
@@ -47,13 +41,8 @@ export function TimeEditView({stopTime,focusIndex,close}:TimeEditViewProps){
         console.log(newStopTime);
         if(JSON.stringify(newStopTime)!==JSON.stringify(stopTime)){
             console.log(JSON.stringify(newStopTime),JSON.stringify(stopTime));
-            const token=await getAuth().currentUser?.getIdToken();
-            axios.put(`${process.env.REACT_APP_SERVER_URL}/api/stopTime/${companyID}`,newStopTime,                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-            );
+            axiosClient.put(`/api/stopTime/${companyID}`,newStopTime)
+                .catch(err=>{});
         }
     }
 
@@ -74,13 +63,7 @@ export function TimeEditView({stopTime,focusIndex,close}:TimeEditViewProps){
                                     onChange={async e=>{
                             const newStopTime={...stopTime};
                             newStopTime.stopType=parseInt(e.target.value);
-                            const token=await getAuth().currentUser?.getIdToken();
-                            axios.put(`${process.env.REACT_APP_SERVER_URL}/api/stopTime/${companyID}`,newStopTime,                {
-                                    headers: {
-                                        Authorization: `Bearer ${token}`
-                                    }
-                                }
-                            );
+                            axiosClient.put(`/api/stopTime/${companyID}`,newStopTime).catch(err=>{});
 
                         }}>
                             <FormControlLabel value="0" control={<Radio/>} label="運行なし"/>

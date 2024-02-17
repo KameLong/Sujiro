@@ -24,7 +24,7 @@ function CompanyListPage() {
         axiosClient.get(`/api/company/getAll?timestamp=${new Date().getTime()}`)
         .then(res => {
             setMyCompany(res.data);
-        })
+        }).catch((err)=>{});
     }
 
     useEffect(() => {
@@ -136,8 +136,9 @@ function CompanyEdit({close,company}:CompanyEditProps){
                             if(company2.userID.length===0){
                                 company2.userID=user?.uid??"";
                             }
-                            await axiosClient.put(`/api/company`, company2);
-                            close();
+                            axiosClient.put(`/api/company`, company2).then(()=>{
+                                close();
+                            }).catch((err)=>{});
                         }
                     }}>決定</Button>
                 </DialogActions>

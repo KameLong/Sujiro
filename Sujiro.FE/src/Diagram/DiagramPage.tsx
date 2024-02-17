@@ -8,8 +8,8 @@ import {TimeTableTrip} from "../TimeTable/TimeTableData";
 import {TimetableSelected} from "../TimeTable/TimeTablePage";
 import {useRequiredParams} from "../Hooks/useRequiredParams";
 import {auth} from "../firebase";
-import axios from "axios";
 import {getAuth} from "firebase/auth";
+import {axiosClient} from "../Common/AxiosHook";
 
 function DiagramPage() {
     const {companyID} = useRequiredParams<{ companyID: string }>();
@@ -86,41 +86,26 @@ function DiagramPage() {
         moveing2:{x:0,y:0}
     });
 
-    const loadDiagramData=async()=>{
-        const token = await getAuth().currentUser?.getIdToken()
-        const res=await axios.get(`${process.env.REACT_APP_SERVER_URL}/api/DiagramPage/${companyID}/${routeID}?timestamp=${new Date().getTime()}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-        switch(res.status){
-            case 200:
-                console.log(res.data);
+    const loadDiagramData=()=>{
+        axiosClient.get(`/api/DiagramPage/${companyID}/${routeID}?timestamp=${new Date().getTime()}`)
+            .then(res=>{
                 setDownTrips(res.data.downTrips);
                 setUpTrips(res.data.upTrips);
                 setStations(res.data.stations);
-                break;
-            case 403:
-                console.log("403");
-                break;
-            default:
-                break;
-        }
-        setDiaRect(prevState => {
-            return {
-                xStart: prevState.xStart,
-                xEnd: prevState.xEnd,
-                yStart: res.data.stations[0].stationTime,
-                yEnd: res.data.stations[res.data.stations.length - 1].stationTime
-            }
-        })
-
+                setDiaRect(prevState => {
+                    return {
+                        xStart: prevState.xStart,
+                        xEnd: prevState.xEnd,
+                        yStart: res.data.stations[0].stationTime,
+                        yEnd: res.data.stations[res.data.stations.length - 1].stationTime
+                    }
+                })
+            }).catch(err=>{})
     }
 
     useEffect(() => {
         auth.onAuthStateChanged(async (user) => {
-            await loadDiagramData();
+            loadDiagramData();
             const token = await getAuth().currentUser?.getIdToken()
 
             const connection = new signalR.HubConnectionBuilder()

@@ -12,7 +12,6 @@ import {
     List,
     ListItem,
 } from '@mui/material';
-import axios from "axios";
 import {TimeEditView} from "./TimeEditView";
 import Box from "@mui/material/Box";
 import {Settings} from "@mui/icons-material";
@@ -23,6 +22,7 @@ import {
 import {useIdToken} from "react-firebase-hooks/auth";
 import {useRequiredParams} from "../Hooks/useRequiredParams";
 import {getAuth} from "firebase/auth";
+import {axiosClient} from "../Common/AxiosHook";
 
 const MemoTrainView = memo(TrainView);
 
@@ -144,22 +144,11 @@ function TimeTablePage() {
         e?.preventDefault();
     };
     const loadTimeTableData=async()=>{
-        const token=await getAuth().currentUser?.getIdToken();
-        const res=await axios.get(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/${companyID}/${routeID}/${direct}?timestamp=${new Date().getTime()}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            }
-        )
-        switch(res.status){
-            case 200:
+        axiosClient.get(`/api/timetablePage/${companyID}/${routeID}/${direct}?timestamp=${new Date().getTime()}`)
+            .then(res=>{
                 setTrips(res.data.trips);
                 setStations(res.data.stations);
-                break;
-            default:
-                console.log(res.status,res.data);
-        }
+            }).catch(err=>{});
     }
 
     useEffect(() => {
@@ -269,7 +258,7 @@ function TimeTablePage() {
                 return;
             }
             const trips: TimeTableTrip[] = JSON.parse(text);
-            const promise=trips.map(async trip => {
+            const promise=trips.map(trip => {
                 if (trip.tripID === undefined) {
                     console.log("tripID is undefined");
                     return;
@@ -283,11 +272,10 @@ function TimeTablePage() {
                 const selectedTrip = tripList.find(item => item.tripID === selectedTripID);
                 if (!selectedTrip) return;
                 console.log({trip: trip, insertTripID: selectedTripID});
-                const token=await getAuth().currentUser?.getIdToken();
-                await axios.post(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/InsertTrip/${companyID}`,
-                    {trip: trip, insertTripID: selectedTripID},{headers: {Authorization: `Bearer ${token}`}});
+                return axiosClient.post(`/api/timetablePage/InsertTrip/${companyID}`,
+                    {trip: trip, insertTripID: selectedTripID});
             });
-            await Promise.all(promise);
+            await Promise.all(promise).catch(err => {});
     }
 
     return (
@@ -336,8 +324,7 @@ function TimeTablePage() {
                                              trip.stopTimes[i].depTime += addSec;
                                          }
                                      }
-                                     const token=await getAuth().currentUser?.getIdToken();
-                                     axios.put(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/UpdateTrip/${companyID}`, trip,{headers: {Authorization: `Bearer ${token}`}});
+                                     axiosClient.put(`/api/timetablePage/UpdateTrip/${companyID}`, trip).catch(err => {});
                                      e.preventDefault();
 
                                  }
@@ -362,8 +349,7 @@ function TimeTablePage() {
                                              trip.stopTimes[i].depTime += addSec;
                                          }
                                      }
-                                     const token=await getAuth().currentUser?.getIdToken();
-                                     axios.put(`${process.env.REACT_APP_SERVER_URL}/api/timetablePage/UpdateTrip/${companyID}`, trip,{headers: {Authorization: `Bearer ${token}`}});
+                                     axiosClient.put(`/api/timetablePage/UpdateTrip/${companyID}`, trip).catch(err => {});
                                      e.preventDefault();
                                  }
                                  break;
@@ -387,13 +373,7 @@ function TimeTablePage() {
                                  if (selected?.tripID === undefined) {
                                      return;
                                  }
-                                 const token=await getAuth().currentUser?.getIdToken();
-                                 await axios.delete(`${process.env.REACT_APP_SERVER_URL}/api/trip/${companyID}/${selected?.tripID}`,
-                                     {
-                                            headers: {
-                                                Authorization: `Bearer ${token}`
-                                            }
-                                     });
+                                 axiosClient.delete(`/api/trip/${companyID}/${selected?.tripID}`).catch(err => {});
                                  e.preventDefault();
                                  break;
 

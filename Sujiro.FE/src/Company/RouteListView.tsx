@@ -80,20 +80,12 @@ export default function RouteListView({companyID}:RouteListViewProps) {
                         </ListItem>
                         <ListItem>
                             <Button  onClick={async()=>{
-                                const deleteAction=await axiosClient.delete(`/api/route/${companyID}/${editRoute?.routeID}`);
-                                switch (deleteAction.status) {
-                                    case 200:
-                                        console.log("削除成功");
-                                        break;
-                                    case 404:
-                                        console.log("削除失敗");
-                                        break;
-                                    default:
-                                        console.log("削除失敗");
-                                        break;
-                                }
-                                await loadRouteFromServer();
-                                setOpenActionRouteDialog(false);
+                                axiosClient.delete(`/api/route/${companyID}/${editRoute?.routeID}`)
+                                    .then(res => {
+                                        return loadRouteFromServer();
+                                    }).then(res=> {
+                                        setOpenActionRouteDialog(false);
+                                    }).catch(err=>{});
                             }}>削除する</Button>
                         </ListItem>
                     </List>
@@ -135,12 +127,14 @@ function RouteEdit({close,route,companyID}:RouteEditProps){
                 <TextField fullWidth={true} label={"路線名"} required={true} value={routeName} onChange={e=>setRouteName(e.target.value)}/>
             </DialogContent>
             <DialogActions>
-                <Button  onClick={async() => {
+                <Button  onClick={() => {
                     if(routeName.length>0) {
                         const route2={...route};
                         route2.name=routeName;
-                        await axiosClient.put(`/api/route/${companyID}`, route2);
-                        close();
+                        axiosClient.put(`/api/route/${companyID}`, route2)
+                            .then(res=>{
+                                close();
+                            }).catch(err=>{});
                     }
                 }}>決定</Button>
             </DialogActions>

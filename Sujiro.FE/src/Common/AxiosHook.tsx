@@ -1,6 +1,5 @@
 import React, {useContext} from 'react'
-import axios, { AxiosRequestConfig } from 'axios'
-import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import {getAuth} from "firebase/auth";
 import {statusContext} from "./UseStatusContext";
 
@@ -18,7 +17,6 @@ export const axiosClient = axios.create({
 
 export function AxiosClientProvider({children}: {children: React.ReactElement}) {
     // 関数コンポーネントなのでフックが使える
-    const navigate = useNavigate()
     const ctx=useContext(statusContext);
 
     React.useEffect(() => {
@@ -37,7 +35,6 @@ export function AxiosClientProvider({children}: {children: React.ReactElement}) 
         // レスポンス インターセプター
         const responseInterceptor = axiosClient.interceptors.response.use(
             (response) => {
-                console.log(response.status);
                 return response
             },
             (error) => {

@@ -1,25 +1,21 @@
 import {
-    Backdrop,
-    Button, CircularProgress,
+    Button,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
     Divider,
-    Fab,
     List,
     ListItem,
     TextField
 } from "@mui/material";
-import {Add, Home} from "@mui/icons-material";
-import Box from "@mui/material/Box";
+import {Home} from "@mui/icons-material";
 import React, {useEffect, useState} from "react";
 import {getAuth} from "firebase/auth";
-import axios from "axios";
 import {Route, RouteStation, Station} from "../SujiroData/DiaData";
 import {auth} from "../firebase";
-import { GiRailway } from "react-icons/gi";
 import {useRequiredParams} from "../Hooks/useRequiredParams";
+import {axiosClient} from "../Common/AxiosHook";
 export interface RoutePageProps {
 }
 export default function RoutePage({}:RoutePageProps) {
@@ -37,28 +33,16 @@ export default function RoutePage({}:RoutePageProps) {
     const [isLogout,setIsLogout]=useState(false);
 
     const loadRouteFromServer=async()=>{
-        const token=await getAuth().currentUser?.getIdToken();
-        axios.get(`${process.env.REACT_APP_SERVER_URL}/api/RouteEditPage/${companyID}/${routeID}?timestamp=${new Date().getTime()}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            }
+        axiosClient.get(`/api/RouteEditPage/${companyID}/${routeID}?timestamp=${new Date().getTime()}`
         ).then(res => {
             setRoute(res.data);
-        })
+        }).catch(err=>{});
     }
     const loadStationFromServer=async()=>{
-        const token=await getAuth().currentUser?.getIdToken();
-        axios.get(`${process.env.REACT_APP_SERVER_URL}/api/station/${companyID}?timestamp=${new Date().getTime()}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            }
+        axiosClient.get(`/api/station/${companyID}?timestamp=${new Date().getTime()}`,
         ).then(res => {
             setStations(res.data);
-        })
+        }).catch(err=>{});
     }
     useEffect(() => {
         auth.onAuthStateChanged(async (user) => {
@@ -112,15 +96,10 @@ export default function RoutePage({}:RoutePageProps) {
                     setOpenInsertStationDialog(false);
                     const token = await getAuth().currentUser?.getIdToken();
 
-                    axios.put(`${process.env.REACT_APP_SERVER_URL}/api/RouteEditPage/insert/${companyID}/${routeID}`,{stationID:station.stationID,routeStationID:insertRouteStation?.routeStationID} ,
-                        {                headers: {
-                                Authorization: `Bearer ${token}`
-                            }
-                        })
+                    axiosClient.put(`/api/RouteEditPage/insert/${companyID}/${routeID}`,{stationID:station.stationID,routeStationID:insertRouteStation?.routeStationID})
                         .then(res=>{
                             loadRouteFromServer();
-                        }
-                        )
+                        }).catch(err=>{});
                 }}/>
             </Dialog>
             <Dialog open={openChangeStationDialog}　onClose={()=>{setOpenChangeStationDialog(false)}}>
@@ -134,12 +113,10 @@ export default function RoutePage({}:RoutePageProps) {
                         return;
                     }
                     const routeStation={...insertRouteStation,stationID:station.stationID};
-                    await axios.put(`${process.env.REACT_APP_SERVER_URL}/api/RouteStation/${companyID}`, routeStation,
-                        {                headers: {
-                                Authorization: `Bearer ${token}`
-                            }
-                        })
-                                loadRouteFromServer();
+                    axiosClient.put(`/api/RouteStation/${companyID}`, routeStation)
+                        .then(res=>{
+                            loadRouteFromServer();
+                        }).catch(err=>{});
                 }}/>
             </Dialog>
             <Dialog open={openSelectStationDialog} onClose={()=>{setOpenSelectStationDialog(false);}}>
@@ -162,10 +139,15 @@ export default function RoutePage({}:RoutePageProps) {
                     <ListItem>
                         <Button onClick={async ()=>{
                             setLoading(true);
-                            await axios.delete(`${process.env.REACT_APP_SERVER_URL}/api/RouteStation/${companyID}/${insertRouteStation?.routeStationID}`,{headers: {Authorization: `Bearer ${await getAuth().currentUser?.getIdToken()}`}});
-                            await loadRouteFromServer();
-                            setOpenSelectStationDialog(false);
-                            setLoading(false);
+                            axiosClient.delete(`/api/RouteStation/${companyID}/${insertRouteStation?.routeStationID}`)
+                                .then(res=>{
+                                    return loadRouteFromServer();
+                                })
+                                .then(res=>{
+                                    setOpenSelectStationDialog(false);
+                                    setLoading(false);
+                                })
+                                .catch(err=>{});
                         }}>駅を削除する</Button>
                     </ListItem>
                 </List>
@@ -221,9 +203,10 @@ function RouteEdit({close,route,companyID}:RouteEditProps){
 
                         const route2={...route};
                         route2.name=routeName;
-                        const token=await getAuth().currentUser?.getIdToken();
-                        await axios.put(`${process.env.REACT_APP_SERVER_URL}/api/route/${companyID}`, route2,{headers: {Authorization: `Bearer ${token}`}});
-                        close();
+                        axiosClient.put(`/api/route/${companyID}`, route2)
+                            .then(res=>{
+                                close();
+                            }).catch(err=>{});
                     }
                 }}>決定</Button>
             </DialogActions>

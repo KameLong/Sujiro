@@ -30,17 +30,12 @@ export default function StationListView({companyID}:StationListViewProps) {
     const ctx=useContext(statusContext);
     useEffect(() => {
         auth.onAuthStateChanged(async(user) => {
-            if (user) {
-                const token=await user.getIdToken();
-                axiosClient.get(`/api/station/${companyID}?timestamp=${new Date().getTime()}`
-                ).then(res => {
-                    setStations(res.data);
-                }).catch((err)=>{
+            axiosClient.get(`/api/station/${companyID}?timestamp=${new Date().getTime()}`
+            ).then(res => {
+                setStations(res.data);
+            }).catch((err)=>{
 
-                });
-            }else{
-                 ctx.setNotLogined(false);
-            }
+            });
         });
     },[]);
 
@@ -81,24 +76,13 @@ export default function StationListView({companyID}:StationListViewProps) {
                         </ListItem>
                         <ListItem>
                             <Button  onClick={async()=>{
-                                const deleteAction=await axiosClient.delete(`${process.env.REACT_APP_SERVER_URL}/api/station/${companyID}/${editStation?.stationID}`
-                                );
-                                switch (deleteAction.status) {
-                                    case 200:
-                                        console.log("削除成功");
-                                        break;
-                                    case 404:
-                                        console.log("削除失敗");
-                                        break;
-                                    default:
-                                        console.log("削除失敗");
-                                        break;
-                                }
-                                axiosClient.get(`/api/station/${companyID}?timestamp=${new Date().getTime()}`
-                                ).then(res => {
-                                    setStations(res.data);
-                                })
-                                setOpenActionStation(false);
+                                axiosClient.delete(`${process.env.REACT_APP_SERVER_URL}/api/station/${companyID}/${editStation?.stationID}`)
+                                    .then(res => {
+                                        return axiosClient.get(`/api/station/${companyID}?timestamp=${new Date().getTime()}`);
+                                    }).then(res => {
+                                        setStations(res.data);
+                                        setOpenActionStation(false);
+                                    }).catch(err=>{});
                             }}>削除する</Button>
                         </ListItem>
                     </List>
@@ -111,7 +95,7 @@ export default function StationListView({companyID}:StationListViewProps) {
                     axiosClient.get(`/api/station/${companyID}?timestamp=${new Date().getTime()}`
                     ).then(res => {
                         setStations(res.data);
-                    })
+                    }).catch((err)=>{});
 
 
                 }} station={editStation} companyID={companyID}/>
@@ -143,12 +127,14 @@ function StationEdit({close,station,companyID}:StationEditProps){
                 <TextField fullWidth={true} label={"駅名"} required={true} value={stationName} onChange={e=>setStationName(e.target.value)}/>
             </DialogContent>
             <DialogActions>
-                <Button  onClick={async() => {
+                <Button  onClick={() => {
                     if(stationName.length>0) {
                         const station2={...station};
                         station2.name=stationName;
-                        await axiosClient.put(`/api/station/${companyID}`, station2);
-                        close();
+                        axiosClient.put(`/api/station/${companyID}`, station2)
+                            .then(res=>{
+                                close();
+                            }).catch((err)=>{});
                     }
                 }}>決定</Button>
             </DialogActions>

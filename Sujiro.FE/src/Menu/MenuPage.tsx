@@ -1,24 +1,9 @@
 import {
-    Backdrop,
-    Button, CircularProgress,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
     Divider,
-    Fab,
-    List,
-    ListItem,
-    TextField
 } from "@mui/material";
-import {Add, Home} from "@mui/icons-material";
-import Box from "@mui/material/Box";
 import React, {useContext, useEffect, useState} from "react";
-import {getAuth} from "firebase/auth";
 import {Route, RouteStation, Station} from "../SujiroData/DiaData";
 import {auth} from "../firebase";
-import { GiRailway } from "react-icons/gi";
-import {useRequiredParams} from "../Hooks/useRequiredParams";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import {TreeItem, TreeView} from "@mui/x-tree-view";
@@ -28,7 +13,6 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import {useParams} from "react-router-dom";
 import {axiosClient} from "../Common/AxiosHook";
 export interface MenuPageProps {
-    // companyID:string|undefined
 }
 export default function MenuPage({}:MenuPageProps) {
     const {companyID} = useParams<{ companyID: string }>();
@@ -99,64 +83,6 @@ export default function MenuPage({}:MenuPageProps) {
     )
 }
 
-interface StationSelectorProps {
-    stations: Station[];
-    onSelectStation: (station: Station) => void;
-}
-
-function StationSelector({stations, onSelectStation}: StationSelectorProps) {
-    return (
-        <DialogContent>
-            <List>
-                {stations.map((station) => {
-                    return (<ListItem onClick={async () => {
-                        onSelectStation(station);
-                    }}>{station.name}</ListItem>)
-                })}
-            </List>
-
-        </DialogContent>
-    )
-}
 
 
-interface RouteEditProps {
-    close: () => void;
-    route: Route | undefined;
-    companyID: string | undefined
-}
 
-function RouteEdit({close, route, companyID}: RouteEditProps) {
-    const [routeName, setRouteName] = useState(route?.name ?? "");
-
-    if (route === undefined) {
-        return (<div/>);
-    }
-
-    return (
-        <div>
-            <DialogTitle>{"路線名を編集"}</DialogTitle>
-
-            <DialogContent>
-                <TextField fullWidth={true} label={"路線名"} required={true} value={routeName}
-                           onChange={e => setRouteName(e.target.value)}/>
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={async () => {
-                    if (routeName.length > 0) {
-
-                        const route2 = {...route};
-                        route2.name = routeName;
-                        await axiosClient.put(`/api/route/${companyID}`, route2);
-                        close();
-                    }
-                }}>決定</Button>
-            </DialogActions>
-        </div>
-    )
-}
-
-
-interface EditRoute extends Route{
-    routeStations:RouteStation[]
-}

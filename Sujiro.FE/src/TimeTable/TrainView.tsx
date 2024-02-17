@@ -2,9 +2,9 @@ import React, {Dispatch, SetStateAction} from "react";
 import style from "./TimeTablePage.module.css";
 import {Route, RouteStation, Station, StopTime} from "../SujiroData/DiaData";
 import {Button, Dialog, DialogTitle, List, ListItem} from "@mui/material";
-import axios from "axios";
 import {time2Str, TimeTableStation, TimeTableTrip} from "./TimeTableData";
 import {TimetableSelected} from "./TimeTablePage";
+import {axiosClient} from "../Common/AxiosHook";
 interface TrainViewProps {
     trip:TimeTableTrip;
     stations:TimeTableStation[]
@@ -26,16 +26,12 @@ function TrainView({trip,stations,direct,selected,setSelected,onDoubleClick}:Tra
                 console.log("edit");
                 break;
             case "delete":
-                axios.delete(`${process.env.REACT_APP_SERVER_URL}/api/trip/${trip.tripID}`);
+                axiosClient.delete(`/api/trip/${trip.tripID}`).catch(err=>{});
                 break;
             default:
                 break;
         }
     };
-
-    // const getStopTime = (stationID:number)=>{
-    //     return trip.stopTimes.filter(item=>item.stationID===stationID)[0];
-    // }
     const getDepTimeStr=(station:TimeTableStation,stopTimes:StopTime[],stations:TimeTableStation[])=>{
         const index=stations.findIndex(item=>item.routeStationID===station.routeStationID);
         const stopTime=stopTimes.find(item=>item.routeStationID===station.routeStationID);
