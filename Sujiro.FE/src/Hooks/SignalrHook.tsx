@@ -3,6 +3,7 @@ import axios from 'axios'
 import {getAuth} from "firebase/auth";
 import {statusContext, useStatusContext} from "./UseStatusContext";
 import * as signalR from "@microsoft/signalr";
+import {HubConnection} from "@microsoft/signalr";
 
 const BaseUrl = process.env.REACT_APP_SERVER_URL;
 
@@ -10,14 +11,31 @@ const BaseUrl = process.env.REACT_APP_SERVER_URL;
 export const useSignalR=()=>{
     const ctx=useContext(statusContext);
     const [connection,setConnection]=React.useState<signalR.HubConnection|undefined>(undefined);
+    const [onStart,setOnStart]=React.useState<{onStart:((conn:HubConnection)=>void)|undefined}>({onStart:undefined});
+
     React.useEffect(() => {
-        if (connection !== undefined) {
-            connection.start().then(() => {
-                console.log('SignalR Connected');
-            }).catch((err) => {
-                console.log('SignalR Connection Error: ', err);
-            });
-        }
+        connection?.start().then(() => {
+            ctx.setSignalRConnectionError(false);
+            console.log(connection);
+            if(onStart.onStart!==undefined){
+                onStart.onStart(connection)
+            }
+        });
+        connection?.onreconnected(()=>{
+            ctx.setSignalRConnectionError(false);
+            console.log(connection);
+            if(onStart.onStart!==undefined){
+                onStart.onStart(connection)
+            }
+            console.log('SignalR Reconnected');
+        })
+        connection?.onreconnecting(()=>{
+            ctx.setSignalRConnectionError(true);
+            console.log('SignalR Reconnecting');
+        })
+        connection?.onclose(()=>{
+            console.log('SignalR Disconnected');
+        });
         return () => {
             if (connection !== undefined) {
                 connection.stop().then(() => {
@@ -36,5 +54,5 @@ export const useSignalR=()=>{
             .build();
         setConnection(connection);
     }
-    return {createConnection,connection};
+    return {createConnection,connection,setOnStart};
 }

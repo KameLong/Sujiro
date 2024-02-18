@@ -10,10 +10,13 @@ import {requiredParamsHook} from "../Hooks/RequiredParamsHook";
 import {auth} from "../firebase";
 import {getAuth} from "firebase/auth";
 import {axiosClient} from "../Hooks/AxiosHook";
+import {HubConnection} from "@microsoft/signalr";
+import {useSignalR} from "../Hooks/SignalrHook";
 
 function DiagramPage() {
     const {companyID} = requiredParamsHook<{ companyID: string }>();
     const {routeID} = requiredParamsHook<{ routeID: string }>();
+    const signalR=useSignalR();
 
     const SCALE:number=3;
     const [stations, setStations] = useState<DiagramStation[]>([]);
@@ -106,88 +109,93 @@ function DiagramPage() {
     useEffect(() => {
         auth.onAuthStateChanged(async (user) => {
             loadDiagramData();
-            const token = await getAuth().currentUser?.getIdToken()
+            signalR.setOnStart({onStart:(conn:HubConnection)=> {
+                    console.log("onStart",conn);
+                    console.trace();
+                    if(conn===undefined){
+                        console.error("signalR");
+                        return;
+                    }
+                    conn.invoke("Init",companyID);
+                    conn.off("UpdateStopTimes");
+                    conn.on("UpdateStopTimes", (stopTimes: StopTime[]) => {
+                        setDownTrips(prev => {
+                            const next=[...prev];
+                            stopTimes.forEach(stopTime => {
+                                const tripIndex = next.findIndex(item => item.tripID === stopTime.tripID);
+                                if (tripIndex < 0) {
+                                    return;
+                                }
+                                const stopTimeIndex = next[tripIndex].stopTimes.findIndex(item => item.stopTimeID === stopTime.stopTimeID);
+                                if (stopTimeIndex < 0) {
+                                    return;
+                                }
+                                next[tripIndex] = {...next[tripIndex]};
+                                next[tripIndex].stopTimes = [...next[tripIndex].stopTimes];
+                                next[tripIndex].stopTimes[stopTimeIndex] = stopTime;
 
-            const connection = new signalR.HubConnectionBuilder()
-                .withUrl(`${process.env.REACT_APP_SERVER_URL}/ws/chatHub`, {accessTokenFactory: () => token ?? ''})
-                .build();
-            await connection.start();
-            connection.invoke("Init",companyID);
-            connection.off("UpdateStopTimes");
-            connection.on("UpdateStopTimes", (stopTimes: StopTime[]) => {
-                setDownTrips(prev => {
-                    const next=[...prev];
-                    stopTimes.forEach(stopTime => {
-                        const tripIndex = next.findIndex(item => item.tripID === stopTime.tripID);
-                        if (tripIndex < 0) {
-                            return;
-                        }
-                        const stopTimeIndex = next[tripIndex].stopTimes.findIndex(item => item.stopTimeID === stopTime.stopTimeID);
-                        if (stopTimeIndex < 0) {
-                            return;
-                        }
-                        next[tripIndex] = {...next[tripIndex]};
-                        next[tripIndex].stopTimes = [...next[tripIndex].stopTimes];
-                        next[tripIndex].stopTimes[stopTimeIndex] = stopTime;
+                            });
+                            return next;
+                        });
+                        setUpTrips(prev => {
+                            const next=[...prev];
+                            stopTimes.forEach(stopTime => {
+                                const tripIndex = next.findIndex(item => item.tripID === stopTime.tripID);
+                                if (tripIndex < 0) {
+                                    return;
+                                }
+                                const stopTimeIndex = next[tripIndex].stopTimes.findIndex(item => item.stopTimeID === stopTime.stopTimeID);
+                                if (stopTimeIndex < 0) {
+                                    return;
+                                }
+                                next[tripIndex] = {...next[tripIndex]};
+                                next[tripIndex].stopTimes = [...next[tripIndex].stopTimes];
+                                next[tripIndex].stopTimes[stopTimeIndex] = stopTime;
 
+                            });
+                            return next;
+                        });
                     });
-                    return next;
-                });
-                setUpTrips(prev => {
-                    const next=[...prev];
-                    stopTimes.forEach(stopTime => {
-                        const tripIndex = next.findIndex(item => item.tripID === stopTime.tripID);
-                        if (tripIndex < 0) {
-                            return;
-                        }
-                        const stopTimeIndex = next[tripIndex].stopTimes.findIndex(item => item.stopTimeID === stopTime.stopTimeID);
-                        if (stopTimeIndex < 0) {
-                            return;
-                        }
-                        next[tripIndex] = {...next[tripIndex]};
-                        next[tripIndex].stopTimes = [...next[tripIndex].stopTimes];
-                        next[tripIndex].stopTimes[stopTimeIndex] = stopTime;
 
+                    conn.off("UpdateTrips");
+                    conn.on("UpdateTrips", async(trips:Trip[]) => {
+                        setUpTrips(prev => {
+                            const next=[...prev];
+                            trips.forEach(trip => {
+                                const tripIndex = next.findIndex(item => item.tripID === trip.tripID);
+                                if (tripIndex < 0) {
+                                    return;
+                                }
+                                next[tripIndex] = {...next[tripIndex],...trip};
+
+                            });
+                            return next;
+                        });
+                        setDownTrips(prev => {
+                            const next=[...prev];
+                            trips.forEach(trip => {
+                                const tripIndex = next.findIndex(item => item.tripID === trip.tripID);
+                                if (tripIndex < 0) {
+                                    return;
+                                }
+                                next[tripIndex] = {...next[tripIndex],...trip};
+
+                            });
+                            return next;
+                        });
                     });
-                    return next;
-                });
-            });
-
-            connection.off("UpdateTrips");
-            connection.on("UpdateTrips", async(trips:Trip[]) => {
-                setUpTrips(prev => {
-                    const next=[...prev];
-                    trips.forEach(trip => {
-                        const tripIndex = next.findIndex(item => item.tripID === trip.tripID);
-                        if (tripIndex < 0) {
-                            return;
-                        }
-                        next[tripIndex] = {...next[tripIndex],...trip};
-
+                    conn.off("DeleteTrips");
+                    conn.on("DeleteTrips", async() => {
+                        await loadDiagramData();
                     });
-                    return next;
-                });
-                setDownTrips(prev => {
-                    const next=[...prev];
-                    trips.forEach(trip => {
-                        const tripIndex = next.findIndex(item => item.tripID === trip.tripID);
-                        if (tripIndex < 0) {
-                            return;
-                        }
-                        next[tripIndex] = {...next[tripIndex],...trip};
-
+                    conn.off("InsertTrips");
+                    conn.on("InsertTrips", async() => {
+                        await loadDiagramData();
                     });
-                    return next;
-                });
-            });
-            connection.off("DeleteTrips");
-            connection.on("DeleteTrips", async() => {
-                await loadDiagramData();
-            });
-            connection.off("InsertTrips");
-            connection.on("InsertTrips", async() => {
-                await loadDiagramData();
-            });
+                }});
+            signalR.createConnection();
+
+
 
 
 

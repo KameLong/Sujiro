@@ -1,11 +1,9 @@
 import React, {memo, useCallback, useEffect, useState} from 'react';
 import style from './TimeTablePage.module.css';
-import * as signalR from "@microsoft/signalr";
 import StationView from "./StationView";
 import TrainView from "./TrainView";
 import {Station, StopTime, Trip} from "../SujiroData/DiaData";
 import {TimeTableStation, TimeTableTrip} from "./TimeTableData";
-import {useParams} from "react-router-dom";
 import {
     Button,
     Dialog, Fab,
@@ -21,12 +19,15 @@ import {
 } from '../firebase';
 import {useIdToken} from "react-firebase-hooks/auth";
 import {requiredParamsHook} from "../Hooks/RequiredParamsHook";
-import {getAuth} from "firebase/auth";
 import {axiosClient} from "../Hooks/AxiosHook";
+import {useSignalR} from "../Hooks/SignalrHook";
+import {HubConnection} from "@microsoft/signalr";
 
 const MemoTrainView = memo(TrainView);
 
 function TimeTablePage() {
+    const signalR=useSignalR();
+
     const {companyID} = requiredParamsHook<{ companyID: string }>();
     const {routeID} = requiredParamsHook<{ routeID: string }>();
     const {direct} = requiredParamsHook<{ direct: string }>();
@@ -154,61 +155,70 @@ function TimeTablePage() {
     useEffect(() => {
         auth.onAuthStateChanged(async(user) => {
             await loadTimeTableData();
-            const token = await getAuth().currentUser?.getIdToken()
-            const connection = new signalR.HubConnectionBuilder()
-                .withUrl(`${process.env.REACT_APP_SERVER_URL}/ws/chatHub`, {accessTokenFactory: () => token ?? ''})
-                .build();
-            await connection.start();
-            connection.invoke("Init",companyID);
-            connection.off("UpdateStopTimes");
-            connection.on("UpdateStopTimes", (stopTimes: StopTime[]) => {
-                setTrips(prev => {
-                    const next=[...prev];
-                    stopTimes.forEach(stopTime => {
-                        const tripIndex = next.findIndex(item => item.tripID === stopTime.tripID);
-                        if (tripIndex < 0) {
-                            return;
-                        }
-                        const stopTimeIndex = next[tripIndex].stopTimes.findIndex(item => item.stopTimeID === stopTime.stopTimeID);
-                        if (stopTimeIndex < 0) {
-                            return;
-                        }
-                        next[tripIndex] = {...next[tripIndex]};
-                        next[tripIndex].stopTimes = [...next[tripIndex].stopTimes];
-                        next[tripIndex].stopTimes[stopTimeIndex] = stopTime;
+            signalR.setOnStart({onStart:(conn:HubConnection)=> {
+                console.log("onStart",conn);
+                console.trace();
+                if(conn===undefined){
+                    console.error("signalR");
+                    return;
+                }
+                conn.invoke("Init",companyID);
+                conn.off("UpdateStopTimes");
+                conn.on("UpdateStopTimes", (stopTimes: StopTime[]) => {
+                    console.log(stopTimes);
+                    setTrips(prev => {
+                        const next=[...prev];
+                        stopTimes.forEach(stopTime => {
+                            const tripIndex = next.findIndex(item => item.tripID === stopTime.tripID);
+                            if (tripIndex < 0) {
+                                return;
+                            }
+                            const stopTimeIndex = next[tripIndex].stopTimes.findIndex(item => item.stopTimeID === stopTime.stopTimeID);
+                            if (stopTimeIndex < 0) {
+                                return;
+                            }
+                            next[tripIndex] = {...next[tripIndex]};
+                            next[tripIndex].stopTimes = [...next[tripIndex].stopTimes];
+                            next[tripIndex].stopTimes[stopTimeIndex] = stopTime;
 
+                        });
+                        return next;
                     });
-                    return next;
                 });
-            });
 
-            connection.off("UpdateTrips");
-            connection.on("UpdateTrips", async(trips:Trip[]) => {
-                setTrips(prev => {
-                    const next=[...prev];
-                    trips.forEach(trip => {
-                        const tripIndex = next.findIndex(item => item.tripID === trip.tripID);
-                        if (tripIndex < 0) {
-                            return;
-                        }
-                        next[tripIndex] = {...next[tripIndex],...trip};
+                conn.off("UpdateTrips");
+                conn.on("UpdateTrips", async(trips:Trip[]) => {
+                    setTrips(prev => {
+                        const next=[...prev];
+                        trips.forEach(trip => {
+                            const tripIndex = next.findIndex(item => item.tripID === trip.tripID);
+                            if (tripIndex < 0) {
+                                return;
+                            }
+                            next[tripIndex] = {...next[tripIndex],...trip};
 
+                        });
+                        return next;
                     });
-                    return next;
                 });
-            });
-            connection.off("DeleteTrips");
+                conn.off("DeleteTrips");
 
-            connection.on("DeleteTrips", async() => {
-                await loadTimeTableData();
-            });
-            connection.off("InsertTrips");
+                conn.on("DeleteTrips", async() => {
+                    await loadTimeTableData();
+                });
+                conn.off("InsertTrips");
 
-            connection.on("InsertTrips", async() => {
-                await loadTimeTableData();
-            });
+                conn.on("InsertTrips", async() => {
+                    await loadTimeTableData();
+                });
+
+            }});
+            signalR.createConnection();
         });
     }, []);
+    useEffect(() => {
+        console.log(signalR.connection);
+    }, [signalR.connection]);
 
 
 

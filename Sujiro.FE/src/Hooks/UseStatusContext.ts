@@ -14,6 +14,8 @@ interface StatusContext{
     setNetworkError: (current: boolean) => void;
     notFoundError?: boolean;
     setNotFoundError: (current: boolean) => void;
+    signalRConnectionError?: boolean;
+    setSignalRConnectionError: (current: boolean) => void;
 
 };
 
@@ -37,6 +39,9 @@ export const statusContext = createContext<StatusContext>({
     },
     notFoundError: false,
     setNotFoundError: () => {
+    },
+    signalRConnectionError: false,
+    setSignalRConnectionError: () => {
     }
 
 
@@ -51,15 +56,16 @@ export const useStatusContext = (): StatusContext => {
     const [clientError, setClientError] = useState<undefined|string>(undefined);
     const [networkError, setNetworkError] = useState(false);
     const [notFoundError, setNotFoundError] = useState(false);
+    const [signalRConnectionError, setSignalRConnectionError] = useState(false);
 
 
     useEffect(()=>{
-        if(notLogined || unAuthorized || forbiddenError || clientError || networkError || notFoundError){
+        if(notLogined || unAuthorized || forbiddenError || clientError || networkError || notFoundError|| signalRConnectionError){
             setHasError(true);
         }else{
             setHasError(false);
         }
-    },[notLogined, unAuthorized, forbiddenError, clientError, networkError, notFoundError]);
+    },[notLogined, unAuthorized, forbiddenError, clientError, networkError, notFoundError, signalRConnectionError]);
 
     const setLogined2 = useCallback((current: boolean) => {
         console.log(current);
@@ -80,6 +86,8 @@ export const useStatusContext = (): StatusContext => {
         networkError: networkError,
         setNetworkError: setNetworkError,
         notFoundError: notFoundError,
-        setNotFoundError: setNotFoundError
+        setNotFoundError: setNotFoundError,
+        signalRConnectionError: signalRConnectionError,
+        setSignalRConnectionError: setSignalRConnectionError
     };
 };

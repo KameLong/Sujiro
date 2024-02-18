@@ -148,6 +148,13 @@ function ErrorAlert() {
 
                 }
                 {
+                    ctx.signalRConnectionError?
+                        <Alert  severity="error">
+                            通信エラーが発生しました（SignalR）
+                        </Alert>:null
+
+                }
+                {
                     ctx.isNotLogined?
                         <Alert  severity="warning" >
                             ログインが必要なページを開こうとしています。
