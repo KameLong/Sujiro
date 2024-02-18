@@ -2,9 +2,11 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Data.Sqlite;
 using Sujiro.Data;
 using Sujiro.WebAPI.Service.AuthService;
 using Sujiro.WebAPI.SignalR;
+using Route = Sujiro.Data.Route;
 
 namespace Sujiro.WebAPI.Controllers.SujirawData
 {
@@ -39,9 +41,14 @@ namespace Sujiro.WebAPI.Controllers.SujirawData
                 return BadRequest(e.Message);
             }
         }
+        /**
+         * 新しいRouteStationを追加します
+         **/
+
         [HttpPut("{companyID}")]
         public async Task<ActionResult> Put(long companyID, [FromBody] RouteStation routeStation)
         {
+            throw new Exception("Not implemented");
             if (!AuthService.HasAccessPrivileges(Configuration["ConnectionStrings:DBdir"], User, companyID))
             {
                 return Forbid();
@@ -53,7 +60,19 @@ namespace Sujiro.WebAPI.Controllers.SujirawData
                 {
                     return NotFound();
                 }
-                RouteStation.PutRouteStation(filePath, routeStation);
+                using (var conn = new SqliteConnection("Data Source=" + filePath))
+                {
+                    conn.Open();
+                    var tran = conn.BeginTransaction();
+                    var route=Route.GetRoute<Route>(conn, routeStation.RouteID);
+                    if(route == null)
+                    {
+                        return NotFound();
+                    }
+
+                    routeStation.Replace(conn);
+                    tran.Commit();
+                }
                 return Ok();
             }
             catch (Exception e)
@@ -75,7 +94,13 @@ namespace Sujiro.WebAPI.Controllers.SujirawData
                 {
                     return NotFound();
                 }
-                RouteStation.DeleteRouteStation(filePath, routeStationID);
+                using(var conn= new SqliteConnection("Data Source=" + filePath))
+                {
+                    conn.Open();
+                    var tran = conn.BeginTransaction();
+                    RouteStation.DeleteRouteStation(conn, routeStationID);
+                    tran.Commit();
+                }
                 return Ok();
             }
             catch (Exception e)

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.Sqlite;
 using Sujiro.Data;
+using Sujiro.Data.Common;
 using Sujiro.WebAPI.Service.AuthService;
 using Sujiro.WebAPI.SignalR;
 using System.Diagnostics;
@@ -21,7 +22,8 @@ namespace Sujiro.WebAPI.Controllers
 
         public class MenuData
         {
-            List<Route> routes;
+            public List<Route> routes { get; set;}
+            public Company company { get; set;}
         }
 
 
@@ -44,8 +46,10 @@ namespace Sujiro.WebAPI.Controllers
                 {
                     return NotFound();
                 }
-                var routes = Route.GetAllRoute(filePath);
-                return Ok(routes);
+                var result = new MenuData();
+                result.routes= Route.GetAllRoute(filePath);
+                result.company=Company.GetCompany(Path.Combine(Configuration["ConnectionStrings:DBdir"],MasterData.MASTER_DATA_FILE), companyID);
+                return Ok(result);
             }
             catch (Exception ex)
             {

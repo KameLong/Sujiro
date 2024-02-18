@@ -59,7 +59,7 @@ namespace OuDia
                     {
                         routeStation.Style |= 0x01000000;
                     }
-                    routeStation.ReplaceSqlite(conn);
+                    routeStation.Replace(conn);
                     return routeStation;
 
                 }).ToList();

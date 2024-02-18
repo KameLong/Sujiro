@@ -84,17 +84,31 @@ namespace Sujiro.WebAPI.Controllers.FE
                 RouteStation routeStation = new RouteStation();
                 routeStation.RouteID = routeID;
                 routeStation.StationID = routeStationAppend.stationID;
-                var editRoute = Route.GetRoute<EditRoute>(filePath, routeID);
-                if (editRoute == null)
+                using (var conn = new SqliteConnection("Data Source=" + filePath))
                 {
-                    return NotFound();
+                    conn.Open();
+                    var tran = conn.BeginTransaction();
+                    try
+                    {
+                        var editRoute = Route.GetRoute<EditRoute>(conn, routeID);
+                        if (editRoute == null)
+                        {
+                            return NotFound();
+                        }
+                        RouteStation.InsertRouteStation(conn, routeID, routeStationAppend.stationID, routeStationAppend.routeStationID);
+                        tran.Commit();
+                        return Ok();
+                    }
+                    catch (Exception ex)
+                    {
+                        tran.Rollback();
+                        return StatusCode(500);
+                    }
                 }
-                RouteStation.InsertRouteStation(filePath, routeID, routeStationAppend.stationID, routeStationAppend.routeStationID);
-                return Ok();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                return BadRequest(e.Message);
+                return StatusCode(500);
             }
 
         }

@@ -15,7 +15,7 @@ namespace Sujiro.Data
         public long stopID { get; set; } = -1;
         public int ariTime { get; set; } = -1;
         public int depTime { get; set; } = -1;
-        public int stopType { get; set; } = -1;
+        public int stopType { get; set; } = 0;
 
         public StopTime()
         {

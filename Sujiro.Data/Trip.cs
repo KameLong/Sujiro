@@ -68,11 +68,8 @@ namespace Sujiro.Data
             }
             return null;
         }
-        public static IEnumerable<Trip> GetAllTrip(string dbPath,long  routeID)
+        public static IEnumerable<Trip> GetAllTrip(SqliteConnection conn,long  routeID)
         {
-            using (var conn = new SqliteConnection("Data Source=" + dbPath))
-            {
-                conn.Open();
                 var command = conn.CreateCommand();
                 command.CommandText = $"select * from {TABLE_NAME} where routeID=:routeID";
                 command.Parameters.Add(new SqliteParameter(":routeID", routeID));
@@ -81,8 +78,6 @@ namespace Sujiro.Data
                 {
                     yield return new Trip(reader);
                 }
-                conn.Close();
-            }
         }
         
         public void Replace(SqliteConnection conn)

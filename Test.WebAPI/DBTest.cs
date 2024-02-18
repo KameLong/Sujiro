@@ -129,18 +129,22 @@ namespace Test.WebAPI
         public void CreateStopTimes()
         {
             CreateTrips();
-            var trips = Trip.GetAllTrip(DBdir + $"company_{companyID}.sqlite", routeID).ToList();
-            var routeStations = RouteStation.GetAllRouteStations<RouteStation>(DBdir + $"company_{companyID}.sqlite",routeID).ToList();
-            foreach(var trip in trips)
+            using (var conn = new SqliteConnection("Data Source=" + DBdir + $"company_{companyID}.sqlite"))
             {
-                foreach(var routeStation in routeStations)
+                conn.Open();
+                var trips = Trip.GetAllTrip(conn, routeID).ToList();
+               var routeStations = RouteStation.GetAllRouteStations<RouteStation>(conn,routeID).ToList();
+                foreach(var trip in trips)
                 {
-                    StopTime stopTime = new StopTime();
-                    stopTime.ariTime = Random.Shared.Next(); ;
-                    stopTime.depTime = Random.Shared.Next(); ;
-                    stopTime.routeStationID = routeStation.RouteStationID;
-                    stopTime.tripID = trip.TripID;
-                    StopTime.PutStopTime(DBdir + $"company_{companyID}.sqlite", stopTime);
+                    foreach(var routeStation in routeStations)
+                    {
+                        StopTime stopTime = new StopTime();
+                        stopTime.ariTime = Random.Shared.Next(); ;
+                        stopTime.depTime = Random.Shared.Next(); ;
+                        stopTime.routeStationID = routeStation.RouteStationID;
+                        stopTime.tripID = trip.TripID;
+                        stopTime.Replace(conn);
+                    }
                 }
             }
         }

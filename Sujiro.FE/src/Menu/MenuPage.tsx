@@ -2,7 +2,7 @@ import {
     Divider,
 } from "@mui/material";
 import React, {useContext, useEffect, useState} from "react";
-import {Route, RouteStation, Station} from "../SujiroData/DiaData";
+import {Company, Route, RouteStation, Station} from "../SujiroData/DiaData";
 import {auth} from "../firebase";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
@@ -18,16 +18,22 @@ export default function MenuPage({}:MenuPageProps) {
     const {companyID} = useParams<{ companyID: string }>();
     const {routeID} = useParams<{ routeID: string }>();
     const [routes,setRoutes] = useState<Route[]>([]);
+    const [company,setCompany] = useState<Company|undefined>();
     console.log(companyID,routeID);
 
     const loadMenuDataFromServer=async()=>{
         if(companyID===undefined){
             return;
         }
-        console.log(companyID);
         axiosClient.get(`/api/MenuPage/company/${companyID}?timestamp=${new Date().getTime()}`
         ).then(res => {
-            setRoutes(res.data);
+            console.log(res.data);
+            if(res.data.routes){
+                setRoutes(res.data.routes);
+            }
+            if(res.data.company){
+                setCompany(res.data.company);
+            }
         }).catch(err=>{});
     }
 
@@ -40,8 +46,10 @@ export default function MenuPage({}:MenuPageProps) {
     return (
         <div >
             <Toolbar>
-                <Typography variant="h6" noWrap component="div">
-                    MENU
+                <Typography variant="h6" noWrap component="div" onClick={()=>{
+                    window.location.href=`/Company/${companyID}`
+                }}>
+                    {company?.name??"Loading"}
                 </Typography>
 
             </Toolbar>
@@ -56,13 +64,16 @@ export default function MenuPage({}:MenuPageProps) {
                     routes.map((route) => {
                         return (
                             <TreeItem key={route.routeID} nodeId={route.routeID.toString()} label={route.name}>
-                                <TreeItem nodeId="111" label="下り時刻表" onClick={e => {
+                                <TreeItem nodeId="111" label="駅一覧" onClick={e => {
+                                    window.location.href = `/route/${companyID}/${route.routeID}`
+                                }}/>
+                                <TreeItem nodeId="112" label="下り時刻表" onClick={e => {
                                     window.location.href = `/TimeTable/${companyID}/${route.routeID}/0`
                                 }}/>
-                                <TreeItem nodeId="112" label="上り時刻表" onClick={e => {
+                                <TreeItem nodeId="113" label="上り時刻表" onClick={e => {
                                     window.location.href = `/TimeTable/${companyID}/${route.routeID}/1`
                                 }}/>
-                                <TreeItem nodeId="113" label="ダイヤグラム"
+                                <TreeItem nodeId="114" label="ダイヤグラム"
                                           onClick={e => {
                                               window.location.href = `/Diagram/${companyID}/${route.routeID}`
                                           }}

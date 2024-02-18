@@ -55,7 +55,7 @@ namespace Sujiro.Data
         {
             return $"create table {TABLE_NAME} (routestationID integer PRIMARY KEY,routeID integer not null,stationID integer not null,seq integer default 0,style interger not null default 0)";
         }
-        public void ReplaceSqlite(SqliteConnection conn)
+        public void Replace(SqliteConnection conn)
         {
             var command = conn.CreateCommand();
 
@@ -73,28 +73,43 @@ namespace Sujiro.Data
             using (var conn = new SqliteConnection("Data Source=" + dbPath))
             {
                 conn.Open();
-                routeStation.ReplaceSqlite(conn);
+                routeStation.Replace(conn);
                 conn.Close();
             }
         }
-        public static void DeleteRouteStation(string dbPath, long routeStationID)
+        public static void DeleteRouteStation(SqliteConnection conn , long routeStationID)
         {
-            using (var conn = new SqliteConnection("Data Source=" + dbPath))
+            var command = conn.CreateCommand();
+            command.CommandText = $"Select seq from {TABLE_NAME} where routeStationID= {routeStationID}";
+            int seq = Convert.ToInt32(command.ExecuteScalar());
+            command = conn.CreateCommand();
+            command.CommandText = $"Update {TABLE_NAME} set seq=seq-1 where routeID=(select routeID from {TABLE_NAME} where routeStationID={routeStationID}) and seq>{seq}";
+            command.ExecuteNonQuery();
+            command = conn.CreateCommand();
+            command.CommandText = $"DELETE FROM {TABLE_NAME} WHERE routeStationID = {routeStationID}";
+            command.ExecuteNonQuery();
+
+            command = conn.CreateCommand();
+            command.CommandText=$@"SELECT * FROM {StopTime.TABLE_NAME} WHERE routeStationID=:routeStationID";
+            command.Parameters.Add(new SqliteParameter(":routeStationID", routeStationID));
+            var reader = command.ExecuteReader();
+
+            var deleteStopTimes = new List<StopTime>();
+            while (reader.Read())
             {
-                conn.Open();
-                var command = conn.CreateCommand();
-                command.CommandText = $"Select seq from {TABLE_NAME} where routeStationID= {routeStationID}";
-                int seq = Convert.ToInt32(command.ExecuteScalar());
-                command =conn.CreateCommand();
-                command.CommandText =$"Update {TABLE_NAME} set seq=seq-1 where routeID=(select routeID from {TABLE_NAME} where routeStationID={routeStationID}) and seq>{seq}";
-                command.ExecuteNonQuery();
-                command = conn.CreateCommand();
-                command.CommandText = $"DELETE FROM {TABLE_NAME} WHERE routeStationID = {routeStationID}";
-                command.ExecuteNonQuery();
-                conn.Close();
+                deleteStopTimes.Add(new StopTime(reader));
             }
+
+            command = conn.CreateCommand();
+            command.CommandText=$@"DELETE FROM {StopTime.TABLE_NAME} WHERE routeStationID=:routeStationID";
+            command.Parameters.Add(new SqliteParameter(":routeStationID", routeStationID));
+            command.ExecuteNonQuery();
+
+
+
+
         }
-        public static List<T> GetAllRouteStations<T>(string dbPath,long routeID) where T : RouteStation, new()
+        public static List<T> GetAllRouteStations<T>(string dbPath, long routeID) where T : RouteStation, new()
         {
             List<RouteStation> routeStations = new List<RouteStation>();
             using (var conn = new SqliteConnection("Data Source=" + dbPath))
@@ -119,20 +134,15 @@ namespace Sujiro.Data
         }
 
 
-        public static void InsertRouteStation(string dbPath,long routeID,long stationID,long?insertRouteStationID)
+        public static void InsertRouteStation(SqliteConnection conn, long routeID, long stationID, long? insertRouteStationID)
         {
-            //todo StationTimeの扱い
-            using (var conn = new SqliteConnection("Data Source=" + dbPath))
+            try
             {
-                conn.Open();
-                var tran = conn.BeginTransaction();
-                try
-                {
-
                 var command = conn.CreateCommand();
                 RouteStation routeStation = new RouteStation();
                 routeStation.RouteID = routeID;
                 routeStation.StationID = stationID;
+                routeStation.Style = 0x00000101;
                 if (insertRouteStationID == null)
                 {
                     command.CommandText = $"Select count(*) from {TABLE_NAME} where routeID=:routeID";
@@ -148,18 +158,24 @@ namespace Sujiro.Data
                     command.Parameters.Add(new SqliteParameter(":routeID", routeID));
                     command.Parameters.Add(new SqliteParameter(":seq", routeStation.Seq));
                     command.ExecuteNonQuery();
-                }
-                routeStation.ReplaceSqlite(conn);
-                tran.Commit();
-                }
-                catch(Exception ex)
-                {
-                    Debug.WriteLine(ex.Message);
-                    tran.Rollback();
-                }
 
-                conn.Close();
+                    //stationTimeの追加
+
+                }
+                routeStation.Replace(conn);
+                Trip.GetAllTrip(conn, routeID).ToList().ForEach(x =>
+                {
+                    StopTime stopTime = new StopTime();
+                    stopTime.tripID = x.TripID;
+                    stopTime.routeStationID = routeStation.RouteStationID;
+                    stopTime.Replace(conn);
+                });
             }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+
 
         }
     }
