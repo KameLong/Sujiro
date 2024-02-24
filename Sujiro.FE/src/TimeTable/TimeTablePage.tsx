@@ -146,6 +146,8 @@ function TimeTablePage() {
         e?.preventDefault();
     };
     const loadTimeTableData=async()=>{
+        setTrips([]);
+        setStations([]);
         axiosClient.get(`/api/timetablePage/${companyID}/${routeID}/${direct}?timestamp=${new Date().getTime()}`)
             .then(res=>{
                 setTrips(res.data.trips);
@@ -216,10 +218,8 @@ function TimeTablePage() {
             }});
             signalR.createConnection();
         });
-    }, []);
-    useEffect(() => {
-        console.log(signalR.connection);
-    }, [signalR.connection]);
+    }, [direct,routeID,companyID]);
+
     const [open, setOpen] = React.useState(false);
     const handleClickOpen = () => {
         setOpen(true);

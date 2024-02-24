@@ -14,12 +14,17 @@ export const useSignalR=()=>{
     const [onStart,setOnStart]=React.useState<{onStart:((conn:HubConnection)=>void)|undefined}>({onStart:undefined});
 
     React.useEffect(() => {
-        connection?.start().then(() => {
+        connection?.stop().then(() => {
+            return connection?.start();
+        }).then(()=>{
             ctx.setSignalRConnectionError(false);
             console.log(connection);
+
             if(onStart.onStart!==undefined){
                 onStart.onStart(connection)
             }
+        }).catch((err) => {
+            console.log('SignalR Connection Error: ', err);
         });
         connection?.onreconnected(()=>{
             ctx.setSignalRConnectionError(false);
@@ -47,12 +52,12 @@ export const useSignalR=()=>{
         };
     }, [connection]);
     const createConnection=()=>{
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl(`${process.env.REACT_APP_SERVER_URL}/ws/chatHub`,
-                {accessTokenFactory: async() => await getAuth().currentUser?.getIdToken() ?? ''})
-            .withAutomaticReconnect()
-            .build();
-        setConnection(connection);
+            const conn = new signalR.HubConnectionBuilder()
+                .withUrl(`${process.env.REACT_APP_SERVER_URL}/ws/chatHub`,
+                    {accessTokenFactory: async() => await getAuth().currentUser?.getIdToken() ?? ''})
+                .withAutomaticReconnect()
+                .build();
+            setConnection(conn);
     }
     return {createConnection,connection,setOnStart};
 }

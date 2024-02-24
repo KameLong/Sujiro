@@ -65,16 +65,16 @@ export default function MenuPage({}:MenuPageProps) {
                     routes.map((route) => {
                         return (
                             <TreeItem key={route.routeID} nodeId={route.routeID.toString()} label={route.name}>
-                                <TreeItem nodeId="111" label="駅一覧" onClick={e => {
+                                <TreeItem nodeId={route.routeID+"0"} label="駅一覧" onClick={e => {
                                     navigate(`/route/${companyID}/${route.routeID}`);
                                 }}/>
-                                <TreeItem nodeId="112" label="下り時刻表" onClick={e => {
+                                <TreeItem nodeId={route.routeID+"1"} label="下り時刻表" onClick={e => {
                                     navigate(`/TimeTable/${companyID}/${route.routeID}/0`);
                                 }}/>
-                                <TreeItem nodeId="113" label="上り時刻表" onClick={e => {
+                                <TreeItem nodeId={route.routeID+"2"} label="上り時刻表" onClick={e => {
                                     navigate(`/TimeTable/${companyID}/${route.routeID}/1`);
                                 }}/>
-                                <TreeItem nodeId="114" label="ダイヤグラム"
+                                <TreeItem nodeId={route.routeID+"3"} label="ダイヤグラム"
                                           onClick={e => {
                                               navigate(`/Diagram/${companyID}/${route.routeID}`);
                                           }}
