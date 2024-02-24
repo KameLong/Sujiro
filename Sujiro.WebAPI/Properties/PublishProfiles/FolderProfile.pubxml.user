@@ -5,7 +5,66 @@ https://go.microsoft.com/fwlink/?LinkID=208121.
 <Project>
   <PropertyGroup>
     <_PublishTargetUrl>C:\Users\kamelong\Desktop\Sujiro</_PublishTargetUrl>
-    <History>True|2024-02-12T14:56:11.0475127Z;True|2024-02-12T23:36:15.9978304+09:00;True|2024-02-12T19:46:46.8727074+09:00;True|2024-02-12T19:45:46.6919514+09:00;True|2024-01-24T01:01:02.1161562+09:00;True|2024-01-23T08:50:32.4073032+09:00;True|2024-01-21T21:17:45.5140861+09:00;True|2024-01-21T21:12:34.9153267+09:00;True|2024-01-20T11:10:33.0838783+09:00;True|2024-01-20T10:44:24.9531751+09:00;True|2024-01-20T10:14:25.7952380+09:00;True|2024-01-17T01:00:46.9414793+09:00;False|2024-01-17T01:00:34.6866126+09:00;True|2024-01-17T00:30:42.8445888+09:00;True|2024-01-17T00:23:32.2518547+09:00;True|2024-01-17T00:17:22.6728148+09:00;True|2024-01-14T22:15:22.0704696+09:00;True|2024-01-14T22:09:27.1640664+09:00;True|2024-01-14T22:04:56.2468320+09:00;True|2024-01-14T21:58:46.1830750+09:00;True|2024-01-14T21:52:02.7755884+09:00;True|2024-01-14T21:50:29.3304459+09:00;True|2024-01-14T21:48:42.8407106+09:00;True|2024-01-14T21:46:10.6819031+09:00;</History>
+    <History>True|2024-02-18T14:05:00.4710613Z;True|2024-02-12T23:56:11.0475127+09:00;True|2024-02-12T23:36:15.9978304+09:00;True|2024-02-12T19:46:46.8727074+09:00;True|2024-02-12T19:45:46.6919514+09:00;True|2024-01-24T01:01:02.1161562+09:00;True|2024-01-23T08:50:32.4073032+09:00;True|2024-01-21T21:17:45.5140861+09:00;True|2024-01-21T21:12:34.9153267+09:00;True|2024-01-20T11:10:33.0838783+09:00;True|2024-01-20T10:44:24.9531751+09:00;True|2024-01-20T10:14:25.7952380+09:00;True|2024-01-17T01:00:46.9414793+09:00;False|2024-01-17T01:00:34.6866126+09:00;True|2024-01-17T00:30:42.8445888+09:00;True|2024-01-17T00:23:32.2518547+09:00;True|2024-01-17T00:17:22.6728148+09:00;True|2024-01-14T22:15:22.0704696+09:00;True|2024-01-14T22:09:27.1640664+09:00;True|2024-01-14T22:04:56.2468320+09:00;True|2024-01-14T21:58:46.1830750+09:00;True|2024-01-14T21:52:02.7755884+09:00;True|2024-01-14T21:50:29.3304459+09:00;True|2024-01-14T21:48:42.8407106+09:00;True|2024-01-14T21:46:10.6819031+09:00;</History>
     <LastFailureDetails />
   </PropertyGroup>
+  <ItemGroup>
+    <File Include="wwwroot/asset-manifest.json">
+      <publishTime>02/18/2024 23:04:23</publishTime>
+    </File>
+    <File Include="wwwroot/favicon.ico">
+      <publishTime>01/06/2024 17:33:40</publishTime>
+    </File>
+    <File Include="wwwroot/font/DiaPro-Bold.ttf">
+      <publishTime>02/12/2022 13:40:49</publishTime>
+    </File>
+    <File Include="wwwroot/font/DiaPro-Regular.ttf">
+      <publishTime>02/12/2022 13:40:49</publishTime>
+    </File>
+    <File Include="wwwroot/font/font-license">
+      <publishTime>01/21/2024 13:29:25</publishTime>
+    </File>
+    <File Include="wwwroot/font/NotoSansJP.ttf">
+      <publishTime>05/03/2023 08:59:44</publishTime>
+    </File>
+    <File Include="wwwroot/index.html">
+      <publishTime>02/18/2024 23:04:23</publishTime>
+    </File>
+    <File Include="wwwroot/logo192.png">
+      <publishTime>01/06/2024 17:33:41</publishTime>
+    </File>
+    <File Include="wwwroot/logo512.png">
+      <publishTime>01/06/2024 17:33:41</publishTime>
+    </File>
+    <File Include="wwwroot/manifest.json">
+      <publishTime>01/06/2024 17:33:41</publishTime>
+    </File>
+    <File Include="wwwroot/npm-license.html">
+      <publishTime>01/21/2024 13:49:21</publishTime>
+    </File>
+    <File Include="wwwroot/robots.txt">
+      <publishTime>01/06/2024 17:33:42</publishTime>
+    </File>
+    <File Include="wwwroot/static/css/main.857fe22f.css">
+      <publishTime>02/18/2024 23:04:23</publishTime>
+    </File>
+    <File Include="wwwroot/static/css/main.857fe22f.css.map">
+      <publishTime>02/18/2024 23:04:23</publishTime>
+    </File>
+    <File Include="wwwroot/static/js/main.e1909e83.js">
+      <publishTime>02/18/2024 23:04:23</publishTime>
+    </File>
+    <File Include="wwwroot/static/js/main.e1909e83.js.LICENSE.txt">
+      <publishTime>02/18/2024 23:04:23</publishTime>
+    </File>
+    <File Include="wwwroot/static/js/main.e1909e83.js.map">
+      <publishTime>02/18/2024 23:04:23</publishTime>
+    </File>
+    <File Include="wwwroot/static/media/DiaPro-Regular.b9c5a7b082c8c76b3d67.ttf">
+      <publishTime>02/18/2024 23:04:23</publishTime>
+    </File>
+    <File Include="wwwroot/static/media/NotoSansJP.2a77d217ecd601bbf009.ttf">
+      <publishTime>02/18/2024 23:04:23</publishTime>
+    </File>
+  </ItemGroup>
 </Project>

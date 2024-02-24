@@ -13,6 +13,7 @@ import RoutePage from "./Route/RoutePage";
 import SujirawLayout from "./Common/SujirawLayout";
 import DiagramPage from "./Diagram/DiagramPage";
 import SignIn from "./Auth/Signin";
+import TrainTypeListPage from "./TrainType/TrainTypePage";
 
 
 
@@ -36,6 +37,9 @@ function App() {
             }> </Route>
             <Route path="/Company/:companyID" element={
                 <SujirawLayout><CompanyPage/></SujirawLayout>
+            }> </Route>
+            <Route path="/TrainType/:companyID" element={
+                <SujirawLayout><TrainTypeListPage/></SujirawLayout>
             }> </Route>
             <Route path="/Route/:companyID/:routeID" element={
                 <SujirawLayout><RoutePage/></SujirawLayout>

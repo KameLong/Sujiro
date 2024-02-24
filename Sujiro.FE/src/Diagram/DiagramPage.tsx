@@ -6,7 +6,7 @@ import {DisplayObject} from "pixi.js";
 import {DiagramData, DiagramStation, DiagramTrip} from "./DiagramData";
 import {TimeTableTrip} from "../TimeTable/TimeTableData";
 import {TimetableSelected} from "../TimeTable/TimeTablePage";
-import {requiredParamsHook} from "../Hooks/RequiredParamsHook";
+import {useRequiredParamsHook} from "../Hooks/UseRequiredParamsHook";
 import {auth} from "../firebase";
 import {getAuth} from "firebase/auth";
 import {axiosClient} from "../Hooks/AxiosHook";
@@ -14,8 +14,8 @@ import {HubConnection} from "@microsoft/signalr";
 import {useSignalR} from "../Hooks/SignalrHook";
 
 function DiagramPage() {
-    const {companyID} = requiredParamsHook<{ companyID: string }>();
-    const {routeID} = requiredParamsHook<{ routeID: string }>();
+    const {companyID} = useRequiredParamsHook<{ companyID: string }>();
+    const {routeID} = useRequiredParamsHook<{ routeID: string }>();
     const signalR=useSignalR();
 
     const SCALE:number=3;

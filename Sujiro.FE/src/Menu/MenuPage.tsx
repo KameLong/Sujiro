@@ -10,7 +10,7 @@ import {TreeItem, TreeView} from "@mui/x-tree-view";
 import style from "../App.module.css";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import {useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import {axiosClient} from "../Hooks/AxiosHook";
 export interface MenuPageProps {
 }
@@ -20,6 +20,7 @@ export default function MenuPage({}:MenuPageProps) {
     const [routes,setRoutes] = useState<Route[]>([]);
     const [company,setCompany] = useState<Company|undefined>();
     console.log(companyID,routeID);
+    const navigate = useNavigate();
 
     const loadMenuDataFromServer=async()=>{
         if(companyID===undefined){
@@ -65,17 +66,17 @@ export default function MenuPage({}:MenuPageProps) {
                         return (
                             <TreeItem key={route.routeID} nodeId={route.routeID.toString()} label={route.name}>
                                 <TreeItem nodeId="111" label="駅一覧" onClick={e => {
-                                    window.location.href = `/route/${companyID}/${route.routeID}`
+                                    navigate(`/route/${companyID}/${route.routeID}`);
                                 }}/>
                                 <TreeItem nodeId="112" label="下り時刻表" onClick={e => {
-                                    window.location.href = `/TimeTable/${companyID}/${route.routeID}/0`
+                                    navigate(`/TimeTable/${companyID}/${route.routeID}/0`);
                                 }}/>
                                 <TreeItem nodeId="113" label="上り時刻表" onClick={e => {
-                                    window.location.href = `/TimeTable/${companyID}/${route.routeID}/1`
+                                    navigate(`/TimeTable/${companyID}/${route.routeID}/1`);
                                 }}/>
                                 <TreeItem nodeId="114" label="ダイヤグラム"
                                           onClick={e => {
-                                              window.location.href = `/Diagram/${companyID}/${route.routeID}`
+                                              navigate(`/Diagram/${companyID}/${route.routeID}`);
                                           }}
                                 />
                             </TreeItem>

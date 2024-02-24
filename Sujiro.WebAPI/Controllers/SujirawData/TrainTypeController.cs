@@ -19,12 +19,13 @@ namespace Sujiro.WebAPI.Controllers.SujirawData
             Configuration = configuration;
         }
 
-        [HttpGet]
-        public IEnumerable<TrainType> Get()
+        [HttpGet("{companyID}")]
+
+        public IEnumerable<TrainType> Get(long companyID)
         {
-            DateTime now = DateTime.Now;
+            string dbpath = Configuration["ConnectionStrings:DBdir"] + "company_" + companyID + ".sqlite";
             var trainTypes = new List<TrainType>();
-            using (var conn = new SqliteConnection("Data Source=" + Configuration["ConnectionStrings:DBpath"]))
+            using (var conn = new SqliteConnection("Data Source=" + dbpath))
             {
                 conn.Open();
                 var tran = conn.BeginTransaction();
@@ -41,9 +42,6 @@ namespace Sujiro.WebAPI.Controllers.SujirawData
                     }
                 }
             }
-            Debug.WriteLine((DateTime.Now - now).TotalMilliseconds);
-
-
             return trainTypes;
         }
 

@@ -193,10 +193,30 @@ namespace Sujiro.WebAPI.Controllers
                     var tran = conn.BeginTransaction();
                     var command = conn.CreateCommand();
 
-                    command.CommandText = $"select TripSeq from {Trip.TABLE_NAME} WHERE direct=:direct and tripID=:tripID";
-                    command.Parameters.Add(new SqliteParameter(":direct", trip.direct));
-                    command.Parameters.Add(new SqliteParameter(":tripID", insert.insertTripID));
-                    int seq=(int)(long)command.ExecuteScalar();
+                    if (trip.TypeID == -1)
+                    {
+                        trip.TypeID =TrainType.GetAllTrainType(conn).First().TrainTypeID;
+                    }
+
+                    long insertTripID = insert.insertTripID;
+                    int seq = 0;
+                    if (insertTripID == -1)
+                    {
+                        command = conn.CreateCommand();
+                        command.CommandText=$"select count(*) from {Trip.TABLE_NAME} where RouteID=:RouteID and direct=:direct";
+                        command.Parameters.Add(new SqliteParameter(":RouteID", trip.RouteID));
+                        command.Parameters.Add(new SqliteParameter(":direct", trip.direct));
+                        seq = (int)(long)command.ExecuteScalar();
+                    }
+                    else
+                    {
+                        command = conn.CreateCommand();
+                        command.CommandText = $"select TripSeq from {Trip.TABLE_NAME} WHERE tripID=:tripID";
+                        command.Parameters.Add(new SqliteParameter(":direct", trip.direct));
+                        command.Parameters.Add(new SqliteParameter(":tripID", insert.insertTripID));
+                        seq = (int)(long)command.ExecuteScalar();
+                    }
+
 
 
 

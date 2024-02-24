@@ -22,7 +22,8 @@ export function AxiosClientProvider({children}: {children: React.ReactElement}) 
             if (config.headers !== undefined) {
                 const token=await getAuth().currentUser?.getIdToken()
                 if (token) {
-                  config.headers.Authorization = `Bearer ${token}`
+                  config.headers.Authorization = `Bearer ${token}`;
+                  config.decompress=true;
                 }
             }
             return config

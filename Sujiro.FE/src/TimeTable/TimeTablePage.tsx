@@ -18,19 +18,20 @@ import {
     auth
 } from '../firebase';
 import {useIdToken} from "react-firebase-hooks/auth";
-import {requiredParamsHook} from "../Hooks/RequiredParamsHook";
+import {useRequiredParamsHook} from "../Hooks/UseRequiredParamsHook";
 import {axiosClient} from "../Hooks/AxiosHook";
 import {useSignalR} from "../Hooks/SignalrHook";
 import {HubConnection} from "@microsoft/signalr";
+import {AddNewTripView} from "./AddNewTripView";
 
 const MemoTrainView = memo(TrainView);
 
 function TimeTablePage() {
     const signalR=useSignalR();
 
-    const {companyID} = requiredParamsHook<{ companyID: string }>();
-    const {routeID} = requiredParamsHook<{ routeID: string }>();
-    const {direct} = requiredParamsHook<{ direct: string }>();
+    const {companyID} = useRequiredParamsHook<{ companyID: string }>();
+    const {routeID} = useRequiredParamsHook<{ routeID: string }>();
+    const {direct} = useRequiredParamsHook<{ direct: string }>();
 
     const [user] = useIdToken(auth);
     const [stations, setStations] = useState<TimeTableStation[]>([]);
@@ -154,7 +155,7 @@ function TimeTablePage() {
 
     useEffect(() => {
         auth.onAuthStateChanged(async(user) => {
-            await loadTimeTableData();
+            loadTimeTableData();
             signalR.setOnStart({onStart:(conn:HubConnection)=> {
                 console.log("onStart",conn);
                 console.trace();
@@ -219,18 +220,7 @@ function TimeTablePage() {
     useEffect(() => {
         console.log(signalR.connection);
     }, [signalR.connection]);
-
-
-
-
-
-
-
-
-
-
     const [open, setOpen] = React.useState(false);
-
     const handleClickOpen = () => {
         setOpen(true);
     };
@@ -404,6 +394,7 @@ function TimeTablePage() {
                                                 onDoubleClick={onDoubleClick}/>
                             )
                         })}
+                        <AddNewTripView stations={stations} direct={Number(direct)}/>
                     </div>
                 </div>
                 <Dialog  open={open}   sx={{

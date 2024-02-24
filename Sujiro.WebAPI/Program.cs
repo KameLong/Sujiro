@@ -62,7 +62,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
 
     });
-
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -71,7 +74,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseResponseCompression();
 app.UseHttpsRedirection();
 app.UseCors(MyAllowSpecificOrigins);
 
@@ -80,6 +83,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<SujirawHub>("/ws/chatHub");
+
 
 
 //https://learn.microsoft.com/en-gb/aspnet/core/tutorials/web-api-javascript?view=aspnetcore-8.0&viewFallbackFrom=aspnetcore-3.0
