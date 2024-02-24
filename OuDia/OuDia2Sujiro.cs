@@ -218,7 +218,6 @@ namespace OuDia
             var trainTypes = oudiaRoute.TrainTypes.Select(type =>
             {
                 var trainType = new Sujiro.Data.TrainType();
-                trainType.TrainTypeID = oudiaRoute.TrainTypes.IndexOf(type);
                 trainType.Name = type.Name;
                 trainType.ShortName = type.ShortName;
                 trainType.color = "#" + type.TextColor.Substring(6, 2) + type.TextColor.Substring(4, 2) + type.TextColor.Substring(2, 2);

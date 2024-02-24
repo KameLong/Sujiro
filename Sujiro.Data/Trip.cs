@@ -37,7 +37,7 @@ namespace Sujiro.Data
             Number = (string)(reader["number"]);
             Name = (string)(reader["name"]);
             direct = (int)(long)reader["direct"];
-            TypeID = (int)(long)reader["typeID"];
+            TypeID = (long)reader["typeID"];
             TripSeq = (int)(long)reader["tripSeq"];
         }
 
