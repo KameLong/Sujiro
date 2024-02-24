@@ -29,8 +29,8 @@ export default function RoutePage({}:RoutePageProps) {
     const [openSelectStationDialog,setOpenSelectStationDialog]=useState(false);
     const [insertRouteStation,setInsertRouteStation]=useState<RouteStation|undefined>(undefined);
 
-    const [loading,setLoading]=useState(true);
-    const [isLogout,setIsLogout]=useState(false);
+
+
 
     const loadRouteFromServer=async()=>{
         axiosClient.get(`/api/RouteEditPage/${companyID}/${routeID}?timestamp=${new Date().getTime()}`
@@ -46,14 +46,9 @@ export default function RoutePage({}:RoutePageProps) {
     }
     useEffect(() => {
         auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                const loadRoute=loadRouteFromServer();
-                const loadStation=loadStationFromServer();
-                await Promise.all([loadRoute,loadStation]);
-                setLoading(false);
-            }else{
-                setIsLogout(true);
-            }
+            const loadRoute=loadRouteFromServer();
+            const loadStation=loadStationFromServer();
+            await Promise.all([loadRoute,loadStation]);
         });
     },[]);
     const setRouteName=(name:string)=>{
@@ -137,15 +132,13 @@ export default function RoutePage({}:RoutePageProps) {
                         }}>駅を変更する</Button>
                     </ListItem>
                     <ListItem>
-                        <Button onClick={async ()=>{
-                            setLoading(true);
+                        <Button onClick={()=>{
                             axiosClient.delete(`/api/RouteStation/${companyID}/${insertRouteStation?.routeStationID}`)
                                 .then(res=>{
                                     return loadRouteFromServer();
                                 })
                                 .then(res=>{
                                     setOpenSelectStationDialog(false);
-                                    setLoading(false);
                                 })
                                 .catch(err=>{});
                         }}>駅を削除する</Button>

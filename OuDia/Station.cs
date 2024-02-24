@@ -11,6 +11,9 @@ namespace OuDia
         public string Name { get; set; }
         public string type { get; set; }
         public string size { get; set; }
+
+        public bool kyoukaisen { get; set; }
+
         public Route route;
 
         public Station(Route route = null)
@@ -42,7 +45,7 @@ namespace OuDia
                                 size = value;
                                 break;
                             case "Kyoukaisen":
-                                //todo
+                                kyoukaisen = value == "1";
                                 break;
                             case "DiagramRessyajouhouHyoujiNobori":
                                 //todo

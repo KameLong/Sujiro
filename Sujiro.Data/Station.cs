@@ -32,11 +32,18 @@ namespace Sujiro.Data
         }
         public void ReplaceStation(SqliteConnection conn)
         {
+            try
+            {
+
             var command = conn.CreateCommand();
             command.CommandText = $@"REPLACE INTO {TABLE_NAME} (stationID,name)values(:stationID,:name)";
             command.Parameters.Add(new SqliteParameter(":stationID", StationID));
             command.Parameters.Add(new SqliteParameter(":name", Name));
             command.ExecuteNonQuery();
+            }catch(Exception ex)
+            {
+                throw ex;
+            }
 
         }
 

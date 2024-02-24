@@ -20,6 +20,13 @@ namespace OuDia
             StreamReader sr = new StreamReader(fileName, Encoding.GetEncoding("Shift_JIS"));
             Read(sr);
         }
+        public LineFile(Stream stream)
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            StreamReader sr = new StreamReader(stream, Encoding.GetEncoding("Shift_JIS"));
+            Read(sr);
+        }
+
         public void Read(StreamReader sr)
         {
             while (true)

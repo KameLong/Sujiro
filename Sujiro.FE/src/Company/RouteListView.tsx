@@ -18,6 +18,7 @@ import {Route} from "../SujiroData/DiaData";
 import {auth} from "../firebase";
 import { GiRailway } from "react-icons/gi";
 import {axiosClient} from "../Hooks/AxiosHook";
+import NewRouteDialog, {ImportOuDiaDialog} from "./NewRouteDialog";
 
 export interface RouteListViewProps {
     companyID:string
@@ -27,6 +28,13 @@ export default function RouteListView({companyID}:RouteListViewProps) {
     const [editRoute,setEditRoute]=useState<Route|undefined>(undefined);
     const [openEditRouteDialog,setOpenEditRouteDialog]=useState(false);
     const [openActionRouteDialog,setOpenActionRouteDialog]=useState(false);
+
+    const [openNewRouteDialog,setOpenNewRouteDialog]=useState(false);
+    const [openImportOudiaDialog,setOpenImportOudiaDialog]=useState(false);
+
+
+
+
     const loadRouteFromServer=async()=>{
         const token=await getAuth().currentUser?.getIdToken();
         axiosClient.get(`/api/route/${companyID}?timestamp=${new Date().getTime()}`
@@ -62,7 +70,7 @@ export default function RouteListView({companyID}:RouteListViewProps) {
                         color:"#000000",
                         companyID:Number(companyID)
                     });
-                    setOpenEditRouteDialog(true);
+                    setOpenNewRouteDialog(true);
                 }}>
                     <Add/>
                 </Fab>
@@ -96,10 +104,26 @@ export default function RouteListView({companyID}:RouteListViewProps) {
                 <RouteEdit close={async()=>{
                     setOpenEditRouteDialog(false);
                     await loadRouteFromServer();
-
-
                 }} route={editRoute} companyID={companyID}/>
-
+            </Dialog>
+            <Dialog open={openNewRouteDialog} onClose={()=>{setOpenNewRouteDialog(false);}}>
+                <NewRouteDialog onClose={
+                    (result:string)=>{
+                        if(result==="newRoute"){
+                            setOpenEditRouteDialog(true);
+                        }
+                        if(result==="importOudia"){
+                            setOpenImportOudiaDialog(true);
+                        }
+                        setOpenNewRouteDialog(false);
+                    }
+                }/>
+            </Dialog>
+            <Dialog open={openImportOudiaDialog} onClose={()=>{setOpenImportOudiaDialog(false);}}>
+                <ImportOuDiaDialog close={()=>{
+                    setOpenImportOudiaDialog(false);
+                    loadRouteFromServer();
+                }}/>
             </Dialog>
 
         </>
