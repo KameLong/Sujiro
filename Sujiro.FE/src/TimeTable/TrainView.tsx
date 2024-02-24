@@ -3,8 +3,8 @@ import style from "./TimeTablePage.module.css";
 import {Route, RouteStation, Station, StopTime} from "../SujiroData/DiaData";
 import {Button, Dialog, DialogTitle, List, ListItem} from "@mui/material";
 import {time2Str, TimeTableStation, TimeTableTrip} from "./TimeTableData";
-import {TimetableSelected} from "./TimeTablePage";
 import {axiosClient} from "../Hooks/AxiosHook";
+import {TimetableSelected} from "./TimetableSelectedHook";
 interface TrainViewProps {
     trip:TimeTableTrip;
     stations:TimeTableStation[]

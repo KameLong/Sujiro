@@ -23,6 +23,7 @@ import {axiosClient} from "../Hooks/AxiosHook";
 import {useSignalR} from "../Hooks/SignalrHook";
 import {HubConnection} from "@microsoft/signalr";
 import {AddNewTripView} from "./AddNewTripView";
+import useTimetableSelected from "./TimetableSelectedHook";
 
 const MemoTrainView = memo(TrainView);
 
@@ -33,121 +34,41 @@ function TimeTablePage() {
     const {routeID} = useRequiredParamsHook<{ routeID: string }>();
     const {direct} = useRequiredParamsHook<{ direct: string }>();
 
-    const [user] = useIdToken(auth);
     const [stations, setStations] = useState<TimeTableStation[]>([]);
     const [trips, setTrips] = useState<TimeTableTrip[]>([]);
-    const [selected, setSelected] = useState<TimetableSelected | null>(null);
+    const timetableSelected=useTimetableSelected();
+
     const onRightKeyDown = (e: React.KeyboardEvent<HTMLDivElement> | undefined) => {
         if (open) {
             return;
         }
-        setSelected((prev) => {
-            if (prev === null) {
-                return null;
-            }
-            const tripIndex = trips.findIndex(item => item.tripID === prev.tripID);
-            const newTrip = trips[tripIndex + 1];
-            if (newTrip) {
-                return {tripID: newTrip.tripID, stationID: prev.stationID, viewID: prev.viewID};
-            }
-            return prev;
-        });
+        timetableSelected.moveToNextTrip(trips);
         if (e) {
             e.preventDefault();
         }
-
     };
     const onLeftKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (open) {
             return;
         }
-        setSelected((prev) => {
-            if (prev === null) {
-                return null;
-            }
-            const tripIndex = trips.findIndex(item => item.tripID === prev.tripID);
-            const newTrip = trips[tripIndex - 1];
-            if (newTrip) {
-                return {tripID: newTrip.tripID, stationID: prev.stationID, viewID: prev.viewID};
-            }
-            return prev;
-        });
+        timetableSelected.moveToPrevTrip(trips);
         e.preventDefault();
     };
     const onUpKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (open) {
             return;
         }
-        setSelected((prev) => {
-            console.log("s", prev);
-            if (prev === null) {
-                return null;
-            }
-            let stationIndex = stations.findIndex(item => item.routeStationID === prev.stationID);
-            let viewID = prev.viewID;
-            while (true) {
-                if (viewID === 0) {
-                    stationIndex--;
-                    viewID = 3;
-                }
-                viewID--;
-                if (stationIndex < 0) {
-                    return prev;
-                }
-                switch (viewID) {
-                    case 2:
-                        if ((stations[stationIndex].style & 0x01) > 0) {
-                            return {tripID: prev.tripID, stationID: stations[stationIndex].routeStationID, viewID};
-                        }
-                        break;
-                    case 0:
-                        if ((stations[stationIndex].style & 0x02) > 0) {
-                            return {tripID: prev.tripID, stationID: stations[stationIndex].routeStationID, viewID};
-                        }
-                        break;
-                }
-            }
-        });
+        timetableSelected.moveToPrevStation(stations);
         e.preventDefault();
     };
     const onDownKeyDown = (e: React.KeyboardEvent<HTMLDivElement> | undefined) => {
         if (open) {
             return;
         }
-        setSelected((prev) => {
-            if (prev === null) {
-                return null;
-            }
-            let stationIndex = stations.findIndex(item => item.routeStationID === prev.stationID);
-            let viewID = prev.viewID;
-            while (true) {
-                viewID++;
-                if (viewID === 3) {
-                    stationIndex++;
-                    viewID = 0;
-                }
-                if (stationIndex >= stations.length) {
-                    return prev;
-                }
-                switch (viewID) {
-                    case 2:
-                        if ((stations[stationIndex].style & 0x01) > 0) {
-                            return {tripID: prev.tripID, stationID: stations[stationIndex].routeStationID, viewID};
-                        }
-                        break;
-                    case 0:
-                        if ((stations[stationIndex].style & 0x02) > 0) {
-                            return {tripID: prev.tripID, stationID: stations[stationIndex].routeStationID, viewID};
-                        }
-                        break;
-                }
-            }
-        });
+        timetableSelected.moveToNextStation(stations);
         e?.preventDefault();
     };
     const loadTimeTableData=async()=>{
-        setTrips([]);
-        setStations([]);
         axiosClient.get(`/api/timetablePage/${companyID}/${routeID}/${direct}?timestamp=${new Date().getTime()}`)
             .then(res=>{
                 setTrips(res.data.trips);
@@ -306,18 +227,18 @@ function TimeTablePage() {
                                  if (e.ctrlKey) {
                                      //以後の駅をすべて１分遅らせる
                                      const addSec = 60;
-                                     const trip = trips.find(item => item.tripID === selected?.tripID);
+                                     const trip = trips.find(item => item.tripID === timetableSelected.selected?.tripID);
                                      if (!trip) return;
                                      console.log(trip);
                                      let flag = false;
                                      for (let i = 0; i < trip.stopTimes.length; i++) {
-                                         if (trip.stopTimes[i].routeStationID === selected?.stationID && selected?.viewID === 0) {
+                                         if (trip.stopTimes[i].routeStationID === timetableSelected.selected?.stationID && timetableSelected.selected?.viewID === 0) {
                                              flag = true;
                                          }
                                          if (flag && trip.stopTimes[i].ariTime >= 0) {
                                              trip.stopTimes[i].ariTime += addSec;
                                          }
-                                         if (trip.stopTimes[i].routeStationID === selected?.stationID && selected?.viewID === 2) {
+                                         if (trip.stopTimes[i].routeStationID === timetableSelected.selected?.stationID && timetableSelected.selected?.viewID === 2) {
                                              flag = true;
                                          }
                                          if (flag && trip.stopTimes[i].depTime >= 0) {
@@ -332,17 +253,17 @@ function TimeTablePage() {
                              case "J":
                                  if (e.ctrlKey) {
                                      const addSec = -60;
-                                     const trip = trips.find(item => item.tripID === selected?.tripID);
+                                     const trip = trips.find(item => item.tripID === timetableSelected.selected?.tripID);
                                      if (!trip) return;
                                      let flag = false;
                                      for (let i = 0; i < trip.stopTimes.length; i++) {
-                                         if (trip.stopTimes[i].routeStationID === selected?.stationID && selected?.viewID === 0) {
+                                         if (trip.stopTimes[i].routeStationID === timetableSelected.selected?.stationID && timetableSelected.selected?.viewID === 0) {
                                              flag = true;
                                          }
                                          if (flag && trip.stopTimes[i].ariTime >= 0) {
                                              trip.stopTimes[i].ariTime += addSec;
                                          }
-                                         if (trip.stopTimes[i].routeStationID === selected?.stationID && selected?.viewID === 2) {
+                                         if (trip.stopTimes[i].routeStationID === timetableSelected.selected?.stationID && timetableSelected.selected?.viewID === 2) {
                                              flag = true;
                                          }
                                          if (flag && trip.stopTimes[i].depTime >= 0) {
@@ -356,7 +277,7 @@ function TimeTablePage() {
                              case "c":
                                  if (e.ctrlKey) {
                                      console.log(e);
-                                     const trip = trips.find(item => item.tripID === selected?.tripID);
+                                     const trip = trips.find(item => item.tripID === timetableSelected.selected?.tripID);
                                      if (!trip) return;
                                      copyTrip(trip);
                                      e.preventDefault();
@@ -365,15 +286,15 @@ function TimeTablePage() {
                              case "v":
                                  if (e.ctrlKey) {
                                      console.log(e);
-                                     pasteTrip(trips,selected?.tripID);
+                                     pasteTrip(trips,timetableSelected.selected?.tripID);
                                      e.preventDefault();
                                  }
                                  break;
                              case "Delete":
-                                 if (selected?.tripID === undefined) {
+                                 if (timetableSelected.selected?.tripID === undefined) {
                                      return;
                                  }
-                                 axiosClient.delete(`/api/trip/${companyID}/${selected?.tripID}`).catch(err => {});
+                                 axiosClient.delete(`/api/trip/${companyID}/${timetableSelected.selected?.tripID}`).catch(err => {});
                                  e.preventDefault();
                                  break;
 
@@ -389,8 +310,8 @@ function TimeTablePage() {
                         {trips.map((trip) => {
                             return (
                                 <MemoTrainView key={trip.tripID} trip={trip} stations={stations} direct={Number(direct)}
-                                               selected={selected?.tripID === trip.tripID ? selected : null}
-                                               setSelected={setSelected}
+                                               selected={timetableSelected.selected?.tripID === trip.tripID ? timetableSelected.selected : null}
+                                               setSelected={timetableSelected.setSelected}
                                                 onDoubleClick={onDoubleClick}/>
                             )
                         })}
@@ -402,12 +323,12 @@ function TimeTablePage() {
                         padding: 5,
                     },
                 }}>
-                    <TimeEditView close={()=>handleClose("")} focusIndex={selected?.viewID} stopTime={selected ? trips.find(item => item.tripID === selected.tripID)?.stopTimes.find(item => item.routeStationID === selected.stationID)! : null}/>
+                    <TimeEditView close={()=>handleClose("")} focusIndex={timetableSelected.selected?.viewID} stopTime={timetableSelected.selected ? trips.find(item => item.tripID === timetableSelected.selected?.tripID)?.stopTimes.find(item => item.routeStationID === timetableSelected.selected?.stationID)! : null}/>
                 </Dialog>
             </div>
             {
-                ((selected!==null) ?
-                    <TimeEditView close={undefined} focusIndex={undefined} stopTime={selected ? trips.find(item => item.tripID === selected.tripID)?.stopTimes.find(item => item.routeStationID === selected.stationID)! : null}
+                ((timetableSelected.selected!==null) ?
+                    <TimeEditView close={undefined} focusIndex={undefined} stopTime={timetableSelected.selected ? trips.find(item => item.tripID === timetableSelected.selected?.tripID)?.stopTimes.find(item => item.routeStationID === timetableSelected.selected?.stationID)! : null}
                     /> : null)
             }
             <Dialog  onClose={handleClose2} open={openEditTrain}>
@@ -415,7 +336,7 @@ function TimeTablePage() {
                     <ListItem>
                         <Button
                             onClick={e=>{
-                                const trip = trips.find(item => item.tripID === selected?.tripID);
+                                const trip = trips.find(item => item.tripID === timetableSelected.selected?.tripID);
                                 if (!trip) {
                                     setOpenEditTrain(false);
                                     return;
@@ -431,19 +352,11 @@ function TimeTablePage() {
                         <Button
                             onClick={e=>{
                                 console.log("編集");
-                                pasteTrip(trips,selected?.tripID);
+                                pasteTrip(trips,timetableSelected.selected?.tripID);
                                 setOpenEditTrain(false);
                             }}
                         >貼り付け</Button>
                     </ListItem>
-                    {/*<ListItem>*/}
-                    {/*    <Button*/}
-                    {/*        onClick={e=>{*/}
-                    {/*            console.log("編集");*/}
-                    {/*            setOpenEditTrain(false);*/}
-                    {/*        }}*/}
-                    {/*    >削除</Button>*/}
-                    {/*</ListItem>*/}
                     <ListItem>
                         <Button
                             onClick={e=>{
@@ -475,8 +388,3 @@ function TimeTablePage() {
 export default TimeTablePage;
 
 
-export interface TimetableSelected{
-    tripID:number;
-    stationID:number;
-    viewID:number;
-}

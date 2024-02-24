@@ -4,11 +4,8 @@ import {StopTime, Trip} from "../SujiroData/DiaData";
 import * as PIXI from 'pixi.js'
 import {DisplayObject} from "pixi.js";
 import {DiagramData, DiagramStation, DiagramTrip} from "./DiagramData";
-import {TimeTableTrip} from "../TimeTable/TimeTableData";
-import {TimetableSelected} from "../TimeTable/TimeTablePage";
 import {useRequiredParamsHook} from "../Hooks/UseRequiredParamsHook";
 import {auth} from "../firebase";
-import {getAuth} from "firebase/auth";
 import {axiosClient} from "../Hooks/AxiosHook";
 import {HubConnection} from "@microsoft/signalr";
 import {useSignalR} from "../Hooks/SignalrHook";
@@ -206,7 +203,7 @@ function DiagramPage() {
 
 
         });
-    },[]);
+    },[companyID,routeID]);
 
 
 
