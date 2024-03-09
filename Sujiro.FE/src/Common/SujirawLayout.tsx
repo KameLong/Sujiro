@@ -97,7 +97,7 @@ export default function SujirawLayout(props:any) {
                 </Box>
                 <Box
                     component="main"
-                    sx={{display:'flex',flexDirection:'column', flexGrow: 1,  width: { sm: `calc(100% - ${drawerWidth}px)` } ,height:'100%'}}
+                    sx={{display:'flex',flexDirection:'column', flexGrow: 1,  width: { sm: `calc(100% - ${drawerWidth}px)`,xs:'100% ' } ,height:'100%'}}
                 >
                     <Toolbar variant="dense" />
                     {props.children}

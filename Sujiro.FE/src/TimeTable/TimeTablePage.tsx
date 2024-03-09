@@ -373,11 +373,11 @@ function TimeTablePage() {
                     </ListItem>
                 </List>
             </Dialog>
-            <Box sx={{ '& > :not(style)': { m: 1 }, position: 'fixed', bottom: 20, right: 20 }}>
-                <Fab color="primary" aria-label="add" onClick={()=>setOpenEditTrain(true)}>
-                    <Settings/>
-                </Fab>
-            </Box>
+            {/*<Box sx={{ '& > :not(style)': { m: 1 }, position: 'fixed', bottom: 20, right: 20 }}>*/}
+            {/*    <Fab color="primary" aria-label="add" onClick={()=>setOpenEditTrain(true)}>*/}
+            {/*        <Settings/>*/}
+            {/*    </Fab>*/}
+            {/*</Box>*/}
 
 
         </div>

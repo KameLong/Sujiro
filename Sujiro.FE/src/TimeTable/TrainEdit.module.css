@@ -1,0 +1,54 @@
+.trainEditHeader{
+    font-size:16px;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    white-space: nowrap;
+    text-align: center;
+    border-top:1px solid black;
+    border-left:1px solid black;
+    border-bottom:1px solid black;
+    box-sizing: border-box;
+    height:30px;
+    line-height: 30px;
+}
+.trainEditBody{
+    font-size:14px;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    white-space: nowrap;
+    text-align: center;
+    border-left:1px solid black;
+    border-bottom:1px solid black;
+    box-sizing: border-box;
+    height:30px;
+    line-height: 30px;
+    background-color: #F8F8F8;
+
+}
+.trainEditBodyHalf{
+    font-size:14px;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    white-space: nowrap;
+    text-align: center;
+    border-left:1px solid black;
+    border-bottom:1px solid black;
+    box-sizing: border-box;
+    height:15px;
+    background-color: #F8F8F8;
+
+}
+.trainEditEditable{
+    background-color: #FFFFFF;
+}
+.trainEditEditableSelected{
+    background-color: #FFD700;
+}
+.test{
+    border: 0px;
+    appearance: none; /* 標準のスタイルを無効にする */
+    height:30px;
+    width:20px;
+    font-size: 16px;
+    overflow-x: hidden;
+}

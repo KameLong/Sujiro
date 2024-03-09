@@ -1,0 +1,52 @@
+*{
+    box-sizing: border-box;
+}
+.MuiGrid2-direction-xs-row{
+    padding:2px 4px;
+}
+.MuiRadio-root{
+    padding:4px;
+}
+.MuiButton-outlined {
+    font-size: 12px;
+    margin:2px 2px;
+    padding:10px 0px;
+    min-width: 0px;
+    width:100%;
+    box-sizing: border-box;
+}
+.MuiButton-contained {
+    font-size: 12px;
+    margin:2px 2px;
+    padding:10px 0px;
+    min-width: 0px;
+    width:100%;
+    box-sizing: border-box;
+}
+.MuiFormControlLabel-root{
+    font-size: 10px;
+    margin-right: 0px;
+    margin-left:0px;
+    height: 100%;
+}
+.MuiFormControlLabel-label{
+    font-size: 12px;
+}
+.MuiCheckbox-root{
+    padding:4px;
+}
+
+
+.MuiSelect-select{
+    background-color: #EECCEE;
+    height:30px;
+    padding:0px;
+    padding-right:0px;
+
+}
+div:has(.MuiSelect-select){
+    svg{
+        display: none;
+    }
+}
+

@@ -14,6 +14,8 @@ import SujirawLayout from "./Common/SujirawLayout";
 import DiagramPage from "./Diagram/DiagramPage";
 import SignIn from "./Auth/Signin";
 import TrainTypeListPage from "./TrainType/TrainTypePage";
+import TimeEdit from "./TimeTable/TimeEdit";
+import {TrainEditTest} from "./TimeTable/TrainEdit";
 
 
 
@@ -21,7 +23,8 @@ function App() {
     return (
         <Routes >
             <Route path="/" element={
-                <SujirawLayout><CompanyListPage/></SujirawLayout>
+                <SujirawLayout><TrainEditTest/></SujirawLayout>
+                // <SujirawLayout><CompanyListPage/></SujirawLayout>
             }/>
             <Route path="/Diagram/:companyID/:routeID" element={
                 <SujirawLayout><DiagramPage/></SujirawLayout>
