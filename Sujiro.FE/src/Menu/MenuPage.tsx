@@ -61,6 +61,10 @@ export default function MenuPage({}:MenuPageProps) {
                       defaultCollapseIcon={<ExpandMoreIcon/>}
                       defaultExpandIcon={<ChevronRightIcon/>}
             >
+                <TreeItem nodeId={"100"} label={"種別"} onClick={e => {
+                    navigate(`/TrainType/${companyID}`);
+                }
+                }/>
                 {
                     routes.map((route) => {
                         return (

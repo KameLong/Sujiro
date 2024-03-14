@@ -4,7 +4,7 @@ import {auth} from "../firebase";
 import {HubConnection} from "@microsoft/signalr";
 import {StopTime, Trip} from "../SujiroData/DiaData";
 import {axiosClient} from "../Hooks/AxiosHook";
-import {Grid, MenuItem, Select, StyledEngineProvider} from "@mui/material";
+import {FormControl, Grid, InputLabel, MenuItem, Select, StyledEngineProvider, TextField} from "@mui/material";
 import style from './TrainEdit.module.css';
 import TimeEdit from "./TimeEdit";
 import './test.css';
@@ -20,7 +20,9 @@ function useTimeEditHook() {
     const [routeStationID, setRouteStationID] = useState(-1);
     const [isDep, setIsDep] = useState(false);
 
-    return {editTime, setEditTime, routeStationID, setRouteStationID, isDep, setIsDep};
+    const [openTimeEdit, setOpenTimeEdit] = useState(false);
+
+    return {editTime, setEditTime, routeStationID, setRouteStationID, isDep, setIsDep,openTimeEdit,setOpenTimeEdit};
 }
 
 export default function TrainEdit({trip, stations}: TrainEditProps) {
@@ -29,6 +31,10 @@ export default function TrainEdit({trip, stations}: TrainEditProps) {
     const timeEditHook = useTimeEditHook();
 
     useEffect(() => {
+        if(trip===undefined){
+            setStopTimes([]);
+            return;
+        }
         const res = stations.map((station) => {
             return trip.stopTimes.filter(st => st.routeStationID === station.routeStationID)[0];
         });
@@ -101,6 +107,14 @@ export default function TrainEdit({trip, stations}: TrainEditProps) {
                 nowStation = i;
             }
         }
+        if(nowStation!=stopTimes.length-1){
+            res.push(
+                <div key={stopTimes[stopTimes.length-1].routeStationID} className={style.trainEditBody}
+                     style={{lineHeight: 30 * (stopTimes.length-1 - nowStation) + 'px', height: 30 * (stopTimes.length-1 - nowStation) + 'px'}}>
+
+                </div>
+            )
+        }
         return res;
     }
 
@@ -128,13 +142,58 @@ export default function TrainEdit({trip, stations}: TrainEditProps) {
 
     }
 
+    if(stations.length!==stopTimes.length || stopTimes.length===0){
+        return <div>駅情報が不正です</div>;
+    }
+
     return (
         <StyledEngineProvider injectFirst>
 
-        <div style={{display: 'flex', flexFlow: 'column', height: '100%', width: '100%', maxWidth: '400px'}}>
+        <div style={{display: 'flex', flexFlow: 'column', height: '100%', maxWidth: '400px',margin:'0px auto'}}>
             <div style={{height: '0px', flexGrow: '1', overflowY: 'auto'}}>
 
                 <Grid container spacing={2} style={{margin: '0px auto', width: '100%'}}>
+                    <Grid
+                        xs={6}
+                        sx={{p:1}}
+                    >
+                        <TextField
+                            label="列車番号"
+                            defaultValue=""
+                            variant="filled"
+                            size={"small"}
+
+                        />
+                    </Grid>
+                    <Grid xs={6}
+                          sx={{p:1}}
+                    >
+                        <TextField
+                            label="列車名"
+                            defaultValue=""
+                            variant="filled"
+                            size={"small"}
+                        />
+
+                    </Grid>
+                    <Grid xs={6}
+                          sx={{p:1}}
+                    >
+                        <FormControl sx={{  width:'100%' }}>
+                            <InputLabel htmlFor="grouped-native-select">列車種別</InputLabel>
+                    <Select
+                        label="列車種別"
+                        defaultValue=""
+                        value='10'
+                        size={"small"}
+                        style={{width:'100%'}}
+                    >
+                        <MenuItem value={10}>Ten</MenuItem>
+                        <MenuItem value={20}>Twenty</MenuItem>
+                        <MenuItem value={30}>Thirty</MenuItem>
+                    </Select>
+                        </FormControl>
+                    </Grid>
                 </Grid>
                 <div style={{
                     display: 'flex',
@@ -173,7 +232,7 @@ export default function TrainEdit({trip, stations}: TrainEditProps) {
                                          className={style.trainEditEditable + " " + style.trainEditBody}>
 
                                         <select
-                                            value={trip.stopTimes.filter(st => st.routeStationID === station.routeStationID)[0].stopType}
+                                            value={stopTimes.filter(st => st.routeStationID === station.routeStationID)[0].stopType}
                                             className={style.test}
                                             onChange={(e) => {
                                                 const newStopTimes = [...stopTimes];
@@ -203,7 +262,7 @@ export default function TrainEdit({trip, stations}: TrainEditProps) {
                                              (timeEditHook.routeStationID === station.routeStationID && !timeEditHook.isDep ? style.trainEditEditableSelected : "")}
 
                                          onClick={(e) => {
-                                             let time = trip.stopTimes.filter(st => st.routeStationID === station.routeStationID)[0].ariTime;
+                                             let time = stopTimes.filter(st => st.routeStationID === station.routeStationID)[0].ariTime;
                                              timeEditHook.setRouteStationID(station.routeStationID);
                                              timeEditHook.setIsDep(false);
                                              if (time < 0) {
@@ -217,9 +276,11 @@ export default function TrainEdit({trip, stations}: TrainEditProps) {
                                              }
 
                                              timeEditHook.setEditTime(time);
+                                             timeEditHook.setOpenTimeEdit(true);
+
 
                                          }}>{
-                                        timeInt2Str(trip.stopTimes.filter(st => st.routeStationID === station.routeStationID)[0].ariTime)
+                                        timeInt2Str(stopTimes.filter(st => st.routeStationID === station.routeStationID)[0].ariTime)
                                     }</div>
                                 )
                             })}
@@ -231,8 +292,8 @@ export default function TrainEdit({trip, stations}: TrainEditProps) {
                                 return (
                                     <div key={station.stationID} className={style.trainEditBody}>{
                                         stopTime(
-                                            trip.stopTimes.filter(st => st.routeStationID === station.routeStationID)[0].depTime,
-                                            trip.stopTimes.filter(st => st.routeStationID === station.routeStationID)[0].ariTime)
+                                            stopTimes.filter(st => st.routeStationID === station.routeStationID)[0].depTime,
+                                            stopTimes.filter(st => st.routeStationID === station.routeStationID)[0].ariTime)
                                     }</div>
                                 )
                             })}
@@ -251,7 +312,7 @@ export default function TrainEdit({trip, stations}: TrainEditProps) {
                                              (timeEditHook.routeStationID === station.routeStationID && timeEditHook.isDep ? style.trainEditEditableSelected : "")}
                                          onClick={(e) => {
 
-                                             let time = trip.stopTimes.filter(st => st.routeStationID === station.routeStationID)[0].ariTime;
+                                             let time = stopTimes.filter(st => st.routeStationID === station.routeStationID)[0].ariTime;
                                              timeEditHook.setRouteStationID(station.routeStationID);
                                              timeEditHook.setIsDep(true);
                                              if (time < 0) {
@@ -264,10 +325,11 @@ export default function TrainEdit({trip, stations}: TrainEditProps) {
                                                  })
                                              }
                                              timeEditHook.setEditTime(time);
+                                             timeEditHook.setOpenTimeEdit(true);
                                          }
                                     }
                                     >{
-                                        timeInt2Str(trip.stopTimes.filter(st => st.routeStationID === station.routeStationID)[0].depTime)
+                                        timeInt2Str(stopTimes.filter(st => st.routeStationID === station.routeStationID)[0].depTime)
                                     }</div>
                                 )
                             })}
@@ -275,7 +337,7 @@ export default function TrainEdit({trip, stations}: TrainEditProps) {
                     </div>
                 </div>
             </div>
-            <div style={{display: timeEditHook.editTime >= 0 ? 'block' : 'none'}}>
+            <div style={{display: (timeEditHook.openTimeEdit&&(timeEditHook.editTime) >= 0) ? 'block' : 'none'}}>
                 <TimeEdit time={timeEditHook.editTime} onChange={(shift, kurisage, kuriage) => {
                     if (timeEditHook.routeStationID >= 0) {
                         const stopTime = [...stopTimes];
@@ -294,7 +356,7 @@ export default function TrainEdit({trip, stations}: TrainEditProps) {
                                     stopTime[i].depTime = (stopTime[i].depTime + shift + 24 * 3600) % (24 * 3600);
                                 }
                                 if (stopTime[i].ariTime >= 0) {
-                                    stopTime[i].ariTime = (trip.stopTimes[i].ariTime + shift + 24 * 3600) % (24 * 3600);
+                                    stopTime[i].ariTime = (stopTimes[i].ariTime + shift + 24 * 3600) % (24 * 3600);
                                 }
                             }
                         }
@@ -307,7 +369,7 @@ export default function TrainEdit({trip, stations}: TrainEditProps) {
                                     stopTime[i].depTime = (stopTime[i].depTime + shift + 24 * 3600) % (24 * 3600);
                                 }
                                 if (stopTime[i].ariTime >= 0) {
-                                    stopTime[i].ariTime = (trip.stopTimes[i].ariTime + shift + 24 * 3600) % (24 * 3600);
+                                    stopTime[i].ariTime = (stopTimes[i].ariTime + shift + 24 * 3600) % (24 * 3600);
                                 }
                             }
                         }
@@ -325,7 +387,12 @@ export default function TrainEdit({trip, stations}: TrainEditProps) {
                                   }
                                   setStopTimes(stopTime);
                               }
-                          }}/>
+                          }}
+                            closeTimeEdit={() => {
+                                console.log("test");
+                              timeEditHook.setOpenTimeEdit(false);
+                            }}
+                />
             </div>
 
         </div>

@@ -5,6 +5,7 @@ import Box from "@mui/material/Box";
 import StationListView from "./StationListView";
 import {useRequiredParamsHook} from "../Hooks/UseRequiredParamsHook";
 import RouteListView from "./RouteListView";
+import TrainTypeListView from "./TrainTypeListView";
 function a11yProps(index: number) {
     return {
         id: `full-width-tab-${index}`,
@@ -37,6 +38,7 @@ function CompanyPage() {
                     >
                         <Tab label="所属駅リスト" {...a11yProps(0)} />
                         <Tab label="所属路線リスト" {...a11yProps(1)} />
+                        <Tab label="種別リスト" {...a11yProps(2)} />
                     </Tabs>
                     <TabPanel value={value} index={0} dir={theme.direction} >
                         <StationListView companyID={companyID}/>
@@ -44,6 +46,9 @@ function CompanyPage() {
                     </TabPanel>
                     <TabPanel value={value} index={1} dir={theme.direction}>
                         <RouteListView companyID={companyID}/>
+                    </TabPanel>
+                    <TabPanel value={value} index={2} dir={theme.direction}>
+                        <TrainTypeListView companyID={companyID}/>
                     </TabPanel>
                 </Paper>
             </Container>

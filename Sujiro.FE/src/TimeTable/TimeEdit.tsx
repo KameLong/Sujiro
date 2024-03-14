@@ -18,6 +18,7 @@ interface TimeEditProps {
     time: number;
     onChange: (time: number,kurisage:boolean,kuriage:boolean) => void;
     deleteTime:()=>void;
+    closeTimeEdit:()=>void;
 }
 
 const useTimeShiftPattern=()=>{
@@ -26,7 +27,7 @@ const useTimeShiftPattern=()=>{
     return {retroactive,setRetroactive,advance,setAdvance};
 
 }
-export default function TimeEdit({time,onChange,deleteTime}:TimeEditProps) {
+export default function TimeEdit({time,onChange,deleteTime,closeTimeEdit}:TimeEditProps) {
     const timeShiftPattern=useTimeShiftPattern();
     const [editTime,setEditTime]=React.useState(time);
     const [editTimeStr,setEditTimeStr]=React.useState(time2Str(editTime));
@@ -125,8 +126,10 @@ export default function TimeEdit({time,onChange,deleteTime}:TimeEditProps) {
                 }}
                 ></Input>
             </Grid>
-            <Grid xs={2} >
-                <Close/>
+            <Grid xs={2} onClick={()=>{
+                closeTimeEdit();
+            }}>
+                <Close />
             </Grid>
             <Grid xs={2} >
                 <Button variant={'contained'} style={{backgroundColor:'lightBlue',color:'black'}}

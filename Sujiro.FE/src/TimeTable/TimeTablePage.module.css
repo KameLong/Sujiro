@@ -8,20 +8,24 @@
     height:100%;
     width:100%;
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
+    overflow-y:hidden;
+}
+.timetableMain2{
+    width: 0;
+    flex-grow: 1;
+    height: 100%;
+    overflow-y:scroll;
 
 }
 .timetableMain{
     display: flex;
     align-items: flex-start;
-    width: 100%;
-    flex-grow: 1;
 
-    height: 0;
+    overflow-y: scroll;
     font-size: var(--timetable-font-pt);
     margin: 0 auto;
     box-sizing: border-box;
-    overflow-y: scroll;
 }
 .timetableMain::-webkit-scrollbar {
     /*width: 8px; !* 8px であればコンテンツがずれない *!*/
@@ -134,5 +138,27 @@
 .selected{
     background-color: #ECE;
     border:1px dashed #000;
+}
+
+@media  screen and (max-width: 1000px) {
+    .timetableRoot{
+        display: flex;
+        flex-wrap: wrap;
+        overflow-y:hidden;
+        flex-flow: column;
+        height:100%;
+    }
+    .timetableMain2{
+        width: 100%;
+        flex-grow: 1;
+        height: 0;
+        overflow-y:scroll;
+    }
+    .trainEditRoot{
+        width:100%;
+        height:50%;
+    }
+
+
 }
 

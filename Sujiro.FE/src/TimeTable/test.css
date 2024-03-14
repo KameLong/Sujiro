@@ -37,13 +37,7 @@
 }
 
 
-.MuiSelect-select{
-    background-color: #EECCEE;
-    height:30px;
-    padding:0px;
-    padding-right:0px;
 
-}
 div:has(.MuiSelect-select){
     svg{
         display: none;

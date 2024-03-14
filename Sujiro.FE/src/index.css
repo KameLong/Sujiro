@@ -27,6 +27,10 @@ code {
   /*overflow-x: hidden;*/
   /*overflow-y: hidden;*/
 }
+/*スクロールバー非表示（Chrome・Safari）*/
+*::-webkit-scrollbar{
+  display:none;
+}
 html{
   height:100%;
 }
