@@ -8,8 +8,6 @@ import {FormControl, Grid, InputLabel, MenuItem, Select, StyledEngineProvider, T
 import style from './TrainEdit.module.css';
 import TimeEdit from "./TimeEdit";
 import './test.css';
-
-
 interface TrainEditProps {
     trip: TimeTableTrip;
     stations: TimeTableStation[];
@@ -19,9 +17,7 @@ function useTimeEditHook() {
     const [editTime, setEditTime] = useState(-1);
     const [routeStationID, setRouteStationID] = useState(-1);
     const [isDep, setIsDep] = useState(false);
-
     const [openTimeEdit, setOpenTimeEdit] = useState(false);
-
     return {editTime, setEditTime, routeStationID, setRouteStationID, isDep, setIsDep,openTimeEdit,setOpenTimeEdit};
 }
 

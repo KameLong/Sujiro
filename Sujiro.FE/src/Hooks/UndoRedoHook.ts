@@ -5,7 +5,7 @@ interface UndoRedoItem{
     task:()=>void;
     undo:()=>void;
 }
-export default function useUndoRedoHook(){
+export default function UndoRedoContext(){
     const [undoStack,setUndoStack]=useState<UndoRedoItem[]>([]);
     const [redoStack,setRedoStack]=useState<UndoRedoItem[]>([]);
 
@@ -27,5 +27,5 @@ export default function useUndoRedoHook(){
         item.undo();
         redoStack.push();
     }
-    return {};
+    return {execute,undo};
 }

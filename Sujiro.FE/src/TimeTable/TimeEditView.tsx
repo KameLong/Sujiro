@@ -14,12 +14,6 @@ interface TimeEditViewProps {
     close:(()=>void)|undefined;
 
 }
-
-
-
-
-
-
 export function TimeEditView({stopTime,focusIndex,close}:TimeEditViewProps){
     const {companyID} = useRequiredParamsHook<{ companyID: string }>();
     const [depTime,setDepTime]=useState(time2Str(stopTime?.depTime));
