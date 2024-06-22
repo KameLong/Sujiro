@@ -1,0 +1,78 @@
+/* グローバルにCSS変数を宣言する */
+:root {
+  --timetable-font-size: 12;
+  --timetable-font-pt: 12px;
+}
+
+.timetableMain{
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+    height: calc(100vh - 0px);
+    font-size: var(--timetable-font-pt);
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+.stationListView{
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    box-sizing: border-box;
+    border-right:2px solid #000;
+}
+.stationView{
+    height:calc(var(--timetable-font-pt) * 1.2 + 1px);
+    text-align:center;
+    overflow-x:hidden;
+    overflow-y:hidden;
+    white-space: nowrap;
+}
+.trainListLayout{
+    height: 100%;
+    width:0px;
+    flex-grow: 1;
+    overflow-x: scroll;
+
+}
+
+.trainListView{
+    display: flex;
+    align-items: flex-start;
+    width:100%;
+    padding: 0 0;
+    box-sizing: border-box;
+}
+.trainView{
+    display: block;
+    flex-shrink: 0;
+    border-right:1px solid #000;
+    width: calc(var(--timetable-font-pt) * 2.4 + 2px);
+    height: 100%;
+    padding: 0 0;
+    box-sizing: border-box;
+}
+.timeView{
+    height:calc(var(--timetable-font-pt) * 1.2 + 1px);
+    overflow-x:hidden;
+    overflow-y:hidden;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.trainNameView{
+    height:calc(var(--timetable-font-pt) * 8.2 + 1px);
+    overflow-x:hidden;
+    overflow-y:hidden;
+    white-space: nowrap;
+    text-align: center;
+    border-bottom: 2px solid #000;
+}
+
+.checkbox{
+    /*transform: scale(1.5);*/
+
+    transform: scale(calc(var(--timetable-font-size) / 10));
+    margin :calc(var(--timetable-font-pt) / 2);
+    box-sizing: border-box;
+
+}

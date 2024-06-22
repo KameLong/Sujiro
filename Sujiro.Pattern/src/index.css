@@ -1,0 +1,52 @@
+@font-face {
+  font-family: 'Noto Sans JP';   /* フォント名 */
+  src: url('../public/font/NotoSansJP.ttf') format('truetype');   /* フォントファイル */
+}
+
+@font-face {
+  font-family: 'DiaPro';   /* フォント名 */
+  src: url('../public/font/DiaPro-Regular.ttf') format('truetype');   /* フォントファイル */
+}
+
+body {
+  margin: 0;
+  font-family: 'Noto Sans JP';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.DiaPro{
+  font-family: 'DiaPro';
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+*{
+  /*overflow-x: hidden;*/
+  /*overflow-y: hidden;*/
+}
+/*スクロールバー非表示（Chrome・Safari）*/
+*::-webkit-scrollbar{
+  display:none;
+}
+html{
+  height:100%;
+}
+body{
+  height:100%;
+}
+#root{
+  height:100%;
+}
+/*input　Numberの矢印を消す*/
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+/*数字は右寄せにします*/
+input[type="number"]{
+  text-align: right;
+}
